@@ -16,6 +16,13 @@
               </p>              
             {% else %}
               <p>Please wait until a training is chosen by the professor.</p>
+
+              <script>
+                setInterval(function() {
+                  location.reload()
+                }, 5000);
+              </script>
+              
             {% endif %}
           </div>
         </div>
@@ -23,29 +30,4 @@
     </div>
   </div>
 {% endblock %}
-{% block scripts %}
-<script>
-  function check_training_assignment(training) {
-    // AJAX request to check if student is assigned to a training
-    $.ajax({
-      url: "{{ url_for('check_training_assignment') }}",
-      type: "GET",
-      success: function(response) {
-        if (response.training) {
-          window.location.href = "{{ url_for('training_page', training='') }}".concat(response.training);
-        }
-      },
-      error: function() {
-        console.log('Error checking training assignment.');
-      }
-    });
-  }
 
-  // Check for training assignment every 5 seconds
-  setInterval(function() {
-    var training = '{{ training }}';
-    check_training_assignment(training);
-  }, 5000);
-</script>
-
-{% endblock %}
