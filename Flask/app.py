@@ -1,13 +1,11 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for ,flash
 from flask_sqlalchemy import SQLAlchemy
 
-import pdb
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:EWa?ss66@localhost/testdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/testdb'
 app.config['SECRET_KEY'] = 'secret_key'
 db = SQLAlchemy(app)
-
 
 class Users(db.Model):
     """
@@ -26,13 +24,21 @@ class Users(db.Model):
     password = db.Column(db.String(60), nullable=False)
     user_type = db.Column(db.Boolean())
     training = db.Column(db.String(20))
-
+    
     def __repr__(self):
         """
         Returns the username of the user.
         """
         return f"User('{self.username}')"
-
+class multiplechoicequestions(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255), nullable=False)
+    option1 = db.Column(db.String(255), nullable=False)
+    option2 = db.Column(db.String(255), nullable=False)
+    option3 = db.Column(db.String(255), nullable=True)
+    option4 = db.Column(db.String(255), nullable=True)
+    answer = db.Column(db.String(255), nullable=False)
+    #training = db.Column(db.String(255), nullable=False)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -55,7 +61,6 @@ def login():
 
     return render_template('login.html')
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """
@@ -66,13 +71,16 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
-        user = Users(username=username, password=password, user_type=False) # Set user_type to False for all new users
-        db.session.add(user)
+        
+        
+        new_user = Users(username=username, password=password, user_type=False)
+        db.session.add(new_user)
         db.session.commit()
-
-    return render_template('register.html')
-
+        
+        flash(f"User '{username}' has been added to the database!", 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('registery.html')
 
 @app.route('/student_waitingroom')
 def student_waitingroom():
@@ -89,7 +97,6 @@ def student_waitingroom():
             training = user.training
             return render_template('student_waitingroom.html', training=training)
     return redirect(url_for('login'))
-
 
 @app.route('/Error')
 def error():
@@ -110,11 +117,12 @@ def professor_dashboard():
         username = session['username']
         user = Users.query.filter_by(username=username).first()
         if user.user_type == True:
-            trainings = ['Training 1', 'Training 2', 'Training 3'] # Example list of available trainings
+            trainings = ['Training 1', 'Training 2', 'Training 3'] # Example list of available trainings TODO: LIST
             return render_template('professor_dashboard.html', trainings=trainings)
         elif user.user_type == False:
             return redirect(url_for('student_waitingroom'))
     return redirect(url_for('login'))
+
 
 @app.route('/select_training/<training>')
 def select_training(training):
@@ -127,7 +135,9 @@ def select_training(training):
     for student in students:
         student.training = training
         db.session.commit()
-    return redirect(url_for('training_page', training=training))
+    return redirect(url_for('training_progress', question =get_questions(training)))                                  
+
+
 
 @app.route('/training_page/<training>')
 def training_page(training):
@@ -136,22 +146,16 @@ def training_page(training):
     If the user is not logged in, they are redirected to the login page.
     """
     if 'username' in session:
-        return render_template('training_page.html', training=training)
+        question = get_questions(training)
+        return render_template('training_page.html', question=question)
     else:
         return redirect(url_for('login'))
 
-#not working yet 
-@app.route('/check_training_assignment')
-def check_training_assignment():
-    """
-    This function returns the training assignment for a student if they are logged in.
-    """
-    if 'username' in session:
-        username = session['username']
-        user = Users.query.filter_by(username=username).first()
-    if user.user_type == False:
-        return {'training': user.training}
-    return {}
+
+@app.route('/training_progress/<question>')
+def training_progress(question):
+    
+    return render_template('training_progress.html', question=question)
 
 @app.route('/')
 def dashboard():
@@ -160,10 +164,30 @@ def dashboard():
     """
     return render_template('dashboard.html')
 
-@app.route('/debug')
-def debug():
-    pdb.set_trace()
-    return 'Debugging'
+def get_questions(training):
+    questionlist = []
+    questions = multiplechoicequestions.query.all()
+    for q in questions:
+        question = {
+            'id': q.id,
+            'question': q.question,
+            'options': [q.option1, q.option2, q.option3, q.option4],
+            'answer': q.answer
+        }
+        print(question)
+        questionlist.append(question)
+    return questionlist
+
+@app.route('/submit_answer', methods=['POST'])
+def submit_answer():
+    id = int(request.form['id'])
+    answer = request.form['answer']
+    is_correct = answer == questions[id-1]['answer']
+    if is_correct and id < len(questions):
+        next_question = questions[id]
+    else:
+        next_question = {'id': None}
+    return jsonify(next_question)
 
 if __name__ == '__main__':
     app.run(debug=True)
