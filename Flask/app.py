@@ -139,17 +139,37 @@ def select_training(training):
 
 
 
-@app.route('/training_page/<training>')
+@app.route('/training_page/<training>', methods=['GET', 'POST'])
 def training_page(training):
     """
     This function handles the training page for a selected training.
     If the user is not logged in, they are redirected to the login page.
     """
-    if 'username' in session:
-        question = get_questions(training)
-        return render_template('training_page.html', question=question)
-    else:
+    if 'username' not in session:
         return redirect(url_for('login'))
+
+    questions = get_questions(training)
+    if request.method == 'POST':
+        # Handle the user's answer
+        answer = request.form.get('answer')
+        # TODO: Handle the user's answer
+        # ...
+
+        # Get the next question
+        current_question_index = request.form.get('current_question_index')
+        current_question_index=int(current_question_index)
+        print(current_question_index + 1 < len(questions))
+        if current_question_index + 1 < len(questions):
+            next_question = questions[current_question_index + 1]
+            return render_template('training_page.html', training=training, question=next_question, current_question_index=current_question_index+1)
+        else:
+            # TODO: Handle end of questions
+            # ...
+            pass
+
+    # Render the first question
+    return render_template('training_page.html', training=training, question=questions[0], current_question_index=0)
+
 
 
 @app.route('/training_progress/<question>')
@@ -178,16 +198,6 @@ def get_questions(training):
         questionlist.append(question)
     return questionlist
 
-@app.route('/submit_answer', methods=['POST'])
-def submit_answer():
-    id = int(request.form['id'])
-    answer = request.form['answer']
-    is_correct = answer == questions[id-1]['answer']
-    if is_correct and id < len(questions):
-        next_question = questions[id]
-    else:
-        next_question = {'id': None}
-    return jsonify(next_question)
 
 if __name__ == '__main__':
     app.run(debug=True)
