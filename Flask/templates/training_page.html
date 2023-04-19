@@ -1,0 +1,23 @@
+{% block title %}
+Training Page
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h2>{{ question['question'] }}</h2>
+  </div>
+  <div class="container">
+    
+    <form method="post">
+      {% for option in question['options'] %}
+      <div>
+        <input type="radio" name="question{{ question['id'] }}" value="{{ option }}" id="{{ option }}">
+        <label for="{{ option }}">{{ option }}</label>
+      </div>
+      {% endfor %}
+      <input type="hidden" name="current_question_index" value="{{ current_question_index }}">
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+  
+{% endblock %}
