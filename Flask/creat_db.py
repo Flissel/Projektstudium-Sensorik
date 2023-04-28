@@ -6,7 +6,7 @@ conn = psycopg2.connect(
     user="postgres",
     password="123",
     dbname="praktikum_db",
-   
+    port="5432",
 )
 
 # Open a cursor to perform database operations
@@ -56,7 +56,22 @@ cur.execute('''
         ID_Benutzer SERIAL PRIMARY KEY,
         Benutzername TEXT,
         Passwort TEXT,
-        Rolle TEXT
+        Rolle BOOLEAN
+    );
+''')
+
+cur.execute('''
+    CREATE TABLE IF NOT EXISTS public.multiplechoice_aufgaben
+(
+    id_multiplechoice_aufgaben integer NOT NULL,
+    frage text COLLATE pg_catalog."default",
+    option1 text COLLATE pg_catalog."default",
+    option2 text COLLATE pg_catalog."default",
+    option3 text COLLATE pg_catalog."default",
+    option4 text COLLATE pg_catalog."default",
+    antwort text COLLATE pg_catalog."default",
+    CONSTRAINT multiplechoice_aufgaben_pkey PRIMARY KEY (id_multiplechoice_aufgaben)
+)
     );
 ''')
 # Add more CREATE TABLE statements for the other tables as needed

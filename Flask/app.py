@@ -3,41 +3,42 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/testdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/praktikum_db'
 app.config['SECRET_KEY'] = 'secret_key'
 db = SQLAlchemy(app)
 
-class Users(db.Model):
+class benutzer(db.Model):
+    __tablename__ = 'benutzer'
     """
-    This class represents the Users table in the database.
+    This class represents the benutzer table in the database.
 
     Attributes:
         id (int): The id of the user.
         username (str): The username of the user.
         password (str): The password of the user.
-        user_type (bool): The type of the user, either a professor or a student.
+        rolle (bool): The type of the user, either a professor or a student.
         training (str): The training that the student is currently assigned to.
     """
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
-    user_type = db.Column(db.Boolean())
-    training = db.Column(db.String(20))
+    id_benutzer = db.Column(db.Integer, primary_key=True)
+    benutzername = db.Column(db.String(20), unique=True, nullable=False)
+    passwort = db.Column(db.String(60), nullable=False)
+    rolle = db.Column(db.Boolean())
+    #training = db.Column(db.String(20))
     
     def __repr__(self):
         """
         Returns the username of the user.
         """
-        return f"User('{self.username}')"
-class multiplechoicequestions(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(255), nullable=False)
+        return f"User('{self.benutzername}')"
+class multiplechoice_aufgaben(db.Model):
+    id_multiplechoice_aufgaben = db.Column(db.Integer, primary_key=True)
+    frage = db.Column(db.String(255), nullable=False)
     option1 = db.Column(db.String(255), nullable=False)
     option2 = db.Column(db.String(255), nullable=False)
     option3 = db.Column(db.String(255), nullable=True)
     option4 = db.Column(db.String(255), nullable=True)
-    answer = db.Column(db.String(255), nullable=False)
+    antwort = db.Column(db.String(255), nullable=False)
     #training = db.Column(db.String(255), nullable=False)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -51,11 +52,14 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = Users.query.filter_by(username=username).first()
+        user = benutzer.query.filter_by(benutzername=username).first()
 
-        if user and user.password == password:
+        if user and user.passwort == password:
             session['username'] = username
-            return redirect(url_for('professor_dashboard'))
+            if user.rolle == True:
+                return redirect(url_for('professor_dashboard'))
+            else:
+                return redirect(url_for('student_waitingroom'))
         else:
             return render_template('login.html', error='Invalid username or password')
 
@@ -73,7 +77,7 @@ def register():
         password = request.form['password']
         
         
-        new_user = Users(username=username, password=password, user_type=False)
+        new_user = benutzer(benutzername=username, passwort=password, rolle=False)
         db.session.add(new_user)
         db.session.commit()
         
@@ -92,8 +96,8 @@ def student_waitingroom():
     """
     if 'username' in session:
         username = session['username']
-        user = Users.query.filter_by(username=username).first()
-        if user.user_type == False:
+        user = benutzer.query.filter_by(benutzername=username).first()
+        if user.rolle == False:
             training = user.training
             return render_template('student_waitingroom.html', training=training)
     return redirect(url_for('login'))
@@ -115,11 +119,11 @@ def professor_dashboard():
     """
     if 'username' in session:
         username = session['username']
-        user = Users.query.filter_by(username=username).first()
-        if user.user_type == True:
+        user = benutzer.query.filter_by(benutzername=username).first()
+        if user.rolle == True:
             trainings = ['Training 1', 'Training 2', 'Training 3'] # Example list of available trainings TODO: LIST
             return render_template('professor_dashboard.html', trainings=trainings)
-        elif user.user_type == False:
+        elif user.rolle == False:
             return redirect(url_for('student_waitingroom'))
     return redirect(url_for('login'))
 
@@ -131,11 +135,11 @@ def select_training(training):
     It sets the 'training' attribute of all students to the selected training.
     After updating the database, it redirects to the training page for the selected training.
     """
-    students = Users.query.filter_by(user_type=False).all()
+    students = benutzer.query.filter_by(rolle=False).all()
     for student in students:
         student.training = training
         db.session.commit()
-    return redirect(url_for('training_progress', question =get_questions(training)))                                  
+    return redirect(url_for('training_progress', question=get_questions(training), students=students))                                  
 
 
 
@@ -186,7 +190,7 @@ def dashboard():
 
 def get_questions(training):
     questionlist = []
-    questions = multiplechoicequestions.query.all()
+    questions = multiplechoice_aufgaben.query.all()
     for q in questions:
         question = {
             'id': q.id,
