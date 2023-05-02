@@ -8,5 +8,7 @@
       <li><a href="{{ url_for('select_training', training=training) }}">{{ training }}</a></li>
     {% endfor %}
   </ul>
-{% endblock %}
 
+  <br>
+  <a href="{{ url_for('create_training') }}" class="btn btn-primary">Training erstellen</a>
+{% endblock %}
