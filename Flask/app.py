@@ -1,45 +1,12 @@
 from flask import Flask, render_template, request, session, redirect, url_for ,flash
 from flask_sqlalchemy import SQLAlchemy
+from model import db, benutzer, Trainings, MultipleChoiceQuestions, CheckboxQuestions, CheckboxGridQuestions, GridQuestions, TextQuestions, ListQuestions
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/praktikum_db'
 app.config['SECRET_KEY'] = 'secret_key'
-db = SQLAlchemy(app)
-
-class benutzer(db.Model):
-    __tablename__ = 'benutzer'
-    """
-    This class represents the benutzer table in the database.
-
-    Attributes:
-        id (int): The id of the user.
-        username (str): The username of the user.
-        password (str): The password of the user.
-        rolle (bool): The type of the user, either a professor or a student.
-        training (str): The training that the student is currently assigned to.
-    """
-
-    id_benutzer = db.Column(db.Integer, primary_key=True)
-    benutzername = db.Column(db.String(20), unique=True, nullable=False)
-    passwort = db.Column(db.String(60), nullable=False)
-    rolle = db.Column(db.Boolean())
-    #training = db.Column(db.String(20))
-    
-    def __repr__(self):
-        """
-        Returns the username of the user.
-        """
-        return f"User('{self.benutzername}')"
-class multiplechoice_aufgaben(db.Model):
-    id_multiplechoice_aufgaben = db.Column(db.Integer, primary_key=True)
-    frage = db.Column(db.String(255), nullable=False)
-    option1 = db.Column(db.String(255), nullable=False)
-    option2 = db.Column(db.String(255), nullable=False)
-    option3 = db.Column(db.String(255), nullable=True)
-    option4 = db.Column(db.String(255), nullable=True)
-    antwort = db.Column(db.String(255), nullable=False)
-    #training = db.Column(db.String(255), nullable=False)
+db.init_app(app)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -127,6 +94,73 @@ def professor_dashboard():
             return redirect(url_for('student_waitingroom'))
     return redirect(url_for('login'))
 
+@app.route('/professor_dashboard/create_training')
+def create_training():
+    """
+    This function handles the professor dashboard page.
+    If the user is logged in as a professor, they are shown the page with the available trainings.
+    If the user is logged in as a student, they are redirected to the student waiting room.
+    If the user is not logged in, they are redirected to the login page.
+    """
+    if 'username' in session:
+        username = session['username']
+        user = benutzer.query.filter_by(benutzername=username).first()
+        if user.rolle == True:
+            if request.method == 'POST':
+                # Retrieve the form data
+                training_name = request.form['training_name']
+                selected_question_ids = request.form.getlist('questions[]')
+
+                # Create the new training object
+                training = Trainings(name=training_name)
+                for i, question_id in enumerate(selected_question_ids):
+                    setattr(training, f'multiplechoice_question{i+1}_id', question_id)
+
+                # Add the new training to the database
+                db.session.add(training)
+                db.session.commit()
+
+                # Redirect to the list of trainings
+                return redirect(url_for('professor_dashboard'))
+
+            else:
+                # Display the form
+                            questions = (
+                MultipleChoiceQuestions.query
+                .with_entities(MultipleChoiceQuestions.multiple_choice_question_id, MultipleChoiceQuestions.question)
+                .all()
+            )
+            questions += (
+                CheckboxQuestions.query
+                .with_entities(CheckboxQuestions.checkbox_question_id, CheckboxQuestions.question)
+                .all()
+            )
+            questions += (
+                CheckboxGridQuestions.query
+                .with_entities(CheckboxGridQuestions.checkbox_grid_question_id, CheckboxGridQuestions.question)
+                .all()
+            )
+            questions += (
+                GridQuestions.query
+                .with_entities(GridQuestions.grid_question_id, GridQuestions.question)
+                .all()
+            )
+            questions += (
+                TextQuestions.query
+                .with_entities(TextQuestions.text_question_id, TextQuestions.question)
+                .all()
+            )
+            questions += (
+                ListQuestions.query
+                .with_entities(ListQuestions.list_question_id, ListQuestions.question)
+                .all()
+            )
+            return render_template('create_training.html', questions=questions)
+            
+                
+        elif user.rolle == False:
+            return redirect(url_for('student_waitingroom'))
+    return redirect(url_for('login'))
 
 @app.route('/select_training/<training>')
 def select_training(training):
@@ -142,13 +176,13 @@ def select_training(training):
     return redirect(url_for('training_progress', question=get_questions(training), students=students))                                  
 
 
-
+"""
 @app.route('/training_page/<training>', methods=['GET', 'POST'])
 def training_page(training):
-    """
+    '''
     This function handles the training page for a selected training.
     If the user is not logged in, they are redirected to the login page.
-    """
+    '''
     if 'username' not in session:
         return redirect(url_for('login'))
 
@@ -173,7 +207,7 @@ def training_page(training):
 
     # Render the first question
     return render_template('training_page.html', training=training, question=questions[0], current_question_index=0)
-
+"""
 
 
 @app.route('/training_progress/<question>')
@@ -188,6 +222,7 @@ def dashboard():
     """
     return render_template('dashboard.html')
 
+"""
 def get_questions(training):
     questionlist = []
     questions = multiplechoice_aufgaben.query.all()
@@ -201,7 +236,7 @@ def get_questions(training):
         print(question)
         questionlist.append(question)
     return questionlist
-
+"""
 
 
       

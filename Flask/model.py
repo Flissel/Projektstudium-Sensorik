@@ -1,39 +1,231 @@
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
-class multiplechoicequestions(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(255), nullable=False)
-    option1 = db.Column(db.String(255), nullable=False)
-    option2 = db.Column(db.String(255), nullable=False)
-    option3 = db.Column(db.String(255), nullable=True)
-    option4 = db.Column(db.String(255), nullable=True)
-    answer = db.Column(db.String(255), nullable=False)
-    #training = db.Column(db.String(255), nullable=False)
-
-
-
-class Users(db.Model):
+class benutzer(db.Model):
+    __tablename__ = 'benutzer'
     """
-    This class represents the Users table in the database.
+    This class represents the benutzer table in the database.
 
     Attributes:
         id (int): The id of the user.
         username (str): The username of the user.
         password (str): The password of the user.
-        user_type (bool): The type of the user, either a professor or a student.
+        rolle (bool): The type of the user, either a professor or a student.
         training (str): The training that the student is currently assigned to.
     """
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
-    user_type = db.Column(db.Boolean())
-    training = db.Column(db.String(20))
+    id_benutzer = db.Column(db.Integer, primary_key=True)
+    benutzername = db.Column(db.String(20), unique=True, nullable=False)
+    passwort = db.Column(db.String(60), nullable=False)
+    rolle = db.Column(db.Boolean())
+    #training = db.Column(db.String(20))
     
     def __repr__(self):
         """
         Returns the username of the user.
         """
-        return f"User('{self.username}')"
-    
+        return f"User('{self.benutzername}')"
+
+class MultipleChoiceQuestions(db.Model):
+    multiple_choice_question_id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255), nullable=False)
+    option_1 = db.Column(db.String(255), nullable=False)
+    option_2 = db.Column(db.String(255), nullable=False)
+    option_3 = db.Column(db.String(255), nullable=True)
+    option_4 = db.Column(db.String(255), nullable=True)
+    option_5 = db.Column(db.String(255), nullable=True)
+    option_6 = db.Column(db.String(255), nullable=True)
+    option_7 = db.Column(db.String(255), nullable=True)
+    option_8 = db.Column(db.String(255), nullable=True)
+    option_9 = db.Column(db.String(255), nullable=True)
+    option_10 = db.Column(db.String(255), nullable=True)
+
+class CheckboxQuestions(db.Model):
+    checkbox_question_id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255), nullable=False)
+    option_1 = db.Column(db.String(255), nullable=False)
+    option_2 = db.Column(db.String(255), nullable=False)
+    option_3 = db.Column(db.String(255), nullable=True)
+    option_4 = db.Column(db.String(255), nullable=True)
+    option_5 = db.Column(db.String(255), nullable=True)
+    option_6 = db.Column(db.String(255), nullable=True)
+    option_7 = db.Column(db.String(255), nullable=True)
+    option_8 = db.Column(db.String(255), nullable=True)
+    option_9 = db.Column(db.String(255), nullable=True)
+    option_10 = db.Column(db.String(255), nullable=True)
+
+class CheckboxGridQuestions(db.Model):
+    checkbox_grid_question_id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255), nullable=False)
+    option_1 = db.Column(db.String(255), nullable=False)
+    option_2 = db.Column(db.String(255), nullable=False)
+    option_3 = db.Column(db.String(255), nullable=True)
+    option_4 = db.Column(db.String(255), nullable=True)
+    option_5 = db.Column(db.String(255), nullable=True)
+    option_6 = db.Column(db.String(255), nullable=True)
+    option_7 = db.Column(db.String(255), nullable=True)
+    option_8 = db.Column(db.String(255), nullable=True)
+    option_9 = db.Column(db.String(255), nullable=True)
+    option_10 = db.Column(db.String(255), nullable=True)
+
+class GridQuestions(db.Model):
+    grid_question_id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255), nullable=False)
+    option_1 = db.Column(db.String(255), nullable=False)
+    option_2 = db.Column(db.String(255), nullable=False)
+    option_3 = db.Column(db.String(255), nullable=True)
+    option_4 = db.Column(db.String(255), nullable=True)
+    option_5 = db.Column(db.String(255), nullable=True)
+    option_6 = db.Column(db.String(255), nullable=True)
+    option_7 = db.Column(db.String(255), nullable=True)
+    option_8 = db.Column(db.String(255), nullable=True)
+    option_9 = db.Column(db.String(255), nullable=True)
+    option_10 = db.Column(db.String(255), nullable=True)
+
+class TextQuestions(db.Model):
+    text_question_id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255), nullable=False)
+    answer = db.Column(db.String(255), nullable=False)
+
+class ListQuestions(db.Model):
+    list_question_id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255), nullable=False)
+    option_1 = db.Column(db.String(255), nullable=False)
+    option_2 = db.Column(db.String(255), nullable=False)
+    option_3 = db.Column(db.String(255), nullable=True)
+    option_4 = db.Column(db.String(255), nullable=True)
+    option_5 = db.Column(db.String(255), nullable=True)
+    option_6 = db.Column(db.String(255), nullable=True)
+    option_7 = db.Column(db.String(255), nullable=True)
+    option_8 = db.Column(db.String(255), nullable=True)
+    option_9 = db.Column(db.String(255), nullable=True)
+    option_10 = db.Column(db.String(255), nullable=True)
+
+class Trainings(db.Model):
+    training_id = db.Column(db.Integer, primary_key=True)
+    training_name = db.Column(db.String(255), nullable=False)
+    multiplechoice_question1_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question1 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question1_id])
+    multiplechoice_question2_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question2 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question2_id])
+    multiplechoice_question3_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question3 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question3_id])
+    multiplechoice_question4_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question4 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question4_id])
+    multiplechoice_question5_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question5 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question5_id])
+    multiplechoice_question6_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question6 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question6_id])
+    multiplechoice_question7_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question7 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question7_id])
+    multiplechoice_question8_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question8 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question8_id])
+    multiplechoice_question9_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question9 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question9_id])
+    multiplechoice_question10_id = db.Column(db.Integer, db.ForeignKey('multiple_choice_questions.multiple_choice_question_id'))
+    multiplechoice_question10 = db.relationship('MultipleChoiceQuestions', foreign_keys=[multiplechoice_question10_id])
+
+    checkbox_question1_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question1 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question1_id])
+    checkbox_question2_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question2 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question2_id])
+    checkbox_question3_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question3 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question3_id])
+    checkbox_question4_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question4 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question4_id])
+    checkbox_question5_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question5 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question5_id])
+    checkbox_question6_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question6 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question6_id])
+    checkbox_question7_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question7 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question7_id])
+    checkbox_question8_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question8 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question7_id])
+    checkbox_question9_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question9 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question9_id])
+    checkbox_question10_id = db.Column(db.Integer, db.ForeignKey('checkbox_questions.checkbox_question_id'))
+    checkbox_question10 = db.relationship('CheckboxQuestions', foreign_keys=[checkbox_question10_id])
+
+    checkbox_grid_question1_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question1 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question1_id])
+    checkbox_grid_question2_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question2 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question2_id])
+    checkbox_grid_question3_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question3 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question3_id])
+    checkbox_grid_question4_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question4 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question4_id])
+    checkbox_grid_question5_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question5 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question5_id])
+    checkbox_grid_question6_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question6 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question6_id])
+    checkbox_grid_question7_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question7 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question7_id])
+    checkbox_grid_question8_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question8 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question8_id])
+    checkbox_grid_question9_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question9 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question9_id])
+    checkbox_grid_question10_id = db.Column(db.Integer, db.ForeignKey('checkbox_grid_questions.checkbox_grid_question_id'))
+    checkbox_grid_question10 = db.relationship('CheckboxGridQuestions', foreign_keys=[checkbox_grid_question10_id])
+
+    grid_question1_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question1 = db.relationship('GridQuestions', foreign_keys=[grid_question1_id])
+    grid_question2_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question2 = db.relationship('GridQuestions', foreign_keys=[grid_question2_id])
+    grid_question3_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question3 = db.relationship('GridQuestions', foreign_keys=[grid_question3_id])
+    grid_question4_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question4 = db.relationship('GridQuestions', foreign_keys=[grid_question4_id])
+    grid_question5_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question5 = db.relationship('GridQuestions', foreign_keys=[grid_question5_id])
+    grid_question6_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question6 = db.relationship('GridQuestions', foreign_keys=[grid_question6_id])
+    grid_question7_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question7 = db.relationship('GridQuestions', foreign_keys=[grid_question7_id])
+    grid_question8_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question8 = db.relationship('GridQuestions', foreign_keys=[grid_question8_id])
+    grid_question9_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question9 = db.relationship('GridQuestions', foreign_keys=[grid_question9_id])
+    grid_question10_id = db.Column(db.Integer, db.ForeignKey('grid_questions.grid_question_id'))
+    grid_question10 = db.relationship('GridQuestions', foreign_keys=[grid_question10_id])
+
+    text_question1_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question1 = db.relationship('TextQuestions', foreign_keys=[text_question1_id])
+    text_question2_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question2 = db.relationship('TextQuestions', foreign_keys=[text_question2_id])
+    text_question3_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question3 = db.relationship('TextQuestions', foreign_keys=[text_question3_id])
+    text_question4_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question4 = db.relationship('TextQuestions', foreign_keys=[text_question4_id])
+    text_question5_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question5 = db.relationship('TextQuestions', foreign_keys=[text_question5_id])
+    text_question6_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question6 = db.relationship('TextQuestions', foreign_keys=[text_question6_id])
+    text_question7_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question7 = db.relationship('TextQuestions', foreign_keys=[text_question7_id])
+    text_question8_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question8 = db.relationship('TextQuestions', foreign_keys=[text_question8_id])
+    text_question9_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question9 = db.relationship('TextQuestions', foreign_keys=[text_question9_id])
+    text_question10_id = db.Column(db.Integer, db.ForeignKey('text_questions.text_question_id'))
+    text_question10 = db.relationship('TextQuestions', foreign_keys=[text_question10_id])
+
+    list_question1_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question1 = db.relationship('ListQuestions', foreign_keys=[list_question1_id])
+    list_question2_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question2 = db.relationship('ListQuestions', foreign_keys=[list_question2_id])
+    list_question3_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question3 = db.relationship('ListQuestions', foreign_keys=[list_question3_id])
+    list_question4_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question4 = db.relationship('ListQuestions', foreign_keys=[list_question4_id])
+    list_question5_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question5 = db.relationship('ListQuestions', foreign_keys=[list_question5_id])
+    list_question6_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question6 = db.relationship('ListQuestions', foreign_keys=[list_question6_id])
+    list_question7_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question7 = db.relationship('ListQuestions', foreign_keys=[list_question7_id])
+    list_question8_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question8 = db.relationship('ListQuestions', foreign_keys=[list_question8_id])
+    list_question9_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question9 = db.relationship('ListQuestions', foreign_keys=[list_question9_id])
+    list_question10_id = db.Column(db.Integer, db.ForeignKey('list_questions.list_question_id'))
+    list_question10 = db.relationship('ListQuestions', foreign_keys=[list_question10_id])
