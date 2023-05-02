@@ -17,6 +17,9 @@ sheet_data = sheets_service.spreadsheets().values().get(spreadsheetId=SHEET_ID, 
 questions = sheet_data['values']
 
 def split_options(options_str):
+    """
+    Splits the options string into a list of options.
+    """
     if not options_str:
         return []
     elif ';' in options_str:
@@ -24,10 +27,10 @@ def split_options(options_str):
     elif ',' in options_str:
         return [option.strip() for option in options_str.split(',')]
 
-
-
-
 def categorize_questions(questions):
+    """
+    Categorizes the questions into different types based on their question type.
+    """
     mc_questions = []
     text_questions = []
     list_questions = []
@@ -52,7 +55,11 @@ def categorize_questions(questions):
     return mc_questions, text_questions, list_questions, grid_questions, checkbox_grid_questions, checkbox_questions
 
 
+
 def combine_all_questions(mc_questions, text_questions, list_questions, grid_questions, checkbox_grid_questions, checkbox_questions):
+    """
+    Combines all categorized questions into a single list of dictionaries.
+    """
     return (
         [{'type': 'multiple_choice', 'question': q, 'options': o} for q, o in mc_questions] + 
         [{'type': 'text', 'question': q} for q in text_questions] + 
@@ -62,7 +69,11 @@ def combine_all_questions(mc_questions, text_questions, list_questions, grid_que
         [{'type': 'checkbox', 'question': q, 'options': o} for q, o in checkbox_questions]
     )
 
+
 def create_tables(conn):
+    """
+    Creates the necessary tables in the PostgreSQL database.
+    """
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS multiple_choice_questions (
@@ -136,10 +147,10 @@ def create_tables(conn):
     ''')
     conn.commit()
 
-
-
-
 def save_questions(conn, questions):
+    """
+    Saves the questions to the PostgreSQL database.
+    """
     cursor = conn.cursor()
     for question in questions:
         title = question["question"]
@@ -193,10 +204,6 @@ def save_questions(conn, questions):
             ''', (title, rows_str, columns_str))
 
     conn.commit()
-
-
-
-
 
 # Set up PostgreSQL connection
 conn = psycopg2.connect(
