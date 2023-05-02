@@ -7,8 +7,20 @@
     <h1>Choose your Role</h1>
     <ul>
       <a href="{{ url_for('login') }}" class="professor-link">Professor</a>
-      <span>&nbsp;&nbsp;or&nbsp;&nbsp;</span>
+      <span class="or">&nbsp;&nbsp;or&nbsp;&nbsp;</span>
       <a href="{{ url_for('register') }}" class="student-link">Student</a>
     </ul>
   </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}
+
+{% block styles %}
+  <style>
+    .or {
+      font-size: 24px;
+    }
+  </style>
 {% endblock %}

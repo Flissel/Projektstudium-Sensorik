@@ -84,30 +84,40 @@ button[type="submit"]:hover {
 }
 
 .dashboard h1 {
-  margin-bottom: 20px;
+  font-size: 36px;
+  margin-bottom: 30px;
 }
 
-.professor-link {
-  background-color: #32cd32;
-  color: #ffffff;
-  padding: 15px 20px;
-  border-radius: 5px;
-  text-decoration: none;
-  font-size: 24px; /* increased font size */
+.dashboard ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
 }
 
+.dashboard li {
+  margin: 0 20px;
+}
+
+.professor-link,
 .student-link {
   background-color: #32cd32;
-  color: #ffffff;
-  padding: 15px 20px;
   border-radius: 5px;
+  color: #fff;
+  display: block;
+  font-size: 24px;
+  padding: 15px 20px;
   text-decoration: none;
-  font-size: 24px; /* increased font size */
+  text-transform: uppercase;
+  transition: background-color 0.3s ease;
 }
 
-.student-link:hover, .professor-link:hover {
+.professor-link:hover,
+.student-link:hover {
   background-color: #228b22;
 }
+
 
 
 .card-header {
