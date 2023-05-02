@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Create Training</title>
+</head>
+<body>
+	<h1>Create Training</h1>
+	<form action="#" method="POST">
+		<label for="training_name">Training Name:</label>
+		<input type="text" name="training_name" id="training_name" required>
+		<br><br>
+
+		{% for question in questions %}
+		<label for="question_{{ question.id }}">{{ question.question }}</label>
+		<input type="checkbox" name="questions[]" value="{{ question.id }}">
+		<br>
+		{% endfor %}
+
+		<input type="submit" value="Create Training">
+	</form>
+</body>
+</html>
