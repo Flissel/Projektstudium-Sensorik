@@ -1,44 +1,12 @@
 from flask import Flask, render_template, request, session, redirect, url_for ,flash
 from flask_sqlalchemy import SQLAlchemy
+from model import db, benutzer, Trainings, MultipleChoiceQuestions, CheckboxQuestions, CheckboxGridQuestions, GridQuestions, TextQuestions, ListQuestions
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/testdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/praktikum_db'
 app.config['SECRET_KEY'] = 'secret_key'
-db = SQLAlchemy(app)
-
-class Users(db.Model):
-    """
-    This class represents the Users table in the database.
-
-    Attributes:
-        id (int): The id of the user.
-        username (str): The username of the user.
-        password (str): The password of the user.
-        user_type (bool): The type of the user, either a professor or a student.
-        training (str): The training that the student is currently assigned to.
-    """
-
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
-    user_type = db.Column(db.Boolean())
-    training = db.Column(db.String(20))
-    
-    def __repr__(self):
-        """
-        Returns the username of the user.
-        """
-        return f"User('{self.username}')"
-class multiplechoicequestions(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(255), nullable=False)
-    option1 = db.Column(db.String(255), nullable=False)
-    option2 = db.Column(db.String(255), nullable=False)
-    option3 = db.Column(db.String(255), nullable=True)
-    option4 = db.Column(db.String(255), nullable=True)
-    answer = db.Column(db.String(255), nullable=False)
-    #training = db.Column(db.String(255), nullable=False)
+db.init_app(app)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -51,11 +19,14 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = Users.query.filter_by(username=username).first()
+        user = benutzer.query.filter_by(benutzername=username).first()
 
-        if user and user.password == password:
+        if user and user.passwort == password:
             session['username'] = username
-            return redirect(url_for('professor_dashboard'))
+            if user.rolle == True:
+                return redirect(url_for('professor_dashboard'))
+            else:
+                return redirect(url_for('student_waitingroom'))
         else:
             return render_template('login.html', error='Invalid username or password')
 
@@ -73,7 +44,7 @@ def register():
         password = request.form['password']
         
         
-        new_user = Users(username=username, password=password, user_type=False)
+        new_user = benutzer(benutzername=username, passwort=password, rolle=False)
         db.session.add(new_user)
         db.session.commit()
         
@@ -92,8 +63,8 @@ def student_waitingroom():
     """
     if 'username' in session:
         username = session['username']
-        user = Users.query.filter_by(username=username).first()
-        if user.user_type == False:
+        user = benutzer.query.filter_by(benutzername=username).first()
+        if user.rolle == False:
             training = user.training
             return render_template('student_waitingroom.html', training=training)
     return redirect(url_for('login'))
@@ -115,14 +86,81 @@ def professor_dashboard():
     """
     if 'username' in session:
         username = session['username']
-        user = Users.query.filter_by(username=username).first()
-        if user.user_type == True:
+        user = benutzer.query.filter_by(benutzername=username).first()
+        if user.rolle == True:
             trainings = ['Training 1', 'Training 2', 'Training 3'] # Example list of available trainings TODO: LIST
             return render_template('professor_dashboard.html', trainings=trainings)
-        elif user.user_type == False:
+        elif user.rolle == False:
             return redirect(url_for('student_waitingroom'))
     return redirect(url_for('login'))
 
+@app.route('/professor_dashboard/create_training')
+def create_training():
+    """
+    This function handles the professor dashboard page.
+    If the user is logged in as a professor, they are shown the page with the available trainings.
+    If the user is logged in as a student, they are redirected to the student waiting room.
+    If the user is not logged in, they are redirected to the login page.
+    """
+    if 'username' in session:
+        username = session['username']
+        user = benutzer.query.filter_by(benutzername=username).first()
+        if user.rolle == True:
+            if request.method == 'POST':
+                # Retrieve the form data
+                training_name = request.form['training_name']
+                selected_question_ids = request.form.getlist('questions[]')
+
+                # Create the new training object
+                training = Trainings(name=training_name)
+                for i, question_id in enumerate(selected_question_ids):
+                    setattr(training, f'multiplechoice_question{i+1}_id', question_id)
+
+                # Add the new training to the database
+                db.session.add(training)
+                db.session.commit()
+
+                # Redirect to the list of trainings
+                return redirect(url_for('professor_dashboard'))
+
+            else:
+                # Display the form
+                            questions = (
+                MultipleChoiceQuestions.query
+                .with_entities(MultipleChoiceQuestions.multiple_choice_question_id, MultipleChoiceQuestions.question)
+                .all()
+            )
+            questions += (
+                CheckboxQuestions.query
+                .with_entities(CheckboxQuestions.checkbox_question_id, CheckboxQuestions.question)
+                .all()
+            )
+            questions += (
+                CheckboxGridQuestions.query
+                .with_entities(CheckboxGridQuestions.checkbox_grid_question_id, CheckboxGridQuestions.question)
+                .all()
+            )
+            questions += (
+                GridQuestions.query
+                .with_entities(GridQuestions.grid_question_id, GridQuestions.question)
+                .all()
+            )
+            questions += (
+                TextQuestions.query
+                .with_entities(TextQuestions.text_question_id, TextQuestions.question)
+                .all()
+            )
+            questions += (
+                ListQuestions.query
+                .with_entities(ListQuestions.list_question_id, ListQuestions.question)
+                .all()
+            )
+            return render_template('create_training.html', questions=questions)
+            
+                
+        elif user.rolle == False:
+            return redirect(url_for('student_waitingroom'))
+    return redirect(url_for('login'))
 
 @app.route('/select_training/<training>')
 def select_training(training):
@@ -131,20 +169,20 @@ def select_training(training):
     It sets the 'training' attribute of all students to the selected training.
     After updating the database, it redirects to the training page for the selected training.
     """
-    students = Users.query.filter_by(user_type=False).all()
+    students = benutzer.query.filter_by(rolle=False).all()
     for student in students:
         student.training = training
         db.session.commit()
-    return redirect(url_for('training_progress', question =get_questions(training)))                                  
+    return redirect(url_for('training_progress', question=get_questions(training), students=students))                                  
 
 
-
+"""
 @app.route('/training_page/<training>', methods=['GET', 'POST'])
 def training_page(training):
-    """
+    '''
     This function handles the training page for a selected training.
     If the user is not logged in, they are redirected to the login page.
-    """
+    '''
     if 'username' not in session:
         return redirect(url_for('login'))
 
@@ -169,7 +207,7 @@ def training_page(training):
 
     # Render the first question
     return render_template('training_page.html', training=training, question=questions[0], current_question_index=0)
-
+"""
 
 
 @app.route('/training_progress/<question>')
@@ -184,9 +222,10 @@ def dashboard():
     """
     return render_template('dashboard.html')
 
+"""
 def get_questions(training):
     questionlist = []
-    questions = multiplechoicequestions.query.all()
+    questions = multiplechoice_aufgaben.query.all()
     for q in questions:
         question = {
             'id': q.id,
@@ -197,7 +236,7 @@ def get_questions(training):
         print(question)
         questionlist.append(question)
     return questionlist
-
+"""
 
 
       

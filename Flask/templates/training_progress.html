@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Training Progress{% endblock %}
+
+{% block content %}
+  <h1>Training Progress</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Training</th>
+        <th>Completed Tasks</th>
+        <th>Progress</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in studenten %}
+        <tr>
+          <td>{{ student.name }}</td>
+          <td>{{ student.training }}</td>
+          <td>{{ student.anzahl_aufgaben }}</td>
+          <td>{{ student.praktikum_id }}%</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
