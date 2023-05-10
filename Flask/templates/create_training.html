@@ -1,22 +1,36 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Create Training</title>
-</head>
-<body>
-	<h1>Create Training</h1>
-	<form action="#" method="POST">
-		<label for="training_name">Training Name:</label>
-		<input type="text" name="training_name" id="training_name" required>
-		<br><br>
+{% extends "base.html" %}
 
-		{% for question in questions %}
-		<label for="question_{{ question.id }}">{{ question.question }}</label>
-		<input type="checkbox" name="questions[]" value="{{ question.id }}">
-		<br>
-		{% endfor %}
+{% block content %}
+<div class="container">
+    <form method="POST" id="create-training-form", action="create_training">
+      <h1>Create Training</h1>
+        {{ form.csrf_token }}
+        {{ form.name.label }} {{ form.name(class="form-control") }}
+        <div class="question_type">
+          <form method="POST" id="add-question-form", action="{{ url_for('add_question')}}">
+            {{form.question_types[0].question_type.label}} {{form.question_types[0].question_type}}
+            {{form.question_types[0].submit.label}} {{form.question_types[0].submit(class="form-control", id="add_form")}}
+        </div>
+        <br>
+        <div class="ebp_forms">
+          {% for question in form.ebp_questions %}
+          {{question.proben_id.label}} {{question.proben_id}}
+          {% endfor %}
+        </div>
+        <div class="rangordnungstest_forms">
+          {% for question in form.rangordnungstest_questions %}
+          {{question.proben_id_1.label}} {{question.proben_id_1}}
+          {{question.proben_id_2.label}} {{question.proben_id_2}}
+          {{question.proben_id_3.label}} {{question.proben_id_3}}
+          {{question.proben_id_4.label}} {{question.proben_id_4}}
+          {{question.proben_id_5.label}} {{question.proben_id_5}}
+          {% endfor %}
+        </div>
+        {{form.submit(class="form-control", id="form_submit")}}
+    </form>
+  </form>
+</div>
 
-		<input type="submit" value="Create Training">
-	</form>
-</body>
-</html>
+
+
+{% endblock %}

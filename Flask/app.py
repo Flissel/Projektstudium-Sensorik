@@ -1,12 +1,62 @@
-from flask import Flask, render_template, request, session, redirect, url_for ,flash
+from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from model import db, benutzer, Trainings, MultipleChoiceQuestions, CheckboxQuestions, CheckboxGridQuestions, GridQuestions, TextQuestions, ListQuestions
+from model import db, Trainings, Questions, EBP, Rangordnungstest, Benutzer, Proben
+from forms import CreateTrainingForm, EbpForm, RangordnungstestForm, AddForm
 
 
 app = Flask(__name__)
+app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/praktikum_db'
 app.config['SECRET_KEY'] = 'secret_key'
 db.init_app(app)
+
+
+
+@app.template_global()
+def render_ebp(ebp_question):
+    return render_template_string(
+        """
+        <div class="question-form">
+        {{ question.proben_id.label }}
+        {{ question.proben_id }}
+        </div>
+        """
+, question=ebp_question)
+
+@app.template_global()
+def render_rangordnungstest(rangordnungstest_question):
+    return render_template_string(
+        """
+        <div class="question-form">
+            {{ question.proben_id_1.label }}
+            {{ question.proben_id_1 }}
+            {{ question.proben_id_2.label }}
+            {{ question.proben_id_2 }}
+            {{ question.proben_id_3.label }}
+            {{ question.proben_id_3 }}
+            {{ question.proben_id_4.label }}
+            {{ question.proben_id_4 }}
+            {{ question.proben_id_5.label }}
+            {{ question.proben_id_5 }}
+        </div>
+        """
+, question=rangordnungstest_question)
+
+@app.route('/add_question', methods=['POST', 'GET'])
+def add_question():
+    if request.method == 'POST':
+        question_type = request.form.get('question_type')
+        if question_type == "ebp":
+            request.form.ebp_questions.append_entry()
+        else:
+            if question_type == "rangordnungstest":
+                request.form.rangordnungstest_questions.append_entry()
+        
+        return render_template("create_training.html", form=request.form)
+            
+        
+        
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -19,7 +69,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = benutzer.query.filter_by(benutzername=username).first()
+        user = Benutzer.query.filter_by(benutzername=username).first()
 
         if user and user.passwort == password:
             session['username'] = username
@@ -44,7 +94,7 @@ def register():
         password = request.form['password']
         
         
-        new_user = benutzer(benutzername=username, passwort=password, rolle=False)
+        new_user = Benutzer(benutzername=username, passwort=password, rolle=False)
         db.session.add(new_user)
         db.session.commit()
         
@@ -63,7 +113,7 @@ def student_waitingroom():
     """
     if 'username' in session:
         username = session['username']
-        user = benutzer.query.filter_by(benutzername=username).first()
+        user = Benutzer.query.filter_by(benutzername=username).first()
         if user.rolle == False:
             training = user.training
             return render_template('student_waitingroom.html', training=training)
@@ -86,7 +136,7 @@ def professor_dashboard():
     """
     if 'username' in session:
         username = session['username']
-        user = benutzer.query.filter_by(benutzername=username).first()
+        user = Benutzer.query.filter_by(benutzername=username).first()
         if user.rolle == True:
             trainings = ['Training 1', 'Training 2', 'Training 3'] # Example list of available trainings TODO: LIST
             return render_template('professor_dashboard.html', trainings=trainings)
@@ -94,73 +144,85 @@ def professor_dashboard():
             return redirect(url_for('student_waitingroom'))
     return redirect(url_for('login'))
 
-@app.route('/professor_dashboard/create_training')
+@app.context_processor
+def utility_processor():
+    def get_attribute(obj, attr):
+        return getattr(obj, attr)
+    return dict(get_attribute=get_attribute)
+
+
+@app.route('/professor_dashboard/create_training', methods=['GET', 'POST'])
 def create_training():
-    """
-    This function handles the professor dashboard page.
-    If the user is logged in as a professor, they are shown the page with the available trainings.
-    If the user is logged in as a student, they are redirected to the student waiting room.
-    If the user is not logged in, they are redirected to the login page.
-    """
-    if 'username' in session:
-        username = session['username']
-        user = benutzer.query.filter_by(benutzername=username).first()
-        if user.rolle == True:
-            if request.method == 'POST':
-                # Retrieve the form data
-                training_name = request.form['training_name']
-                selected_question_ids = request.form.getlist('questions[]')
+    form = CreateTrainingForm()
 
-                # Create the new training object
-                training = Trainings(name=training_name)
-                for i, question_id in enumerate(selected_question_ids):
-                    setattr(training, f'multiplechoice_question{i+1}_id', question_id)
+    if form.validate_on_submit():
+        print("Form validated successfully")
+        question_ids = []
+        num_questions = int(request.form['num_questions'])
 
-                # Add the new training to the database
-                db.session.add(training)
+        for i in range(num_questions):
+            question_type = request.form[f'question_type-{i}']
+
+            if question_type == 'ebp':
+                if request.form[f'ebp_form-proben_id-{i}'] is not None: 
+                    proben_id = request.form[f'ebp_form-proben_id-{i}'] 
+                    ebp = EBP(proben_id=proben_id)
+                    db.session.add(ebp)
+                    db.session.commit()
+
+                    question = Questions(fragen_typ='ebp', fragen_id=ebp.id)
+                    db.session.add(question)
+                    db.session.commit()
+                    question_ids.append(question.id)
+
+            elif question_type == 'rangordnungstest':
+                proben_id_1 = request.form[f'rangordnungstest_form-proben_id_1-{i}']
+                proben_id_2 = request.form[f'rangordnungstest_form-proben_id_2-{i}']
+                proben_id_3 = request.form[f'rangordnungstest_form-proben_id_3-{i}']
+                proben_id_4 = request.form[f'rangordnungstest_form-proben_id_4-{i}']
+                proben_id_5 = request.form[f'rangordnungstest_form-proben_id_5-{i}']
+
+                rangordnungstest = Rangordnungstest(proben_id_1=proben_id_1, proben_id_2=proben_id_2, proben_id_3=proben_id_3, proben_id_4=proben_id_4, proben_id_5=proben_id_5)
+                db.session.add(rangordnungstest)
                 db.session.commit()
 
-                # Redirect to the list of trainings
-                return redirect(url_for('professor_dashboard'))
-
-            else:
-                # Display the form
-                            questions = (
-                MultipleChoiceQuestions.query
-                .with_entities(MultipleChoiceQuestions.multiple_choice_question_id, MultipleChoiceQuestions.question)
-                .all()
-            )
-            questions += (
-                CheckboxQuestions.query
-                .with_entities(CheckboxQuestions.checkbox_question_id, CheckboxQuestions.question)
-                .all()
-            )
-            questions += (
-                CheckboxGridQuestions.query
-                .with_entities(CheckboxGridQuestions.checkbox_grid_question_id, CheckboxGridQuestions.question)
-                .all()
-            )
-            questions += (
-                GridQuestions.query
-                .with_entities(GridQuestions.grid_question_id, GridQuestions.question)
-                .all()
-            )
-            questions += (
-                TextQuestions.query
-                .with_entities(TextQuestions.text_question_id, TextQuestions.question)
-                .all()
-            )
-            questions += (
-                ListQuestions.query
-                .with_entities(ListQuestions.list_question_id, ListQuestions.question)
-                .all()
-            )
-            return render_template('create_training.html', questions=questions)
-            
+                question = Questions(fragen_typ='rangordnungstest', fragen_id=rangordnungstest.id)
+                db.session.add(question)
+                db.session.commit()
+                question_ids.append(question.id)
                 
-        elif user.rolle == False:
-            return redirect(url_for('student_waitingroom'))
-    return redirect(url_for('login'))
+        training = Trainings(
+            name=form.name.data,
+            question_id_1=question_ids[0] if len(question_ids) > 0 else None,
+            question_id_2=question_ids[1] if len(question_ids) > 1 else None,
+            question_id_3=question_ids[2] if len(question_ids) > 2 else None,
+            question_id_4=question_ids[3] if len(question_ids) > 3 else None,
+            question_id_5=question_ids[4] if len(question_ids) > 4 else None,
+            question_id_6=question_ids[5] if len(question_ids) > 5 else None,
+            question_id_7=question_ids[6] if len(question_ids) > 6 else None,
+            question_id_8=question_ids[7] if len(question_ids) > 7 else None,
+            question_id_9=question_ids[8] if len(question_ids) > 8 else None,
+            question_id_10=question_ids[9] if len(question_ids) > 9 else None,
+        )
+        db.session.add(training)
+        db.session.commit()
+
+        return redirect(url_for('index'))
+
+    if request.method == "POST" and form.question_types[0].data["submit"] == True:
+        if form.question_types[0].data["question_type"] == "ebp":
+            form.ebp_questions.append_entry()
+        else:
+            if form.question_types[0].data["question_type"] == "rangordnungstest":
+                form.rangordnungstest_questions.append_entry()
+        form.question_types[0].data["submit"] = False
+    print("Form validated unsuccessful")
+    return render_template('create_training.html', form=form)
+
+
+
+
+
 
 @app.route('/select_training/<training>')
 def select_training(training):
@@ -169,16 +231,17 @@ def select_training(training):
     It sets the 'training' attribute of all students to the selected training.
     After updating the database, it redirects to the training page for the selected training.
     """
-    students = benutzer.query.filter_by(rolle=False).all()
+    students = Benutzer.query.filter_by(rolle=False).all()
     for student in students:
         student.training = training
         db.session.commit()
     return redirect(url_for('training_progress', question=get_questions(training), students=students))                                  
 
 
-"""
+
 @app.route('/training_page/<training>', methods=['GET', 'POST'])
 def training_page(training):
+    return
     '''
     This function handles the training page for a selected training.
     If the user is not logged in, they are redirected to the login page.
@@ -206,8 +269,12 @@ def training_page(training):
             pass
 
     # Render the first question
+    questions = Trainings.query.get(training)
+    for question in questions:
+        if question:
+            question_type = ""
     return render_template('training_page.html', training=training, question=questions[0], current_question_index=0)
-"""
+
 
 
 @app.route('/training_progress/<question>')

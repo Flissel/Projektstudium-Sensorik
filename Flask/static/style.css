@@ -11,17 +11,16 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  width: 100%;
 }
 
 form {
   background-color: #ffffff; /* white */
-  border-radius: 5px;
+  border-radius: 2px;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
   padding: 20px;
   text-align: center;
-  max-width: 500px; /* added max-width */
-  margin: 0 auto; /* added margin to center the form horizontally */
+  margin: 0 auto;
 }
 
 label {
