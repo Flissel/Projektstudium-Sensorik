@@ -125,7 +125,7 @@ def create_training():
 
             else:
                 # Display the form
-                            questions = (
+                questions = (
                 MultipleChoiceQuestions.query
                 .with_entities(MultipleChoiceQuestions.multiple_choice_question_id, MultipleChoiceQuestions.question)
                 .all()
@@ -176,7 +176,7 @@ def select_training(training):
     return redirect(url_for('training_progress', question=get_questions(training), students=students))                                  
 
 
-"""
+
 @app.route('/training_page/<training>', methods=['GET', 'POST'])
 def training_page(training):
     '''
@@ -207,7 +207,7 @@ def training_page(training):
 
     # Render the first question
     return render_template('training_page.html', training=training, question=questions[0], current_question_index=0)
-"""
+
 
 
 @app.route('/training_progress/<question>')
@@ -222,7 +222,7 @@ def dashboard():
     """
     return render_template('dashboard.html')
 
-"""
+
 def get_questions(training):
     questionlist = []
     questions = multiplechoice_aufgaben.query.all()
@@ -236,7 +236,7 @@ def get_questions(training):
         print(question)
         questionlist.append(question)
     return questionlist
-"""
+
 
 
       
