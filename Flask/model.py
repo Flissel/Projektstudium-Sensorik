@@ -51,16 +51,16 @@ class Trainings(db.Model):
     __tablename__ = 'trainings'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    question_id_1 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_2 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_3 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_4 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_5 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_6 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_7 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_8 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_9 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
-    question_id_10 = db.Column(db.Integer, db.ForeignKey('questions.id', ondelete='CASCADE'))
+    question_id_1 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_2 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_3 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_4 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_5 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_6 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_7 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_8 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_9 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_10 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
 
 class Benutzer(db.Model):
     __tablename__ = 'benutzer'

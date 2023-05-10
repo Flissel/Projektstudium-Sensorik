@@ -5,7 +5,7 @@
   <p>Select a training to start:</p>
   <ul>
     {% for training in trainings %}
-      <li><a href="{{ url_for('select_training', training=training) }}">{{ training }}</a></li>
+      <li><a href="{{ url_for('select_training', training=training) }}">{{ training.name }}</a></li>
     {% endfor %}
   </ul>
 

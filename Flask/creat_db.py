@@ -13,14 +13,17 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 # Create the necessary tables
+
+# TODO: Tabellen in der Datenbank vervollständigen
+
 cur = conn.cursor()
 cur.execute('''
             
--- Create the Questions table
-CREATE TABLE questions (
+-- Create the Fragen table
+CREATE TABLE fragen (
     id SERIAL PRIMARY KEY,
-    question_type VARCHAR(255) NOT NULL,
-    question_id INTEGER NOT NULL
+    fragen_typ VARCHAR(255) NOT NULL,
+    fragen_id INTEGER NOT NULL
 );
             
 -- Create the Trainings table
@@ -110,7 +113,21 @@ FOREIGN KEY (question_id)
 REFERENCES rangordnungstest (id)
 ON DELETE CASCADE;
 
+
+
+
+
+INSERT INTO public.benutzer(
+	id, benutzername, passwort, rolle, training_id)
+	VALUES (1, 'Test', '123', TRUE, NULL);
+
+INSERT INTO public.proben(
+	id, proben_nr, probenname, aussehen_farbe, geruch, geschmack, textur, konsistenz)
+	VALUES (1, 999, 'Schwarzdorn', 'Schwarz', 'erdig', 'salzig', 'rau', 'fest');
+
             ''')
+
+
 conn.commit()
 cur.close()
 conn.close()

@@ -1,7 +1,7 @@
 from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from model import db, Trainings, Questions, EBP, Rangordnungstest, Benutzer, Proben
-from forms import CreateTrainingForm, EbpForm, RangordnungstestForm, AddForm
+from forms import CreateTrainingForm, EbpForm, RangordnungstestForm, ModifyForm
 
 
 app = Flask(__name__)
@@ -138,7 +138,7 @@ def professor_dashboard():
         username = session['username']
         user = Benutzer.query.filter_by(benutzername=username).first()
         if user.rolle == True:
-            trainings = ['Training 1', 'Training 2', 'Training 3'] # Example list of available trainings TODO: LIST
+            trainings = Trainings.query.all()
             return render_template('professor_dashboard.html', trainings=trainings)
         elif user.rolle == False:
             return redirect(url_for('student_waitingroom'))
@@ -153,44 +153,48 @@ def utility_processor():
 
 @app.route('/professor_dashboard/create_training', methods=['GET', 'POST'])
 def create_training():
+    """
+    This function adds the ability for the professor to create trainings.
+    A training can consist of multiple question_types.
+    When a training is created all the data is saved to the database.
+    """
+
+    #TODO: Die anderen fragentypen hinzufügen
+
     form = CreateTrainingForm()
 
-    if form.validate_on_submit():
+    #if form.validate_on_submit():
+    if request.method == "POST" and form.data["submit"] == True:
         print("Form validated successfully")
         question_ids = []
-        num_questions = int(request.form['num_questions'])
 
-        for i in range(num_questions):
-            question_type = request.form[f'question_type-{i}']
+        for ebpForm in form.ebp_questions:
+            proben_id = ebpForm.proben_id.data
+            ebp = EBP(proben_id=proben_id)
+            db.session.add(ebp)
+            db.session.commit()
 
-            if question_type == 'ebp':
-                if request.form[f'ebp_form-proben_id-{i}'] is not None: 
-                    proben_id = request.form[f'ebp_form-proben_id-{i}'] 
-                    ebp = EBP(proben_id=proben_id)
-                    db.session.add(ebp)
-                    db.session.commit()
+            question = Questions(fragen_typ='ebp', fragen_id=ebp.id)
+            db.session.add(question)
+            db.session.commit()
+            question_ids.append(question.id)
 
-                    question = Questions(fragen_typ='ebp', fragen_id=ebp.id)
-                    db.session.add(question)
-                    db.session.commit()
-                    question_ids.append(question.id)
+        for rangordnungstestForm in form.rangordnungstest_questions:
+            proben_id_1 = rangordnungstestForm.proben_id_1.data
+            proben_id_2 = rangordnungstestForm.proben_id_2.data
+            proben_id_3 = rangordnungstestForm.proben_id_3.data
+            proben_id_4 = rangordnungstestForm.proben_id_4.data
+            proben_id_5 = rangordnungstestForm.proben_id_5.data
 
-            elif question_type == 'rangordnungstest':
-                proben_id_1 = request.form[f'rangordnungstest_form-proben_id_1-{i}']
-                proben_id_2 = request.form[f'rangordnungstest_form-proben_id_2-{i}']
-                proben_id_3 = request.form[f'rangordnungstest_form-proben_id_3-{i}']
-                proben_id_4 = request.form[f'rangordnungstest_form-proben_id_4-{i}']
-                proben_id_5 = request.form[f'rangordnungstest_form-proben_id_5-{i}']
+            rangordnungstest = Rangordnungstest(proben_id_1=proben_id_1, proben_id_2=proben_id_2, proben_id_3=proben_id_3, proben_id_4=proben_id_4, proben_id_5=proben_id_5)
+            db.session.add(rangordnungstest)
+            db.session.commit()
 
-                rangordnungstest = Rangordnungstest(proben_id_1=proben_id_1, proben_id_2=proben_id_2, proben_id_3=proben_id_3, proben_id_4=proben_id_4, proben_id_5=proben_id_5)
-                db.session.add(rangordnungstest)
-                db.session.commit()
-
-                question = Questions(fragen_typ='rangordnungstest', fragen_id=rangordnungstest.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)
-                
+            question = Questions(fragen_typ='rangordnungstest', fragen_id=rangordnungstest.id)
+            db.session.add(question)
+            db.session.commit()
+            question_ids.append(question.id)
+        print(question_ids)
         training = Trainings(
             name=form.name.data,
             question_id_1=question_ids[0] if len(question_ids) > 0 else None,
@@ -207,14 +211,36 @@ def create_training():
         db.session.add(training)
         db.session.commit()
 
-        return redirect(url_for('index'))
+        return redirect(url_for('professor_dashboard'))
 
-    if request.method == "POST" and form.question_types[0].data["submit"] == True:
+    if request.method == "POST" and form.question_types[0].data["add"] == True:
         if form.question_types[0].data["question_type"] == "ebp":
             form.ebp_questions.append_entry()
-        else:
-            if form.question_types[0].data["question_type"] == "rangordnungstest":
-                form.rangordnungstest_questions.append_entry()
+        if form.question_types[0].data["question_type"] == "rangordnungstest":
+            form.rangordnungstest_questions.append_entry()
+    if request.method == "POST" and form.question_types[0].data["remove"] == True:
+        if form.question_types[0].data["question_type"] == "ebp":
+            form.ebp_questions = form.ebp_questions[0:len(form.ebp_questions)-1]
+        if form.question_types[0].data["question_type"] == "rangordnungstest":
+            form.rangordnungstest_questions = form.rangordnungstest_questions[0:len(form.rangordnungstest_questions)-1]
+        
+        
+        
+    for ebpForm in form.ebp_questions:
+            ebpForm.proben_id.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
+            ebpForm.proben_id.default = ebpForm.proben_id.choices[0]
+    for rangordnungstest in form.rangordnungstest_questions:
+        rangordnungstest.proben_id_1.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
+        rangordnungstest.proben_id_2.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
+        rangordnungstest.proben_id_3.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
+        rangordnungstest.proben_id_4.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
+        rangordnungstest.proben_id_5.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
+        rangordnungstest.proben_id_1.default = rangordnungstest.proben_id_5.choices[0]
+        rangordnungstest.proben_id_2.default = rangordnungstest.proben_id_5.choices[0]
+        rangordnungstest.proben_id_3.default = rangordnungstest.proben_id_5.choices[0]
+        rangordnungstest.proben_id_4.default = rangordnungstest.proben_id_5.choices[0]
+        rangordnungstest.proben_id_5.default = rangordnungstest.proben_id_5.choices[0]
+
         form.question_types[0].data["submit"] = False
     print("Form validated unsuccessful")
     return render_template('create_training.html', form=form)
@@ -241,7 +267,6 @@ def select_training(training):
 
 @app.route('/training_page/<training>', methods=['GET', 'POST'])
 def training_page(training):
-    return
     '''
     This function handles the training page for a selected training.
     If the user is not logged in, they are redirected to the login page.

@@ -9,28 +9,30 @@
         <div class="question_type">
           <form method="POST" id="add-question-form", action="{{ url_for('add_question')}}">
             {{form.question_types[0].question_type.label}} {{form.question_types[0].question_type}}
-            {{form.question_types[0].submit.label}} {{form.question_types[0].submit(class="form-control", id="add_form")}}
+            {{form.question_types[0].add(class="form-control", id="add_form")}} {{form.question_types[0].remove(class="form-control", id="remove_form")}}
         </div>
         <br>
         <div class="ebp_forms">
           {% for question in form.ebp_questions %}
+          <h3>Einfach beschreibende Prüfung - {{ loop.index }}</h3>
           {{question.proben_id.label}} {{question.proben_id}}
+          <hr>
           {% endfor %}
         </div>
         <div class="rangordnungstest_forms">
           {% for question in form.rangordnungstest_questions %}
+          <h3>Rangordnungstest - {{ loop.index }}</h3>
           {{question.proben_id_1.label}} {{question.proben_id_1}}
           {{question.proben_id_2.label}} {{question.proben_id_2}}
           {{question.proben_id_3.label}} {{question.proben_id_3}}
           {{question.proben_id_4.label}} {{question.proben_id_4}}
           {{question.proben_id_5.label}} {{question.proben_id_5}}
+          <hr>
           {% endfor %}
         </div>
         {{form.submit(class="form-control", id="form_submit")}}
     </form>
   </form>
 </div>
-
-
 
 {% endblock %}
