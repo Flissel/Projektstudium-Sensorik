@@ -1,16 +1,43 @@
 {% extends 'base.html' %}
 
-<!-- TODO: Add Training view. So the professor can look at the structure of the selected training before assigning students -->
-
 {% block content %}
-  <h1>Welcome, Professor!</h1>
-  <p>Select a training to start:</p>
-  <ul>
-    {% for training in trainings %}
-      <li><a href="{{ url_for('select_training', training=training) }}">{{ training.name }}</a></li>
-    {% endfor %}
-  </ul>
-
-  <br>
-  <a href="{{ url_for('create_training') }}" class="btn btn-primary">Training erstellen</a>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="card mt-5 shadow-lg">
+          <div class="card-body">
+            <h1 class="card-title text-center">Welcome, Professor!</h1>
+            <h3 class="text-center">Select a training to start:</h3>
+            <hr>
+            <form method="POST" action="{{ url_for('professor_dashboard') }}">
+              <input type="hidden" name="form_id" value="{{ form_id }}">
+              {{form.trainings.label}}
+              <div class="mb-3">
+                {% for training in form.trainings %}
+                  <div class="card mt-4">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">{{training.name}}</h3>
+                        <div>
+                          <button type="submit" class="btn btn-primary mr-2" name="action" value="select {{loop.index -1}}">
+                            <i class="fas fa-check-circle mr-1"></i>Auswählen
+                          </button>  
+                          <button type="submit" class="btn btn-danger" name="action" value="delete {{loop.index -1}}">
+                            <i class="fas fa-trash-alt mr-1"></i>Löschen
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="d-grid gap-2 mt-4">
+                <a href="{{ url_for('create_training') }}" class="btn btn-success">Create Training</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

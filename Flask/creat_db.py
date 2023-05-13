@@ -121,10 +121,26 @@ INSERT INTO public.benutzer(
 	id, benutzername, passwort, rolle, training_id)
 	VALUES (1, 'Test', '123', TRUE, NULL);
 
+INSERT INTO public.benutzer(
+	id, benutzername, passwort, rolle, training_id)
+	VALUES (2, 'Student1', '123', False, NULL);
+
+INSERT INTO public.benutzer(
+	id, benutzername, passwort, rolle, training_id)
+	VALUES (3, 'Student2', '123', False, NULL);
+
+INSERT INTO public.benutzer(
+	id, benutzername, passwort, rolle, training_id)
+	VALUES (4, 'Student3', '123', False, NULL);
+
 INSERT INTO public.proben(
 	id, proben_nr, probenname, aussehen_farbe, geruch, geschmack, textur, konsistenz)
 	VALUES (1, 999, 'Schwarzdorn', 'Schwarz', 'erdig', 'salzig', 'rau', 'fest');
 
+            
+            
+            
+            
             ''')
 
 

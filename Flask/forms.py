@@ -1,11 +1,12 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField, SelectField, FieldList, FormField, HiddenField
 from wtforms.validators import DataRequired
+from model import Trainings
 
 class ModifyForm(FlaskForm):
     question_type = SelectField("Fragentyp", choices=[('ebp', 'EBP'), ('rangordnungstest', 'Rangordnungstest')], default="ebp")
-    add = SubmitField("Add question")
-    remove = SubmitField("Remove question")
+    add = SubmitField("Hinzufügen")
+    remove = SubmitField("Entfernen")
 
 class RangordnungstestForm(FlaskForm):
     proben_id_1 = SelectField('Proben ID 1', choices=[""])
@@ -27,4 +28,12 @@ class CreateTrainingForm(FlaskForm):
     question_types = FieldList(FormField(ModifyForm), min_entries=1)
     ebp_questions = FieldList(FormField(EbpForm))
     rangordnungstest_questions = FieldList(FormField(RangordnungstestForm))
-    submit = SubmitField('Create Training')
+    submit = SubmitField('Trainings erstellen')
+
+class TrainingsViewForm(FlaskForm):
+    trainings = SelectField('Trainings', choices=[])
+    delete = SubmitField('Löschen')
+
+    def __init__(self, *args, **kwargs):
+        super(TrainingsViewForm, self).__init__(*args, **kwargs)
+        self.trainings.choices = [(t.id, t.name) for t in Trainings.query.all()]

@@ -1,7 +1,8 @@
 from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from model import db, Trainings, Questions, EBP, Rangordnungstest, Benutzer, Proben
-from forms import CreateTrainingForm, EbpForm, RangordnungstestForm, ModifyForm
+from forms import CreateTrainingForm, EbpForm, RangordnungstestForm, ModifyForm, TrainingsViewForm
+from uuid import uuid4
 
 
 app = Flask(__name__)
@@ -126,7 +127,7 @@ def error():
     """
     return render_template('Error.html')
 
-@app.route('/professor_dashboard')
+@app.route('/professor_dashboard', methods=['GET', 'POST'])
 def professor_dashboard():
     """
     This function handles the professor dashboard page.
@@ -134,12 +135,29 @@ def professor_dashboard():
     If the user is logged in as a student, they are redirected to the student waiting room.
     If the user is not logged in, they are redirected to the login page.
     """
+    form = TrainingsViewForm()
+    if request.method == 'POST' and session.get('form_id') == request.form.get('form_id') and form.trainings.choices: #prevent double submitting and empty submit
+        session.pop('form_id', None)
+        action = request.form.get('action')
+        if action.startswith("select"):
+            students = Benutzer.query.filter_by(rolle=False).all()
+            for student in students:
+                student.training_id = form.trainings.choices[int(action.split(" ")[1])][0]
+                db.session.commit()
+        if action.startswith("delete"):
+            training = Trainings.query.filter_by(id=form.trainings.choices[int(action.split(" ")[1])][0]).first()
+            db.session.delete(training)
+            db.session.commit()
+        redirect(url_for('professor_dashboard'))
+
     if 'username' in session:
         username = session['username']
         user = Benutzer.query.filter_by(benutzername=username).first()
         if user.rolle == True:
-            trainings = Trainings.query.all()
-            return render_template('professor_dashboard.html', trainings=trainings)
+            form.trainings = Trainings.query.all()
+            form_id = str(uuid4()) #Create "form_id"
+            session['form_id'] = form_id #Add "form_id" to session
+            return render_template('professor_dashboard.html', form=form, form_id=form_id)
         elif user.rolle == False:
             return redirect(url_for('student_waitingroom'))
     return redirect(url_for('login'))
@@ -164,7 +182,7 @@ def create_training():
     form = CreateTrainingForm()
 
     #if form.validate_on_submit():
-    if request.method == "POST" and form.data["submit"] == True:
+    if request.method == "POST" and form.data["submit"] == True and (form.ebp_questions or form.rangordnungstest_questions):
         print("Form validated successfully")
         question_ids = []
 
@@ -218,11 +236,25 @@ def create_training():
             form.ebp_questions.append_entry()
         if form.question_types[0].data["question_type"] == "rangordnungstest":
             form.rangordnungstest_questions.append_entry()
-    if request.method == "POST" and form.question_types[0].data["remove"] == True:
-        if form.question_types[0].data["question_type"] == "ebp":
-            form.ebp_questions = form.ebp_questions[0:len(form.ebp_questions)-1]
-        if form.question_types[0].data["question_type"] == "rangordnungstest":
-            form.rangordnungstest_questions = form.rangordnungstest_questions[0:len(form.rangordnungstest_questions)-1]
+    if request.method == "POST" and request.form.get('action'):
+        action = request.form.get('action').split(" ", 2)
+        print(action[2])
+        if action[1] == "ebp":
+            ebp1 = form.ebp_questions[0:int(action[2])]
+            ebp2 = form.ebp_questions[int(action[2])+1:len(form.ebp_questions)]
+            form.ebp_questions = []
+            for item in ebp1:
+                form.ebp_questions.append(item)
+            for item in ebp2:
+                form.ebp_questions.append(item)
+        if action[1] == "rang":
+            rang1 = form.rangordnungstest_questions[0:int(action[2])]
+            rang2 = form.rangordnungstest_questions[int(action[2])+1:len(form.rangordnungstest_questions)]
+            form.rangordnungstest_questions = []
+            for item in rang1:
+                form.rangordnungstest_questions.append(item)
+            for item in rang2:
+                form.rangordnungstest_questions.append(item)
         
         
         
