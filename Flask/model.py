@@ -178,7 +178,7 @@ class Rangordnungstest(db.model):
     rang_4_proben_id = db.Column(db.Integer)
     rang_5_proben_id = db.Column(db.Integer)
 
-class Dreieckstest(Base):
+class Dreieckstest(db.model):
     __tablename__ = 'dreieckstest'
     id = db.Column(db.Integer, primary_key=True)
     title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
