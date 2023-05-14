@@ -1,38 +1,64 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <form method="POST" id="create-training-form", action="create_training">
-      <h1>Create Training</h1>
-        {{ form.csrf_token }}
-        {{ form.name.label }} {{ form.name(class="form-control") }}
-        <div class="question_type">
-          <form method="POST" id="add-question-form", action="{{ url_for('add_question')}}">
-            {{form.question_types[0].question_type.label}} {{form.question_types[0].question_type}}
-            {{form.question_types[0].add(class="form-control", id="add_form")}} {{form.question_types[0].remove(class="form-control", id="remove_form")}}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header text-white" style="background-color: #32cd32;">
+            <h2>Create Training</h2>
         </div>
-        <br>
-        <div class="ebp_forms">
-          {% for question in form.ebp_questions %}
-          <h3>Einfach beschreibende Prüfung - {{ loop.index }}</h3>
-          {{question.proben_id.label}} {{question.proben_id}}
-          <hr>
-          {% endfor %}
+        <div class="card-body">
+            <form method="POST" id="create-training-form" action="create_training">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }} 
+                    {{ form.name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{form.question_types[0].question_type.label(class="form-label")}} 
+                    {{form.question_types[0].question_type(class="form-control")}}
+                </div>
+                <div class="form-group d-flex justify-content-between align-items-center">
+                    {{form.question_types[0].add(class="btn btn-success")}} 
+                    {{form.question_types[0].remove(class="btn btn-danger")}}
+                </div>
+                <div class="ebp_forms">
+                    {% for question in form.ebp_questions %}
+                    <div class="form-group">
+                        <h3>Einfach beschreibende Prüfung - {{ loop.index }}</h3>
+                        {{question.proben_id.label(class="form-label")}} 
+                        {{question.proben_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete ebp {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="rangordnungstest_forms">
+                    {% for question in form.rangordnungstest_questions %}
+                    <div class="form-group">
+                        <h3>Rangordnungstest - {{ loop.index }}</h3>
+                        {{question.proben_id_1.label(class="form-label")}} 
+                        {{question.proben_id_1(class="form-control")}}
+                        {{question.proben_id_2.label(class="form-label")}} 
+                        {{question.proben_id_2(class="form-control")}}
+                        {{question.proben_id_3.label(class="form-label")}} 
+                        {{question.proben_id_3(class="form-control")}}
+                        {{question.proben_id_4.label(class="form-label")}} 
+                        {{question.proben_id_4(class="form-control")}}
+                        {{question.proben_id_5.label(class="form-label")}} 
+                        {{question.proben_id_5(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete rang {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <!-- Set "form_id" to prevent double submitting -->
+                {{form.submit(class="btn btn-primary btn-block", id="form_submit", style="background-color: #32cd32;")}}
+            </form>
         </div>
-        <div class="rangordnungstest_forms">
-          {% for question in form.rangordnungstest_questions %}
-          <h3>Rangordnungstest - {{ loop.index }}</h3>
-          {{question.proben_id_1.label}} {{question.proben_id_1}}
-          {{question.proben_id_2.label}} {{question.proben_id_2}}
-          {{question.proben_id_3.label}} {{question.proben_id_3}}
-          {{question.proben_id_4.label}} {{question.proben_id_4}}
-          {{question.proben_id_5.label}} {{question.proben_id_5}}
-          <hr>
-          {% endfor %}
-        </div>
-        {{form.submit(class="form-control", id="form_submit")}}
-    </form>
-  </form>
+    </div>
 </div>
-
 {% endblock %}
