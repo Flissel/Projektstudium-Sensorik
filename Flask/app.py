@@ -1,6 +1,6 @@
 from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from model import db, Trainings, Questions, EBP, Rangordnungstest, Benutzer, Proben
+from model import db, Trainings, Fragen, Ebp, Rangordnungstest, Benutzer, Proben
 from forms import CreateTrainingForm, EbpForm, RangordnungstestForm, ModifyForm, TrainingsViewForm
 from uuid import uuid4
 
