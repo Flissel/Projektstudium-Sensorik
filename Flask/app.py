@@ -1,7 +1,7 @@
 from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from model import db, Trainings, Fragen, Ebp, Rangordnungstest, Benutzer, Proben
-from forms import CreateTrainingForm, EbpForm, RangordnungstestForm, ModifyForm, TrainingsViewForm
+from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, ModifyForm, TrainingsViewForm
 from uuid import uuid4
 
 
@@ -186,8 +186,8 @@ def create_training():
         print("Form validated successfully")
         question_ids = []
 
-        for ebpForm in form.ebp_questions:
-            proben_id = ebpForm.proben_id.data
+        for CreateEbpForm in form.ebp_questions:
+            proben_id = CreateEbpForm.proben_id.data
             ebp = Ebp(proben_id=proben_id)
             db.session.add(ebp)
             db.session.commit()
@@ -258,9 +258,9 @@ def create_training():
         
         
         
-    for ebpForm in form.ebp_questions:
-            ebpForm.proben_id.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
-            ebpForm.proben_id.default = ebpForm.proben_id.choices[0]
+    for CreateEbpForm in form.ebp_questions:
+            CreateEbpForm.proben_id.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
+            CreateEbpForm.proben_id.default = CreateEbpForm.proben_id.choices[0]
     for rangordnungstest in form.rangordnungstest_questions:
         rangordnungstest.proben_id_1.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]
         rangordnungstest.proben_id_2.choices = [(record.id, f"{record.proben_nr} - {record.probenname}") for record in Proben.query.all()]

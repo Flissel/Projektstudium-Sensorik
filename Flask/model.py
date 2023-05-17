@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import ARRAY
 
 db = SQLAlchemy()
 
@@ -17,8 +18,9 @@ class Aufgabenstellungen(db.Model):
     __tablename__ = 'aufgabenstellungen'
 
     id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.Text, nullable=False)
+    aufgabenstellung = db.Column(db.Text, nullable=False)
     aufgabentyp = db.Column(db.Text, nullable=False)
+    prüfvariante = db.Column(db.Integer, db.ForeignKey('prüfvarianten', ondelete='CASCADE'))
 
 class Trainings(db.Model):
     __tablename__ = 'trainings'
@@ -27,7 +29,14 @@ class Trainings(db.Model):
     name = db.Column(db.String(255), nullable=False)
     fragen_id_1 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
     fragen_id_2 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    # ... and so on for the rest of the fragen_ids
+    fragen_id_3 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    fragen_id_4 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    fragen_id_5 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    fragen_id_6 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    fragen_id_7 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    fragen_id_8 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    fragen_id_9 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    fragen_id_10 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
 
 class Proben(db.Model):
     __tablename__ = 'proben'
@@ -39,7 +48,7 @@ class Proben(db.Model):
     farbintensität = db.Column(db.Integer)
     geruch = db.Column(db.Text)
     geschmack = db.Column(db.Text)
-    db.Textur = db.Column(db.Text)
+    Textur = db.Column(db.Text)
     konsistenz = db.Column(db.Text)
 
 class Probenreihen(db.Model):
@@ -47,8 +56,17 @@ class Probenreihen(db.Model):
     __tablename__ = 'probenreihen'
 
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text)
     proben_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    # ... and so on for the rest of the proben_ids
+    proben_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_3 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_4 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_5 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_6 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_7 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_8 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_9 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_10 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
 
 class Benutzer(db.Model):
     __tablename__ = 'benutzer'
@@ -64,113 +82,74 @@ class Benutzer(db.Model):
 Fragetyp Tabellen (ebp, rangordnungstest, Auswahltest etc.)
 """
 
-class KonzReihe(db.Model):
+class Konz_reihe(db.Model):
     __tablename__ = "konz_reihe"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    probe_1_antwort = db.Column(db.String)
-    probe_2_antwort = db.Column(db.String)
-    probe_3_antwort = db.Column(db.String)
-    probe_4_antwort = db.Column(db.String)
-    probe_5_antwort = db.Column(db.String)
-    probe_6_antwort = db.Column(db.String)
-    probe_7_antwort = db.Column(db.String)
-    probe_8_antwort = db.Column(db.String)
-    probe_9_antwort = db.Column(db.String)
-    probe_10_antwort = db.Column(db.String)
+    antworten = db.Column(ARRAY(db.Text))
 
-class ProfilPrüfung(db.Model):
+class Profilprüfung(db.Model):
     __tablename__ = "profilprüfung"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    kriterium_1 = db.Column(db.String)
-    kriterium_2 = db.Column(db.String)
-    kriterium_3 = db.Column(db.String)
-    kriterium_4 = db.Column(db.String)
-    kriterium_5 = db.Column(db.String)
-    kriterium_6 = db.Column(db.String)
-    kriterium_7 = db.Column(db.String)
-    kriterium_8 = db.Column(db.String)
-    kriterium_9 = db.Column(db.String)
-    skalenbewertung_1 = db.Column(db.Integer)
-    skalenbewertung_2 = db.Column(db.Integer)
-    skalenbewertung_3 = db.Column(db.Integer)
-    skalenbewertung_4 = db.Column(db.Integer)
-    skalenbewertung_5 = db.Column(db.Integer)
-    skalenbewertung_6 = db.Column(db.Integer)
-    skalenbewertung_7 = db.Column(db.Integer)
-    skalenbewertung_8 = db.Column(db.Integer)
-    skalenbewertung_9 = db.Column(db.Integer)
+    kriterien = db.Column(ARRAY(db.Text))
+    antworten = db.Column(ARRAY(db.Integer))
 
-class HedBeurteilung(db.Model):
+class Hed_beurteilung(db.Model):
     __tablename__ = "hed_beurteilung"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    beurteilung = db.Column(db.String)
-    anmerkung = db.Column(db.String)
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
+    probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
+    beurteilung = db.Column(ARRAY(db.Text))
+    anmerkung = db.Column(ARRAY(db.Text))
 
 class Auswahltest(db.Model):
     __tablename__ = "auswahltest"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    prüfvariante = db.Column(db.String)
-    proben_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_id_3 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_id_4 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_id_5 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_id_6 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    bemerkung_1 = db.Column(db.String)
-    bemerkung_2 = db.Column(db.String)
-    bemerkung_3 = db.Column(db.String)
-    bemerkung_4 = db.Column(db.String)
-    bemerkung_5 = db.Column(db.String)
-    bemerkung_6 = db.Column(db.String)
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
+    probenreihe_id= db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
+    bemerkungen = db.Column(ARRAY(db.Text))
 
 class Geruchserkennung(db.Model):
     __tablename__ = "geruchserkennung"
 
     id = db.Column(db.Integer, primary_key=True, index=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probe_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    geruch = db.Column(db.String)
-    intensität = db.Column(db.Integer)
-    anmerkung = db.Column(db.String)
+    geruch_ohne_auswahl = db.Column(db.Text)
+    geruch_mit_auswahl = db.Column(db.Text)
+    bemerkung = db.Column(db.Text)
     
-class PaarVergleich(db.Model):
+class Paar_vergleich(db.Model):
     __tablename__ = 'paar_vergleich'
     id = db.Column(db.Integer, primary_key=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    prüfvariante = db.Column(db.String)
-    proben_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_auswahl_id = db.Column(db.String)
-    bemerkung = db.Column(db.String)
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
+    probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    proben_auswahl_id = db.Column(db.Integer)
+    bemerkung = db.Column(db.Text)
 
 class Ebp(db.Model):
     __tablename__ = 'ebp'
     id = db.Column(db.Integer, primary_key=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    prüfvariante = db.Column(db.String)
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    aussehen_farbe = db.Column(db.String)
-    geruch = db.Column(db.String)
-    geschmack = db.Column(db.String)
-    textur = db.Column(db.String)
-    konsistenz = db.Column(db.String)
+    aussehen_farbe = db.Column(db.Text)
+    geruch = db.Column(db.Text)
+    geschmack = db.Column(db.Text)
+    textur = db.Column(db.Text)
+    konsistenz = db.Column(db.Text)
 
 class Rangordnungstest(db.Model):
     __tablename__ = 'rangordnungstest'
     id = db.Column(db.Integer, primary_key=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    prüfvariante = db.Column(db.String)
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     rang_1_proben_id = db.Column(db.Integer)
     rang_2_proben_id = db.Column(db.Integer)
@@ -181,8 +160,7 @@ class Rangordnungstest(db.Model):
 class Dreieckstest(db.Model):
     __tablename__ = 'dreieckstest'
     id = db.Column(db.Integer, primary_key=True)
-    title_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    prüfvariante = db.Column(db.String)
+    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     proben_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
     proben_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
     abweichende_probe = db.Column(db.Integer)

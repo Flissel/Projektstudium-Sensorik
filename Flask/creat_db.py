@@ -121,7 +121,6 @@ CREATE TABLE benutzer (
 CREATE TABLE dreieckstest (
     id SERIAL PRIMARY KEY,
     aufgabenstellung_id INTEGER,
-    prüfvariante TEXT NOT NULL,
     probenreihe_id INTEGER NOT NULL,
     proben_auswahl INTEGER[],
     beschreibung TEXT,
@@ -144,24 +143,8 @@ CREATE TABLE profilprüfung (
     id SERIAL PRIMARY KEY,
     aufgabenstellung_id INTEGER,
     proben_id INTEGER NOT NULL,
-    kriterium_1 TEXT,
-    kriterium_2 TEXT,
-    kriterium_3 TEXT,
-    kriterium_4 TEXT,
-    kriterium_5 TEXT,
-    kriterium_6 TEXT,
-    kriterium_7 TEXT,
-    kriterium_8 TEXT,
-    kriterium_9 TEXT,
-    skalenbewertung_1 INTEGER,
-    skalenbewertung_2 INTEGER,
-    skalenbewertung_3 INTEGER,
-    skalenbewertung_4 INTEGER,
-    skalenbewertung_5 INTEGER,
-    skalenbewertung_6 INTEGER,
-    skalenbewertung_7 INTEGER,
-    skalenbewertung_8 INTEGER,
-    skalenbewertung_9 INTEGER,
+    kriterien TEXT[],
+    bewertungen TEXT[],
     FOREIGN KEY (proben_id) REFERENCES proben (id) ON DELETE CASCADE,
     FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
@@ -181,14 +164,8 @@ CREATE TABLE hed_beurteilung (
 CREATE TABLE auswahltest (
     id SERIAL PRIMARY KEY,
     aufgabenstellung_id INTEGER,
-    prüfvariante TEXT NOT NULL,
     probenreihe_id INTEGER NOT NULL,
-    bemerkung_1 TEXT,
-    bemerkung_2 TEXT,
-    bemerkung_3 TEXT,
-    bemerkung_4 TEXT,
-    bemerkung_5 TEXT,
-    bemerkung_6 TEXT,
+    bemerkungen TEXT[],
     FOREIGN KEY (probenreihe_id) REFERENCES probenreihen (id) ON DELETE CASCADE,
     FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
@@ -209,10 +186,9 @@ CREATE TABLE geruchserkennung (
 CREATE TABLE paar_vergleich (
     id SERIAL PRIMARY KEY,
     aufgabenstellung_id INTEGER,
-    prüfvariante TEXT NOT NULL,
     probenreihe_id_1 INTEGER NOT NULL,
     probenreihe_id_2 INTEGER NOT NULL,
-    proben_auswahl_id TEXT,
+    proben_auswahl_id INTEGER NOT NULL,
     bemerkung TEXT,
     FOREIGN KEY (probenreihe_id_1) REFERENCES probenreihen (id) ON DELETE CASCADE,
     FOREIGN KEY (probenreihe_id_2) REFERENCES probenreihen (id) ON DELETE CASCADE,
@@ -223,7 +199,6 @@ CREATE TABLE paar_vergleich (
 CREATE TABLE ebp (
     id SERIAL PRIMARY KEY,
     aufgabenstellung_id INTEGER,
-    prüfvariante TEXT,
     proben_id INTEGER NOT NULL,
     aussehen_farbe TEXT,
     geruch TEXT,
@@ -238,7 +213,6 @@ CREATE TABLE ebp (
 CREATE TABLE rangordnungstest (
     id SERIAL PRIMARY KEY,
     aufgabenstellung_id INTEGER,
-    prüfvariante TEXT NOT NULL,
     probenreihe_id INTEGER NOT NULL,
     rang_1_proben_id INTEGER,
     rang_2_proben_id INTEGER,
