@@ -188,11 +188,11 @@ def create_training():
 
         for ebpForm in form.ebp_questions:
             proben_id = ebpForm.proben_id.data
-            ebp = EBP(proben_id=proben_id)
+            ebp = Ebp(proben_id=proben_id)
             db.session.add(ebp)
             db.session.commit()
 
-            question = Questions(fragen_typ='ebp', fragen_id=ebp.id)
+            question = Fragen(fragen_typ='ebp', fragen_id=ebp.id)
             db.session.add(question)
             db.session.commit()
             question_ids.append(question.id)
@@ -208,7 +208,7 @@ def create_training():
             db.session.add(rangordnungstest)
             db.session.commit()
 
-            question = Questions(fragen_typ='rangordnungstest', fragen_id=rangordnungstest.id)
+            question = Fragen(fragen_typ='rangordnungstest', fragen_id=rangordnungstest.id)
             db.session.add(question)
             db.session.commit()
             question_ids.append(question.id)
