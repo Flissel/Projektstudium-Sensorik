@@ -3,8 +3,6 @@ from wtforms import StringField, IntegerField, SubmitField, SelectField, FieldLi
 from wtforms.validators import DataRequired
 from model import Trainings, Aufgabenstellungen, Probenreihen, Proben
 
-#TODO: Create "create_forms"
-
 
 class ModifyForm(FlaskForm):
     question_type = SelectField("Fragentyp", choices=[('ebp', 'EBP'), ('rangordnungstest', 'Rangordnungstest')], default="ebp")
@@ -105,6 +103,13 @@ class CreateTrainingForm(FlaskForm):
     question_types = FieldList(FormField(ModifyForm), min_entries=1)
     ebp_questions = FieldList(FormField(CreateEbpForm))
     rangordnungstest_questions = FieldList(FormField(CreateRangordnungstestForm))
+    auswahltest_questions = FieldList(FormField(CreateAuswahltest))
+    dreieckstest_questions = FieldList(FormField(CreateDreieckstest))
+    geruchserkennung_questions = FieldList(FormField(CreateGeruchserkennung))
+    hed_beurteilung_questions = FieldList(FormField(CreateHed_beurteilung))
+    konz_reihe_questions = FieldList(FormField(CreateKonz_reihe))
+    paar_vergelich_questions = FieldList(FormField(CreatePaar_vergleich))
+    profilprüfung_questions = FieldList(FormField(CreateProfilprüfung))
     submit = SubmitField('Trainings erstellen')
 
 class TrainingsViewForm(FlaskForm):
