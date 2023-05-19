@@ -20,7 +20,7 @@ class Aufgabenstellungen(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     aufgabenstellung = db.Column(db.Text, nullable=False)
     aufgabentyp = db.Column(db.Text, nullable=False)
-    prüfvariante = db.Column(db.Integer, db.ForeignKey('prüfvarianten', ondelete='CASCADE'))
+    prüfvarianten_id = db.Column(db.Integer, db.ForeignKey('prüfvarianten', ondelete='CASCADE'))
 
 class Trainings(db.Model):
     __tablename__ = 'trainings'
@@ -48,7 +48,7 @@ class Proben(db.Model):
     farbintensität = db.Column(db.Integer)
     geruch = db.Column(db.Text)
     geschmack = db.Column(db.Text)
-    Textur = db.Column(db.Text)
+    textur = db.Column(db.Text)
     konsistenz = db.Column(db.Text)
 
 class Probenreihen(db.Model):
