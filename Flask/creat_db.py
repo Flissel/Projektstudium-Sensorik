@@ -26,13 +26,21 @@ CREATE TABLE fragen (
     fragen_id INTEGER NOT NULL
 );
 
+-- Create the prüfvarianten table
+CREATE TABLE prüfvarianten (
+    id SERIAL PRIMARY KEY,
+    prüfname TEXT
+);
+
 -- Create the aufgabenstellungen table
 CREATE TABLE aufgabenstellungen (
     id SERIAL PRIMARY KEY,
-    text TEXT NOT NULL,
-    aufgabentyp TEXT NOT NULL
+    aufgabenstellung TEXT NOT NULL,
+    aufgabentyp TEXT NOT NULL,
+    prüfvarianten_id INTEGER,
+    FOREIGN KEY (prüfvarianten_id) REFERENCES prüfvarianten (id) ON DELETE CASCADE
 );
-            
+
 -- Create the Trainings table
 CREATE TABLE trainings (
     id SERIAL PRIMARY KEY,
@@ -75,6 +83,7 @@ CREATE TABLE proben (
 -- Create the probenreihen table
 CREATE TABLE probenreihen (
     id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
     proben_id_1 INTEGER NOT NULL,
     proben_id_2 INTEGER NOT NULL,
     proben_id_3 INTEGER NOT NULL,
@@ -110,130 +119,85 @@ CREATE TABLE benutzer (
 -- Create the dreieckstest table
 CREATE TABLE dreieckstest (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
-    prüfvariante TEXT NOT NULL,
+    aufgabenstellung_id INTEGER,
     probenreihe_id INTEGER NOT NULL,
-    proben_auswahl INTEGER,
+    proben_auswahl INTEGER[],
     beschreibung TEXT,
     FOREIGN KEY (probenreihe_id) REFERENCES probenreihen (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Create the konz_reihe table
 CREATE TABLE konz_reihe (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
+    aufgabenstellung_id INTEGER,
     probenreihe_id INTEGER NOT NULL,
-    probe_1_antwort TEXT,
-    probe_2_antwort TEXT,
-    probe_3_antwort TEXT,
-    probe_4_antwort TEXT,
-    probe_5_antwort TEXT,
-    probe_6_antwort TEXT,
-    probe_7_antwort TEXT,
-    probe_8_antwort TEXT,
-    probe_9_antwort TEXT,
-    probe_10_antwort TEXT,
-
+    antworten TEXT[],
     FOREIGN KEY (probenreihe_id) REFERENCES probenreihen (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Create the profilprüfung table
 CREATE TABLE profilprüfung (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
+    aufgabenstellung_id INTEGER,
     proben_id INTEGER NOT NULL,
-    kriterium_1 TEXT,
-    kriterium_2 TEXT,
-    kriterium_3 TEXT,
-    kriterium_4 TEXT,
-    kriterium_5 TEXT,
-    kriterium_6 TEXT,
-    kriterium_7 TEXT,
-    kriterium_8 TEXT,
-    kriterium_9 TEXT,
-    skalenbewertung_1 INTEGER,
-    skalenbewertung_2 INTEGER,
-    skalenbewertung_3 INTEGER,
-    skalenbewertung_4 INTEGER,
-    skalenbewertung_5 INTEGER,
-    skalenbewertung_6 INTEGER,
-    skalenbewertung_7 INTEGER,
-    skalenbewertung_8 INTEGER,
-    skalenbewertung_9 INTEGER,
+    kriterien TEXT[],
+    bewertungen TEXT[],
     FOREIGN KEY (proben_id) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Create the hedonische_beurteilung table
 CREATE TABLE hed_beurteilung (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
-    proben_id INTEGER NOT NULL,
+    aufgabenstellung_id INTEGER,
+    probenreihe_id INTEGER NOT NULL,
     beurteilung TEXT,
     anmerkung TEXT,
-    FOREIGN KEY (proben_id) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    FOREIGN KEY (probenreihe_id) REFERENCES probenreihen (id) ON DELETE CASCADE,
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Create the auswahltest table
 CREATE TABLE auswahltest (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
-    prüfvariante TEXT NOT NULL,
-    proben_id_1 INTEGER NOT NULL,
-    proben_id_2 INTEGER NOT NULL,
-    proben_id_3 INTEGER NOT NULL,
-    proben_id_4 INTEGER NOT NULL,
-    proben_id_5 INTEGER NOT NULL,
-    proben_id_6 INTEGER NOT NULL,
-    bemerkung_1 TEXT,
-    bemerkung_2 TEXT,
-    bemerkung_3 TEXT,
-    bemerkung_4 TEXT,
-    bemerkung_5 TEXT,
-    bemerkung_6 TEXT,
-    FOREIGN KEY (proben_id_1) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (proben_id_2) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (proben_id_3) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (proben_id_4) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (proben_id_5) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (proben_id_6) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    aufgabenstellung_id INTEGER,
+    probenreihe_id INTEGER NOT NULL,
+    bemerkungen TEXT[],
+    FOREIGN KEY (probenreihe_id) REFERENCES probenreihen (id) ON DELETE CASCADE,
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Create the geruchserkennung table
 CREATE TABLE geruchserkennung (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
+    aufgabenstellung_id INTEGER,
     proben_id INTEGER NOT NULL,
     geruch_ohne_auswahl TEXT,
     geruch_mit_auswahl TEXT,
     bemerkung TEXT,
     FOREIGN KEY (proben_id) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Create the paar_vergleich table
 CREATE TABLE paar_vergleich (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
-    prüfvariante TEXT NOT NULL,
-    proben_id_1 INTEGER NOT NULL,
-    proben_id_2 INTEGER NOT NULL,
-    proben_auswahl_id TEXT,
+    aufgabenstellung_id INTEGER,
+    probenreihe_id_1 INTEGER NOT NULL,
+    probenreihe_id_2 INTEGER NOT NULL,
+    proben_auswahl_id INTEGER NOT NULL,
     bemerkung TEXT,
-    FOREIGN KEY (proben_id_1) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (proben_id_2) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    FOREIGN KEY (probenreihe_id_1) REFERENCES probenreihen (id) ON DELETE CASCADE,
+    FOREIGN KEY (probenreihe_id_2) REFERENCES probenreihen (id) ON DELETE CASCADE,
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Create the EBP table
 CREATE TABLE ebp (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
-    prüfvariante TEXT,
+    aufgabenstellung_id INTEGER,
     proben_id INTEGER NOT NULL,
     aussehen_farbe TEXT,
     geruch TEXT,
@@ -241,14 +205,13 @@ CREATE TABLE ebp (
     textur TEXT,
     konsistenz TEXT,
     FOREIGN KEY (proben_id) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Create the rangordnungstest table
 CREATE TABLE rangordnungstest (
     id SERIAL PRIMARY KEY,
-    title_id INTEGER,
-    prüfvariante TEXT NOT NULL,
+    aufgabenstellung_id INTEGER,
     probenreihe_id INTEGER NOT NULL,
     rang_1_proben_id INTEGER,
     rang_2_proben_id INTEGER,
@@ -256,7 +219,7 @@ CREATE TABLE rangordnungstest (
     rang_4_proben_id INTEGER,
     rang_5_proben_id INTEGER,
     FOREIGN KEY (probenreihe_id) REFERENCES probenreihen (id) ON DELETE CASCADE,
-    FOREIGN KEY (title_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
+    FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
 -- Add foreign key constraints for the fragens table
@@ -318,29 +281,49 @@ ON DELETE CASCADE;
 INSERT INTO public.benutzer(
 	id, benutzername, passwort, rolle, training_id)
 	VALUES (1, 'Test', '123', TRUE, NULL);
-
-INSERT INTO public.benutzer(
-	id, benutzername, passwort, rolle, training_id)
-	VALUES (2, 'Student1', '123', False, NULL);
-
-INSERT INTO public.benutzer(
-	id, benutzername, passwort, rolle, training_id)
-	VALUES (3, 'Student2', '123', False, NULL);
-
-INSERT INTO public.benutzer(
-	id, benutzername, passwort, rolle, training_id)
-	VALUES (4, 'Student3', '123', False, NULL);
+    VALUES (2, 'Student1', '123', False, NULL);
+    VALUES (3, 'Student2', '123', False, NULL);
+    VALUES (4, 'Student3', '123', False, NULL);
 
 INSERT INTO public.proben(
 	id, proben_nr, probenname, farbe, farbintensität, geruch, geschmack, textur, konsistenz)
 	VALUES (1, 999, 'Schwarzdorn', 'Schwarz', 100, 'erdig', 'salzig', 'rau', 'fest');
 
-            
-            
-            
-            
-            ''')
+INSERT INTO public.prüfvarianten(
+	id, prüfname)
+	VALUES 
+	(1,'Erkennung von unterschiedlichen Geschmacksintensitäten'),
+	(2,'Erkennung von unterschiedlichen Farbintensitäten'),
+	(3,'Paarweise Vergleichsprüfung'),
+	(4,'Paarweise Vergleichsprüfung (einseitiger test)'),
+	(5,'Geruchserkennungprüfung A'),
+	(6,'Geruchserkennungprüfung B'),
+	(7,'Erkennen der 4 Grundgeschmacksarten'),
+	(8,'Erkennen von verschiedenen Salzen'),
+	(9,'Dreiecksprüfung'),
+	(10,'Erweiterte Hedonische Beurteilung'),
+	(11,'Profilprüfung');
 
+INSERT INTO public.aufgabenstellungen(
+	id, aufgabenstellung, aufgabentyp, prüfvarianten_id)
+	VALUES (1, 'Beschreiben Sie bitte die Merkmale des Ihnen vorliegenden Prüfgutes', 'ebp',NULL),
+    (2, 'Mit diesem Test soll Ihre Fähigkeit der Erkennung verschieden starker Geschmacksintensitäten ermittelt werden. Ordnen Sie deshalb die Proben nach zunehmender Geschmacksintensität.', 'rangordnungstest', 1),
+    (3, 'Ordnen Sie die Proben nach Farbintensität. Notieren Sie die Zahlen der Proben von hell nach dunkel. ', 'rangordnungstest',2),
+    (4, 'Ihnen liegen 2 Probensätze mit jeweils zwei Prüfproben vor. Beantworten Sie bitte für jedes Probenpaar die Prüffrage und tragen Sie die zutreffende Antwort in der Spalte “Antwort” entsprechend ein.', 'paar_vergleich',3),
+    (5, 'Ihnen liegen 2 Probensätze vor.  Beantworten Sie bitte für das Probenpaar die Prüffrage und tragen Sie die zutreffende Antwort in der Spalte “Antwort” entsprechend ein.', 'paar_vergleich',4),
+    (6, 'Versuchen Sie den zu prüfenden Geruch zu erkennen und tragen Sie das Ergebnis unter "Geruchserkennung ohne Auswahlliste" ein. Bescreiben Sie den Geruch', 'geruchserkennung',5),
+    (7, 'Sie erhalten eine Liste mit Vorschlägen möglicher Aromen. Prüfen Sie nun die Aromen erneut und tragen Sie Ihr Ergebnisse in der Spalte "Geruchserkennung mit Auswahlliste" ein. ', 'geruchserkennung',5),
+    (8, 'Versuchen Sie bei den 6 Reaktionsgefäßen den Geruch zu erkennen und tragen Sie das Ergebnis unter "Geruchserkennung ohne Auswahlliste" ein. Bescreiben Sie den Geruch', 'geruchserkennung',6),
+    (9, 'Beschriften Sie Verkostungsbecher mit den untenstehenden Probennummern. Sehen Sie zusätzlichen Becher für das Referenzwasser vor. Sie erhalten 10 verschiedene wässrige Lösungen, die Saccharose (süß), Natriumchlorid (salzig), Citronensäure (sauer) und Coffein (bitter) in geringer Konzentration enthalten. Stellen Sie die Becher entsprechend der Probennummern von links nach rechts auf. Die vorgelegten Proben sind durch “Schmecken” von links nach rechts zu prüfen und in der entsprechenden Spalte durch ein Kreuz (X) zu kennzeichnen. Rückkosten ist nicht erlaubt ', 'auswahltest',7),
+    (10, 'Beschriften Sie Verkostungsbecher mit den untenstehenden Probennummern. Sie erhalten 5 verschiedene wässrige Lösungen mit den Salzen, und eine mit Zreferenzwasser.', 'auswahltest',8),
+    (11, 'Ihnen liegen zwei Probensätze mit jeweils drei codierten Proben vor. In jedem Probensatz sind zwei Proben identisch und eine Probe abweichend. Verkosten Sie die Proben bitte in der vorgegebenen Reihenfolge (Prüfproben von links nach rechts) und tragen Sie jeweils die abweichende Probe ein.Rückkosten ist erlaubt. Wenn Sie den Unterschied nicht sicher erkennen, müssen Sie raten.', 'dreieckstest',9),
+    (12, 'Bitte beurteilen Sie die Probe nach Ihrem Geschmacksempfinden und kreuzen Sie die zutreffende Aussage an.', 'hed_beurteilung',10),
+    (13, 'Beurteilen Sie die Proben einzeln nach den nachfolgend aufgelisten Kriterien. Ordnen Sie jeweils einen Intensitätswert zu. Konzentrieren Sie sich dabei jeweils nur auf die Wahrnehmung des angeführten Parameters. Tragen Sie die Proben auf der Linienskala von 0 bis 10 ein. ', 'profilprüfung',11);
+            
+
+
+            ''')
+#TODO: Aufgabenstellung: Konzentrationsreihen, Verschlussverkostung
 
 conn.commit()
 cur.close()
