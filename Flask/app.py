@@ -1,6 +1,6 @@
 from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from model import db, Trainings, Fragen, Ebp, Rangordnungstest, Benutzer, Proben
+from model import db, Trainings, Fragen, Ebp, Rangordnungstest, Benutzer, Proben, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung
 from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, ModifyForm, TrainingsViewForm
 from uuid import uuid4
 
@@ -187,42 +187,139 @@ def create_training():
             print("Form validated successfully")
             question_ids = []
 
-            for CreateEbpForm in form.ebp_questions:
-                proben_id = CreateEbpForm.proben_id.data
-                ebp = Ebp(proben_id=proben_id)
-                db.session.add(ebp)
+            for question_form in form.ebp_questions:
+                proben_id = question_form.proben_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+                test = Ebp(proben_id=proben_id, aufgabenstellung_id=aufgabenstellung_id)
+                
+                db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='ebp', fragen_id=ebp.id)
+                question = Fragen(fragen_typ='ebp', fragen_id=test.id)
                 db.session.add(question)
                 db.session.commit()
                 question_ids.append(question.id)
 
-            for rangordnungstestForm in form.rangordnungstest_questions:
-                probenreihe_id = rangordnungstestForm.probenreihe_id.data
-                aufgabenstellung_id = rangordnungstestForm.aufgabenstellung_id.data
+            for question_form in form.rangordnungstest_questions:
+                probenreihe_id = question_form.probenreihe_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
 
-                rangordnungstest = Rangordnungstest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
-                db.session.add(rangordnungstest)
+                test = Rangordnungstest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
+                db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='rangordnungstest', fragen_id=rangordnungstest.id)
+                question = Fragen(fragen_typ='rangordnungstest', fragen_id=test.id)
                 db.session.add(question)
                 db.session.commit()
                 question_ids.append(question.id)
-            print(question_ids)
+                
+                
+            for question_form in form.auswahltest_questions:
+                probenreihe_id = question_form.probenreihe_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+
+                test = Auswahltest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
+                db.session.add(test)
+                db.session.commit()
+
+                question = Fragen(fragen_typ='auswahltest', fragen_id=test.id)
+                db.session.add(question)
+                db.session.commit()
+                question_ids.append(question.id)
+            
+            for question_form in form.dreieckstest_questions:
+                probenreihe_id = question_form.probenreihe_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+                lösung = question_form.lösung.data
+
+                test = Dreieckstest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id, lösung=lösung)
+                db.session.add(test)
+                db.session.commit()
+
+                question = Fragen(fragen_typ='dreieckstest', fragen_id=test.id)
+                db.session.add(question)
+                db.session.commit()
+                question_ids.append(question.id)   
+                
+            for question_form in form.geruchserkennung_questions:
+                proben_id = question_form.proben_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+
+                test = Geruchserkennung(aufgabenstellung_id=aufgabenstellung_id, proben_id=proben_id)
+                db.session.add(test)
+                db.session.commit()
+
+                question = Fragen(fragen_typ='geruchserkennung', fragen_id=test.id)
+                db.session.add(question)
+                db.session.commit()
+                question_ids.append(question.id) 
+            
+            for question_form in form.hed_beurteilung_questions:
+                probenreihe_id = question_form.probenreihe_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+
+                test = Hed_beurteilung(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
+                db.session.add(test)
+                db.session.commit()
+
+                question = Fragen(fragen_typ='hed_beurteilung', fragen_id=test.id)
+                db.session.add(question)
+                db.session.commit()
+                question_ids.append(question.id)
+                
+            for question_form in form.konz_reihe_questions:
+                probenreihe_id = question_form.probenreihe_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+
+                test = Konz_reihe(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
+                db.session.add(test)
+                db.session.commit()
+
+                question = Fragen(fragen_typ='konz_reihe', fragen_id=test.id)
+                db.session.add(question)
+                db.session.commit()
+                question_ids.append(question.id)
+                
+            for question_form in form.paar_vergleich_questions:
+                probenreihe_id = question_form.probenreihe_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+                lösung = question_form.lösung.data
+
+                test = Paar_vergleich(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id, lösung=lösung)
+                db.session.add(test)
+                db.session.commit()
+
+                question = Fragen(fragen_typ='paar_vergleich', fragen_id=test.id)
+                db.session.add(question)
+                db.session.commit()
+                question_ids.append(question.id)
+            
+            for question_form in form.profilprüfung_questions:
+                proben_id = question_form.proben_id.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+                kriterien = question_form.kriterien.data
+
+                test = Profilprüfung(aufgabenstellung_id=aufgabenstellung_id, proben_id=proben_id, kriterien=kriterien)
+                db.session.add(test)
+                db.session.commit()
+
+                question = Fragen(fragen_typ='profilprüfung', fragen_id=test.id)
+                db.session.add(question)
+                db.session.commit()
+                question_ids.append(question.id)
+            
             training = Trainings(
                 name=form.name.data,
-                question_id_1=question_ids[0] if len(question_ids) > 0 else None,
-                question_id_2=question_ids[1] if len(question_ids) > 1 else None,
-                question_id_3=question_ids[2] if len(question_ids) > 2 else None,
-                question_id_4=question_ids[3] if len(question_ids) > 3 else None,
-                question_id_5=question_ids[4] if len(question_ids) > 4 else None,
-                question_id_6=question_ids[5] if len(question_ids) > 5 else None,
-                question_id_7=question_ids[6] if len(question_ids) > 6 else None,
-                question_id_8=question_ids[7] if len(question_ids) > 7 else None,
-                question_id_9=question_ids[8] if len(question_ids) > 8 else None,
-                question_id_10=question_ids[9] if len(question_ids) > 9 else None,
+                fragen_id_1=question_ids[0] if len(question_ids) > 0 else None,
+                fragen_id_2=question_ids[1] if len(question_ids) > 1 else None,
+                fragen_id_3=question_ids[2] if len(question_ids) > 2 else None,
+                fragen_id_4=question_ids[3] if len(question_ids) > 3 else None,
+                fragen_id_5=question_ids[4] if len(question_ids) > 4 else None,
+                fragen_id_6=question_ids[5] if len(question_ids) > 5 else None,
+                fragen_id_7=question_ids[6] if len(question_ids) > 6 else None,
+                fragen_id_8=question_ids[7] if len(question_ids) > 7 else None,
+                fragen_id_9=question_ids[8] if len(question_ids) > 8 else None,
+                fragen_id_10=question_ids[9] if len(question_ids) > 9 else None,
             )
             db.session.add(training)
             db.session.commit()
@@ -245,7 +342,7 @@ def create_training():
         if form.question_types[0].data["question_type"] == "konz_reihe":
             form.konz_reihe_questions.append_entry()
         if form.question_types[0].data["question_type"] == "paar_vergleich":
-            form.paar_vergelich_questions.append_entry()
+            form.paar_vergleich_questions.append_entry()
         if form.question_types[0].data["question_type"] == "profilprüfung":
             form.profilprüfung_questions.append_entry()
     if request.method == "POST" and request.form.get('action'):
@@ -308,11 +405,11 @@ def create_training():
             for item in rang2:
                 form.konz_reihe_questions.append(item)
         if action[1] == "paar_vergleich":
-            rang1 = form.paar_vergelich_questions[0:int(action[2])]
-            rang2 = form.paar_vergelich_questions[int(action[2])+1:len(form.paar_vergelich_questions)]
-            form.paar_vergelich_questions = []
+            rang1 = form.paar_vergleich_questions[0:int(action[2])]
+            rang2 = form.paar_vergleich_questions[int(action[2])+1:len(form.paar_vergelich_questions)]
+            form.paar_vergleich_questions = []
             for item in rang1:
-                form.paar_vergelich_questions.append(item)
+                form.paar_vergleich_questions.append(item)
             for item in rang2:
                 form.paar_vergelich_questions.append(item)
         if action[1] == "profilprüfung":

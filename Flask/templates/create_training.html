@@ -56,8 +56,8 @@
                         <h3>Auswahltest - {{ loop.index }}</h3>
                         {{question.aufgabenstellung_id.label(class="form-label")}} 
                         {{question.aufgabenstellung_id(class="form-control")}}
-                        {{question.proben_id.label(class="form-label")}} 
-                        {{question.proben_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
                         <button type="submit" class="btn btn-danger" name="action" value="delete auswahltest {{loop.index -1}}">
                           <i class="fas fa-trash-alt mr-1"></i>Löschen
                         </button>
@@ -128,15 +128,15 @@
                     {% endfor %}
                 </div>
                 <div class="paar_vergleich_forms">
-                    {% for question in form.paar_vergelich_questions %}
+                    {% for question in form.paar_vergleich_questions %}
                     <div class="form-group">
                         <h3>Paarweise Vergleichsprüfung - {{ loop.index }}</h3>
                         {{question.aufgabenstellung_id.label(class="form-label")}} 
                         {{question.aufgabenstellung_id(class="form-control")}}
-                        {{question.probenreihe_id_1.label(class="form-label")}} 
-                        {{question.probenreihe_id_1(class="form-control")}}
-                        {{question.probenreihe_id_2.label(class="form-label")}} 
-                        {{question.probenreihe_id_2(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
+                        {{question.lösung.label(class="form-label")}}
+                        {{question.lösung(class="form-control")}}
                         <button type="submit" class="btn btn-danger" name="action" value="delete paar_vergleich {{loop.index -1}}">
                           <i class="fas fa-trash-alt mr-1"></i>Löschen
                         </button>
