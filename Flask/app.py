@@ -1,8 +1,10 @@
-from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify
+from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify,copy_current_request_context
 from flask_sqlalchemy import SQLAlchemy
-from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung
-from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, ModifyForm, TrainingsViewForm
+from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen
+from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, ModifyForm, TrainingsViewForm, ViewPaar_vergleich
 from uuid import uuid4
+from threading import Thread
+import time
 
 
 app = Flask(__name__)
@@ -73,7 +75,8 @@ def login():
         user = Benutzer.query.filter_by(benutzername=username).first()
 
         if user and user.passwort == password:
-            session['username'] = username
+            session['username'] = user.benutzername
+            session['role'] = user.rolle
             if user.rolle == True:
                 return redirect(url_for('professor_dashboard'))
             else:
@@ -112,14 +115,37 @@ def student_waitingroom():
     If the user is logged in as a student, they are shown the page with the training they are assigned to.
     If the user is not logged in as a student, they are redirected to the login page.
     """
-    if 'username' in session:
-        username = session['username']
-        user = Benutzer.query.filter_by(benutzername=username).first()
-        if user.rolle == False:
-            training = user.training
-            return render_template('student_waitingroom.html', training=training)
-    return redirect(url_for('login'))
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    while True:
+        user = Benutzer.query.filter_by(benutzername=session['username']).first()
+        if user.rolle == False and user.training_id:
+            return redirect(url_for('training_page'))
+    
+    """
 
+    training_available = False  # A flag to signal if training is available
+
+    @copy_current_request_context
+    def check_training(role):
+        nonlocal training_available
+        if role == False:
+            while True:
+                user = Benutzer.query.filter_by(benutzername=session['username']).first()
+                if user and user.training_id:
+                    training_available = True
+                    break
+                time.sleep(1)
+    
+    role = session['role']
+    Thread(target=check_training, args=(role,)).start()
+
+    if training_available:
+        return redirect(url_for('training_page'))
+
+    return render_template('student_waitingroom.html')
+    """
 @app.route('/Error')
 def error():
     """
@@ -183,7 +209,7 @@ def create_training():
 
     #if form.validate_on_submit():
     if request.method == "POST" and form.data["submit"] == True:
-        if form.ebp_questions or form.rangordnungstest_questions or form.auswahltest_questions or form.dreieckstest_questions or form.geruchserkennung_questions or form.hed_beurteilung_questions or form.konz_reihe_questions or form.paar_vergelich_questions or form.profilprüfung_questions:
+        if form.ebp_questions or form.rangordnungstest_questions or form.auswahltest_questions or form.dreieckstest_questions or form.geruchserkennung_questions or form.hed_beurteilung_questions or form.konz_reihe_questions or form.paar_vergleich_questions or form.profilprüfung_questions:
             print("Form validated successfully")
             fragen_ids = []
             fragen_typen = []
@@ -429,8 +455,8 @@ def select_training(training):
 
 
 
-@app.route('/training_page/<training>', methods=['GET', 'POST'])
-def training_page(training):
+@app.route('/training_page/', methods=['GET', 'POST'])
+def training_page():
     '''
     This function handles the training page for a selected training.
     If the user is not logged in, they are redirected to the login page.
@@ -438,31 +464,22 @@ def training_page(training):
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    questions = get_questions(training)
     if request.method == 'POST':
-        # Handle the user's answer
-        answer = request.form.get('answer')
-        # TODO: Handle the user's answer
-        # ...
+        pass
 
-        # Get the next question
-        current_question_index = request.form.get('current_question_index')
-        current_question_index=int(current_question_index)
-        print(current_question_index + 1 < len(questions))
-        if current_question_index + 1 < len(questions):
-            next_question = questions[current_question_index + 1]
-            return render_template('training_page.html', training=training, question=next_question, current_question_index=current_question_index+1)
-        else:
-            # TODO: Handle end of questions
-            # ...
-            pass
+    training = Trainings.query.filter_by(id=Benutzer.query.filter_by(benutzername=session['username']).first().training_id).first()
+    question_index = session.get('question_index', 0)
+    if not question_index:
+        session['question_index'] = 0
+    question_type = training.fragen_typen[question_index]
+    if question_type:
+        if question_type == "paar_vergleich":
+            form = ViewPaar_vergleich()
+            question = Paar_vergleich.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung)
+    return redirect(url_for('login'))
 
-    # Render the first question
-    questions = Trainings.query.get(training)
-    for question in questions:
-        if question:
-            question_type = ""
-    return render_template('training_page.html', training=training, question=questions[0], current_question_index=0)
 
 
 
@@ -476,7 +493,12 @@ def dashboard():
     """
     This function handles the main dashboard page.
     """
-    return render_template('dashboard.html')
+    if 'username' not in session:
+        return render_template('login.html')
+    if Benutzer.query.filter_by(benutzername=session.get('username')).first().rolle == True:
+        return redirect(url_for('professor_dashboard'))
+    else:
+        return redirect(url_for('student_waitingroom'))
 
 """
 def get_questions(training):

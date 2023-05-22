@@ -200,10 +200,11 @@ CREATE TABLE rangordnungstest (
 
 INSERT INTO public.benutzer(
 	id, benutzername, passwort, rolle, training_id)
-	VALUES (1, 'Test', '123', TRUE, NULL);
-    VALUES (2, 'Student1', '123', False, NULL);
-    VALUES (3, 'Student2', '123', False, NULL);
-    VALUES (4, 'Student3', '123', False, NULL);
+	VALUES 
+    (1, 'Test', '123', TRUE, NULL),
+    (2, 'Student1', '123', False, NULL),
+    (3, 'Student2', '123', False, NULL),
+    (4, 'Student3', '123', False, NULL);
 
 INSERT INTO public.proben(
 	id, proben_nr, probenname, farbe, farbintensität, geruch, geschmack, textur, konsistenz)
@@ -212,6 +213,7 @@ INSERT INTO public.proben(
 INSERT INTO public.probenreihen(
 	id, name, proben_ids)
 	VALUES (1, 'Testreihe', ARRAY[1]);
+
 
 INSERT INTO public.prüfvarianten(
 	id, prüfname)
