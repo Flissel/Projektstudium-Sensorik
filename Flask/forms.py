@@ -31,14 +31,18 @@ class CreateProfilprüfung(FlaskForm):
 
 class CreatePaar_vergleich(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('1. Probenreihe', choices=[])
-    lösung = SelectField('Lösungsprobe', choices=[])
+    probenreihe_id_1 = SelectField('1. Probenreihe', choices=[])
+    probenreihe_id_2 = SelectField('2. Probenreihe', choices=[])
+    lösung_1 = SelectField('1. Lösungsprobe', choices=[])
+    lösung_2 = SelectField('2. Lösungsprobe', choices=[])
     
     def __init__(self, *args, **kwargs):
         super(CreatePaar_vergleich, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="paar_vergleich").all()]
-        self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
-        self.lösung.choices = [(p.id, p.probenname) for p in Proben.query.all()]
+        self.probenreihe_id_1.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+        self.probenreihe_id_2.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+        self.lösung_1.choices = [(p.id, p.probenname) for p in Proben.query.all()]
+        self.lösung_2.choices = [(p.id, p.probenname) for p in Proben.query.all()]
 
 class CreateKonz_reihe(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
@@ -72,14 +76,20 @@ class CreateGeruchserkennung(FlaskForm):
 
 class CreateDreieckstest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probenreihe', choices=[])
-    lösung = SelectField('Lösungsprobe', choices=[])
+    probenreihe_id_1 = SelectField('Probenreihe 1', choices=[])
+    probenreihe_id_2 = SelectField('Probenreihe 2', choices=[])
+    lösung_1 = SelectField('Lösungsprobe 1', choices=[])
+    lösung_2 = SelectField('Lösungsprobe 2', choices=[])
+
 
     def __init__(self, *args, **kwargs):
         super(CreateDreieckstest, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="dreieckstest").all()]
-        self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
-        self.lösung.choices = [(p.id, p.probenname) for p in Proben.query.all()]
+        self.probenreihe_id_1.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+        self.probenreihe_id_2.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+        self.lösung_1.choices = [(p.id, p.probenname) for p in Proben.query.all()]
+        self.lösung_2.choices = [(p.id, p.probenname) for p in Proben.query.all()]
+
 
 class CreateAuswahltest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
