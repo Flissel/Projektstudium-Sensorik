@@ -97,7 +97,7 @@ class Profilprüfung(db.Model):
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
     kriterien = db.Column(ARRAY(db.Text))
-    antworten = db.Column(ARRAY(db.Integer))
+    bewertungen = db.Column(ARRAY(db.Integer))
 
 class Hed_beurteilung(db.Model):
     __tablename__ = "hed_beurteilung"
@@ -121,7 +121,7 @@ class Geruchserkennung(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, index=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probe_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
     geruch_ohne_auswahl = db.Column(db.Text)
     geruch_mit_auswahl = db.Column(db.Text)
     bemerkung = db.Column(db.Text)
@@ -130,9 +130,8 @@ class Paar_vergleich(db.Model):
     __tablename__ = 'paar_vergleich'
     id = db.Column(db.Integer, primary_key=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_auswahl_id = db.Column(db.Integer)
+    probenreihe_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    lösung = db.Column(db.Integer)
     bemerkung = db.Column(db.Text)
 
 class Ebp(db.Model):
@@ -161,6 +160,5 @@ class Dreieckstest(db.Model):
     __tablename__ = 'dreieckstest'
     id = db.Column(db.Integer, primary_key=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    proben_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    proben_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    abweichende_probe = db.Column(db.Integer)
+    probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
+    lösung = db.Column(db.Integer, db.ForeignKey('proben.id'))

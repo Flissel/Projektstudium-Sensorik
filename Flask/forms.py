@@ -31,18 +31,18 @@ class CreateProfilprüfung(FlaskForm):
 
 class CreatePaar_vergleich(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id_1 = SelectField('1. Probenreihe', choices=[])
-    probenreihe_id_2 = SelectField('2. Probenreihe', choices=[])
-
+    probenreihe_id = SelectField('1. Probenreihe', choices=[])
+    lösung = SelectField('Lösungsprobe', choices=[])
+    
     def __init__(self, *args, **kwargs):
         super(CreatePaar_vergleich, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="paar_vergleich").all()]
-        self.probenreihe_id_1.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
-        self.probenreihe_id_2.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+        self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+        self.lösung.choices = [(p.id, p.probenname) for p in Proben.query.all()]
 
 class CreateKonz_reihe(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probe', choices=[])
+    probenreihe_id = SelectField('Probenreihe', choices=[])
 
     def __init__(self, *args, **kwargs):
         super(CreateKonz_reihe, self).__init__(*args, **kwargs)
@@ -118,7 +118,7 @@ class CreateTrainingForm(FlaskForm):
     geruchserkennung_questions = FieldList(FormField(CreateGeruchserkennung))
     hed_beurteilung_questions = FieldList(FormField(CreateHed_beurteilung))
     konz_reihe_questions = FieldList(FormField(CreateKonz_reihe))
-    paar_vergelich_questions = FieldList(FormField(CreatePaar_vergleich))
+    paar_vergleich_questions = FieldList(FormField(CreatePaar_vergleich))
     profilprüfung_questions = FieldList(FormField(CreateProfilprüfung))
     submit = SubmitField('Trainings erstellen')
 
