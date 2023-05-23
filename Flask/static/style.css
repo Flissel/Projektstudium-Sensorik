@@ -124,12 +124,14 @@ button[type="submit"]:hover {
 
 
 .card-header {
-  background-color: #007bff;
-  color: #fff;
+  background-color: #d9dbdd;
+  color: #000000;
 }
 
 .card-body {
   padding: 20px;
+  background-color: #d9dbdd;
+  color: #000000;
 }
 
 .btn-primary:hover {
