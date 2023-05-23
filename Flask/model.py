@@ -1,155 +1,73 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import ARRAY
 
 db = SQLAlchemy()
 
-"""
-Allgemeine Tabllen (benutzer, proben, trainings etc.)
-"""
-
-"""
-class Fragen(db.Model):
-    __tablename__ = 'fragen'
-
-    id = db.Column(db.Integer, primary_key=True)
-    fragen_typ = db.Column(db.String(255), nullable=False)
-    fragen_id = db.Column(db.Integer, nullable=False)
-"""
-    
-class Aufgabenstellungen(db.Model):
-    __tablename__ = 'aufgabenstellungen'
-
-    id = db.Column(db.Integer, primary_key=True)
-    aufgabenstellung = db.Column(db.Text, nullable=False)
-    aufgabentyp = db.Column(db.Text, nullable=False)
-    prüfvarianten_id = db.Column(db.Integer, db.ForeignKey('prüfvarianten', ondelete='CASCADE'))
-
-class Trainings(db.Model):
-    __tablename__ = 'trainings'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-    fragen_ids = db.Column(ARRAY(db.INTEGER))
-    fragen_typen= db.Column(ARRAY(db.TEXT))
-
-
 class Proben(db.Model):
     __tablename__ = 'proben'
-
     id = db.Column(db.Integer, primary_key=True)
     proben_nr = db.Column(db.Integer, unique=True, nullable=False)
     probenname = db.Column(db.String(255), nullable=False)
-    farbe = db.Column(db.Text)
-    farbintensität = db.Column(db.Integer)
-    geruch = db.Column(db.Text)
-    geschmack = db.Column(db.Text)
-    textur = db.Column(db.Text)
-    konsistenz = db.Column(db.Text)
+    aussehen_farbe = db.Column(db.Text, nullable=True)
+    geruch = db.Column(db.Text, nullable=True)
+    geschmack = db.Column(db.Text, nullable=True)
+    textur = db.Column(db.Text, nullable=True)
+    konsistenz = db.Column(db.Text, nullable=True)
 
-class Probenreihen(db.Model):
-
-    __tablename__ = 'probenreihen'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text)
-    proben_ids = db.Column(ARRAY(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE')))
-
-class Benutzer(db.Model):
-    __tablename__ = 'benutzer'
-
-    id = db.Column(db.Integer, primary_key=True)
-    benutzername = db.Column(db.Text, nullable=False)
-    passwort = db.Column(db.Text, nullable=False)
-    rolle = db.Column(db.Boolean, nullable=False)
-    training_id = db.Column(db.Integer, db.ForeignKey('trainings.id', ondelete='CASCADE'))
-
-
-"""
-Fragetyp Tabellen (ebp, rangordnungstest, Auswahltest etc.)
-"""
-
-class Konz_reihe(db.Model):
-    __tablename__ = "konz_reihe"
-
-    id = db.Column(db.Integer, primary_key=True, index=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    antworten = db.Column(ARRAY(db.Text))
-
-class Profilprüfung(db.Model):
-    __tablename__ = "profilprüfung"
-
-    id = db.Column(db.Integer, primary_key=True, index=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    kriterien = db.Column(ARRAY(db.Text))
-    bewertungen = db.Column(ARRAY(db.Integer))
-
-class Hed_beurteilung(db.Model):
-    __tablename__ = "hed_beurteilung"
-
-    id = db.Column(db.Integer, primary_key=True, index=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    beurteilung = db.Column(ARRAY(db.Text))
-    anmerkung = db.Column(ARRAY(db.Text))
-
-class Auswahltest(db.Model):
-    __tablename__ = "auswahltest"
-
-    id = db.Column(db.Integer, primary_key=True, index=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id= db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    bemerkungen = db.Column(ARRAY(db.Text))
-
-class Geruchserkennung(db.Model):
-    __tablename__ = "geruchserkennung"
-
-    id = db.Column(db.Integer, primary_key=True, index=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    geruch_ohne_auswahl = db.Column(db.Text)
-    geruch_mit_auswahl = db.Column(db.Text)
-    bemerkung = db.Column(db.Text)
-    
-class Paar_vergleich(db.Model):
-    __tablename__ = 'paar_vergleich'
-    id = db.Column(db.Integer, primary_key=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    lösung_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    lösung_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    bemerkung = db.Column(db.Text)
-
-class Ebp(db.Model):
+class EBP(db.Model):
     __tablename__ = 'ebp'
     id = db.Column(db.Integer, primary_key=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    aussehen_farbe = db.Column(db.Text)
-    geruch = db.Column(db.Text)
-    geschmack = db.Column(db.Text)
-    textur = db.Column(db.Text)
-    konsistenz = db.Column(db.Text)
+    proben_id = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    aussehen_farbe = db.Column(db.Text, nullable=True)
+    geruch = db.Column(db.Text, nullable=True)
+    geschmack = db.Column(db.Text, nullable=True)
+    textur = db.Column(db.Text, nullable=True)
+    konsistenz = db.Column(db.Text, nullable=True)
+
+    probe = db.relationship('Proben', backref=db.backref('ebp', lazy='dynamic'))
 
 class Rangordnungstest(db.Model):
     __tablename__ = 'rangordnungstest'
     id = db.Column(db.Integer, primary_key=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    rang_1_proben_id = db.Column(db.Integer)
-    rang_2_proben_id = db.Column(db.Integer)
-    rang_3_proben_id = db.Column(db.Integer)
-    rang_4_proben_id = db.Column(db.Integer)
-    rang_5_proben_id = db.Column(db.Integer)
+    proben_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_3 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_4 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_id_5 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
 
-class Dreieckstest(db.Model):
-    __tablename__ = 'dreieckstest'
+    probe_1 = db.relationship('Proben', foreign_keys=[proben_id_1], backref=db.backref('rangordnungstest_1', lazy='dynamic'))
+    probe_2 = db.relationship('Proben', foreign_keys=[proben_id_2], backref=db.backref('rangordnungstest_2', lazy='dynamic'))
+    probe_3 = db.relationship('Proben', foreign_keys=[proben_id_3], backref=db.backref('rangordnungstest_3', lazy='dynamic'))
+    probe_4 = db.relationship('Proben', foreign_keys=[proben_id_4], backref=db.backref('rangordnungstest_4', lazy='dynamic'))
+    probe_5 = db.relationship('Proben', foreign_keys=[proben_id_5], backref=db.backref('rangordnungstest_5', lazy='dynamic'))
+
+
+class Questions(db.Model):
+    __tablename__ = 'fragen'
     id = db.Column(db.Integer, primary_key=True)
-    aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    lösung_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    lösung_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    fragen_typ = db.Column(db.String(255), nullable=False)
+    fragen_id = db.Column(db.Integer, nullable=False)
+
+class Trainings(db.Model):
+    __tablename__ = 'trainings'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    question_id_1 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_2 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_3 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_4 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_5 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_6 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_7 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_8 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_9 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    question_id_10 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+
+class Benutzer(db.Model):
+    __tablename__ = 'benutzer'
+    id = db.Column(db.Integer, primary_key=True)
+    benutzername = db.Column(db.String(255), nullable=False)
+    passwort = db.Column(db.String(255), nullable=False)
+    rolle = db.Column(db.Boolean, nullable=False)
+    training_id = db.Column(db.Integer, db.ForeignKey('trainings.id', ondelete='CASCADE'))
+    training = db.relationship('Trainings', backref=db.backref('benutzer', lazy='dynamic'))
 
