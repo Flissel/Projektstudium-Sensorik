@@ -3,21 +3,37 @@ Training Page
 {% endblock %}
 
 {% block content %}
-  <div class="container">
-    <h2>{{ question['question'] }}</h2>
+  <div class="container my-5">
+    <div class="card">
+        <div class="card-header text-white">
+            {% if question_type == 'paar_vergleich' %}
+            <form method="POST" id="paar-vergleich-form" action="answer_question">
+                <h2>Paarweiser Vergleich</h2>
+                <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+                <div>
+                {{ form.proben_id_1.label }} {{ form.proben_id_1(class="form-control") }}
+              </div>
+              <div>
+                {{ form.proben_id_2.label }} {{ form.proben_id_2(class="form-control") }}
+              </div>
+              <div>
+                {{ form.proben_id_3.label }} {{ form.proben_id_3(class="form-control") }}
+              </div>
+            </form>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% for option in question['options'] %}
+                <div class="form-group question_type">
+                    <input class="form-control" type="radio" name="question{{ question['id'] }}" value="{{ option }}" id="{{ option }}">
+                    <label for="{{ option }}">{{ option }}</label>
+                </div>
+                {% endfor %}
+                <input type="hidden" name="current_question_index" value="{{ current_question_index }}">
+                <button type="submit" class="btn btn-primary btn-block choose-button">Submit</button>
+            </form>
+        </div>
+    </div>
   </div>
-  <div class="container">
-    
-    <form method="post">
-      {% for option in question['options'] %}
-      <div>
-        <input type="radio" name="question{{ question['id'] }}" value="{{ option }}" id="{{ option }}">
-        <label for="{{ option }}">{{ option }}</label>
-      </div>
-      {% endfor %}
-      <input type="hidden" name="current_question_index" value="{{ current_question_index }}">
-      <button type="submit">Submit</button>
-    </form>
-  </div>
-  
 {% endblock %}

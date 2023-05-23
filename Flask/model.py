@@ -7,13 +7,15 @@ db = SQLAlchemy()
 Allgemeine Tabllen (benutzer, proben, trainings etc.)
 """
 
+"""
 class Fragen(db.Model):
     __tablename__ = 'fragen'
 
     id = db.Column(db.Integer, primary_key=True)
     fragen_typ = db.Column(db.String(255), nullable=False)
     fragen_id = db.Column(db.Integer, nullable=False)
-
+"""
+    
 class Aufgabenstellungen(db.Model):
     __tablename__ = 'aufgabenstellungen'
 
@@ -27,16 +29,9 @@ class Trainings(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    fragen_id_1 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_2 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_3 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_4 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_5 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_6 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_7 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_8 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_9 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
-    fragen_id_10 = db.Column(db.Integer, db.ForeignKey('fragen.id', ondelete='CASCADE'))
+    fragen_ids = db.Column(ARRAY(db.INTEGER))
+    fragen_typen= db.Column(ARRAY(db.TEXT))
+
 
 class Proben(db.Model):
     __tablename__ = 'proben'
@@ -57,16 +52,7 @@ class Probenreihen(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text)
-    proben_id_1 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_2 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_3 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_4 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_5 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_6 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_7 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_8 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_9 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
-    proben_id_10 = db.Column(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE'))
+    proben_ids = db.Column(ARRAY(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE')))
 
 class Benutzer(db.Model):
     __tablename__ = 'benutzer'
@@ -130,8 +116,10 @@ class Paar_vergleich(db.Model):
     __tablename__ = 'paar_vergleich'
     id = db.Column(db.Integer, primary_key=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    lösung = db.Column(db.Integer)
+    probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
+    probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
+    lösung_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    lösung_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
     bemerkung = db.Column(db.Text)
 
 class Ebp(db.Model):
@@ -160,5 +148,8 @@ class Dreieckstest(db.Model):
     __tablename__ = 'dreieckstest'
     id = db.Column(db.Integer, primary_key=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    lösung = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
+    probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
+    lösung_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    lösung_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
+
