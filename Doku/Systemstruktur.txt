@@ -5,6 +5,3 @@ Wo läuft was:
 - Database Connections 
 DB ULR 
 'postgresql://username:password@localhost/dbname' used DB is in app.py 'postgresql://postgres:EWa?ss66@localhost/testdb'
-
-- Database Strucutre
-https://gitmind.com/app/docs/fprg5gm9

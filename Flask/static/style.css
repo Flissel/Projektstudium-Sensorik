@@ -11,8 +11,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 75%;  /* Increased from 50% to 75% */
-  margin: 0 auto;  /* Center the container */
+  width: 100%;
 }
 
 form {
@@ -22,16 +21,15 @@ form {
   padding: 15px;
   text-align: center;
   margin: 0 auto;
-  width: 100%;
+  width: 35%;
 }
 
 
 label {
   display: block;
   margin-bottom: 10px;
-  margin-top: 10px;
 }
-/*
+
 input[type="text"],
 input[type="password"],
 button[type="submit"] {
@@ -44,19 +42,19 @@ button[type="submit"] {
 }
 
 button[type="submit"] {
-  background-color: #32cd32;
+  background-color: #32cd32; /* green */
   border: none;
-  color: #ffffff;
+  color: #ffffff; /* white */
   cursor: pointer;
 }
 
 button[type="submit"]:hover {
-  background-color: #228b22;
+  background-color: #228b22; /* dark green */
 }
-*/
+
 
 .green-box {
-  background-color: #32cd32;
+  background-color: #32cd32; /* green */
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -140,132 +138,3 @@ button[type="submit"]:hover {
 .btn-primary:focus {
   box-shadow: 0 0 0 0.2rem rgba(10, 201, 42, 0.733);
 }
-
-.delete-button {
-  width: 100px;
-  height: 50px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  background: red;
-  border: none;
-  border-radius: 5px;
-  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-  background: #e62222;
- }
- 
- .delete-button, .delete-button span {
-  transition: 200ms;
- }
- 
- .delete-button .text {
-  transform: translateX(0px);
-  color: white;
-  font-weight: bold;
- }
- 
- .delete-button .icon {
-  position: absolute;
-  border-left: 1px solid #c41b1b;
-  transform: translateX(60px);
-  height: 40px;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
- }
- 
- .delete-button svg {
-  width: 15px;
-  fill: #eee;
- }
- 
- .delete-button:hover {
-  background: #ff3636;
- }
- 
- .delete-button:hover .text {
-  color: transparent;
- }
- 
- .delete-button:hover .icon {
-  width: 90px;
-  border-left: none;
-  transform: translateX(0);
- }
- 
- .delete-button:focus {
-  outline: none;
- }
- 
- .delete-button:active .icon svg {
-  transform: scale(0.8);
- }
-
- .choose-button {
-  width: 120px;
-  height: 50px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  background: #32cd32;
-  border: none;
-  border-radius: 5px;
-  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-  background: #32cd32;
- }
- 
- .choose-button, .choose-button span {
-  transition: 200ms;
- }
- 
- .choose-button .text {
-  transform: translateX(0px);
-  color: white;
-  font-weight: bold;
- }
- 
- .choose-button .icon {
-  position: absolute;
-  border-left: 1px solid #1daf00;
-  transform: translateX(80px);
-  height: 40px;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
- }
- 
- .choose-button svg {
-  width: 15px;
-  fill: #eee;
- }
- 
- .choose-button:hover {
-  background: #32cd32;
- }
- 
- .choose-button:hover .text {
-  color: transparent;
- }
- 
- .choose-button:hover .icon {
-  width: 110px;
-  border-left: none;
-  transform: translateX(0);
- }
- 
- .choose-button:focus {
-  outline: none;
- }
- 
- .choose-button:active .icon svg {
-  transform: scale(0.8);
- }
-
- .question_type {
-  display: inline-flex;
-  margin-right: 10px;
-  margin-bottom: 15px;
-  justify-content: center;
- }
