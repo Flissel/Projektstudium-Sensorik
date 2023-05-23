@@ -142,12 +142,7 @@ class Dreieckstest(db.Model):
     __tablename__ = 'dreieckstest'
     id = db.Column(db.Integer, primary_key=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-<<<<<<< Updated upstream
-    probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    lösung = db.Column(db.Integer, db.ForeignKey('proben.id'))
-=======
     probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     lösung_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
     lösung_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
->>>>>>> Stashed changes
