@@ -128,4 +128,4 @@ class TrainingsViewForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(TrainingsViewForm, self).__init__(*args, **kwargs)
-        self.trainings.choices = [(t.id, t.name) for t in Trainings.query.all()]
+        self.trainings.choices = [(t.id, t.name,t.reference) for t in Trainings.query.all()]

@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from model import db, Trainings, Fragen, Ebp, Rangordnungstest, Benutzer, Proben, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung
 from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, ModifyForm, TrainingsViewForm
 from uuid import uuid4
-
+import json
 
 app = Flask(__name__)
 app.debug = True
@@ -115,8 +115,9 @@ def student_waitingroom():
     if 'username' in session:
         username = session['username']
         user = Benutzer.query.filter_by(benutzername=username).first()
+        
         if user.rolle == False:
-            training = user.training
+            training = user.training_id
             return render_template('student_waitingroom.html', training=training)
     return redirect(url_for('login'))
 
@@ -176,16 +177,13 @@ def create_training():
     A training can consist of multiple question_types.
     When a training is created all the data is saved to the database.
     """
-
-    #TODO: Die anderen fragentypen hinzufügen
-
     form = CreateTrainingForm()
-
     #if form.validate_on_submit():
     if request.method == "POST" and form.data["submit"] == True:
-        if form.ebp_questions or form.rangordnungstest_questions or form.auswahltest_questions or form.dreieckstest_questions or form.geruchserkennung_questions or form.hed_beurteilung_questions or form.konz_reihe_questions or form.paar_vergelich_questions or form.profilprüfung_questions:
+        if form.ebp_questions or form.rangordnungstest_questions or form.auswahltest_questions or form.dreieckstest_questions or form.geruchserkennung_questions or form.hed_beurteilung_questions or form.konz_reihe_questions or form.paar_vergleich_questions or form.profilprüfung_questions:
             print("Form validated successfully")
             question_ids = []
+            question_types = ['ebp', 'rangordnungstest', 'auswahltest', 'dreieckstest', 'geruchserkennung', 'hed_beurteilung', 'konz_reihe', 'paar_vergleich', 'profilprüfung']
 
             for question_form in form.ebp_questions:
                 proben_id = question_form.proben_id.data
@@ -308,21 +306,19 @@ def create_training():
                 db.session.commit()
                 question_ids.append(question.id)
             
+
+            references_fragen = []
+            for question_type, question_id in zip(question_types, question_ids):
+                references_fragen.append({'type': question_type, 'id': question_id})
+            references_fragen_json = json.dumps(references_fragen)
+            
+            # Save the arrays in the training
             training = Trainings(
-                name=form.name.data,
-                fragen_id_1=question_ids[0] if len(question_ids) > 0 else None,
-                fragen_id_2=question_ids[1] if len(question_ids) > 1 else None,
-                fragen_id_3=question_ids[2] if len(question_ids) > 2 else None,
-                fragen_id_4=question_ids[3] if len(question_ids) > 3 else None,
-                fragen_id_5=question_ids[4] if len(question_ids) > 4 else None,
-                fragen_id_6=question_ids[5] if len(question_ids) > 5 else None,
-                fragen_id_7=question_ids[6] if len(question_ids) > 6 else None,
-                fragen_id_8=question_ids[7] if len(question_ids) > 7 else None,
-                fragen_id_9=question_ids[8] if len(question_ids) > 8 else None,
-                fragen_id_10=question_ids[9] if len(question_ids) > 9 else None,
-            )
+                name=form.name.data, 
+                reference=[references_fragen_json]            )
             db.session.add(training)
             db.session.commit()
+            
 
             return redirect(url_for('professor_dashboard'))
 
@@ -461,30 +457,15 @@ def training_page(training):
         return redirect(url_for('login'))
 
     questions = get_questions(training)
-    if request.method == 'POST':
-        # Handle the user's answer
-        answer = request.form.get('answer')
-        # TODO: Handle the user's answer
-        # ...
-
-        # Get the next question
-        current_question_index = request.form.get('current_question_index')
-        current_question_index=int(current_question_index)
-        print(current_question_index + 1 < len(questions))
-        if current_question_index + 1 < len(questions):
-            next_question = questions[current_question_index + 1]
-            return render_template('training_page.html', training=training, question=next_question, current_question_index=current_question_index+1)
-        else:
-            # TODO: Handle end of questions
-            # ...
-            pass
+    
+    
+    print(questions) 
+        
+         
 
     # Render the first question
-    questions = Trainings.query.get(training)
-    for question in questions:
-        if question:
-            question_type = ""
-    return render_template('training_page.html', training=training, question=questions[0], current_question_index=0)
+  
+    return render_template('training_page.html', training=training)
 
 
 
@@ -500,21 +481,49 @@ def dashboard():
     """
     return render_template('dashboard.html')
 
-"""
-def get_questions(training):
-    questionlist = []
-    questions = multiplechoice_aufgaben.query.all()
-    for q in questions:
-        question = {
-            'id': q.id,
-            'question': q.question,
-            'options': [q.option1, q.option2, q.option3, q.option4],
-            'answer': q.answer
-        }
-        print(question)
-        questionlist.append(question)
+
+
+   
+def get_questions(training_id):
+    
+    questionlist=[]
+    # Select all references to questions in the given training by their ID and type
+    question_refs = Trainings.query.filter_by(id=training_id).all()
+    # Retrieve the questions using their ID and type
+ 
+    print(Trainings.reference)
+    
+   # question = get_question_by_id_and_type(Trainings.reference.id, Trainings.reference.type)
+   # questionlist.append(question)
+
     return questionlist
-"""
+   
+def get_question_by_id_and_type(question_id, question_type):
+    # Retrieve the question using its ID and type
+    if question_type == 'ebp':
+        question = Ebp.objects.get(id=question_id)
+    elif question_type == 'rangordnungstest':
+        question = Rangordnungstest.objects.get(id=question_id)
+    elif question_type == 'auswahltest':
+        question = Auswahltest.objects.get(id=question_id)
+    elif question_type == 'dreieckstest':
+        question = Dreieckstest.objects.get(id=question_id)
+    elif question_type == 'geruchserkennung':
+        question = Geruchserkennung.objects.get(id=question_id)
+    elif question_type == 'hed_beurteilung':
+        question = Hed_beurteilung.objects.get(id=question_id)
+    elif question_type == 'konz_reihe':
+        question = Konz_reihe.objects.get(id=question_id)
+    elif question_type == 'paar_vergleich':
+        question = Paar_vergleich.objects.get(id=question_id)
+    elif question_type == 'profilprüfung':
+        question = Profilprüfung.objects.get(id=question_id)
+    else:
+        raise ValueError('Invalid question type')
+
+    return question
+
+
 
 
       
