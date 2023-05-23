@@ -1,9 +1,11 @@
-from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify
+from flask import Flask, render_template,render_template_string, request, session, redirect, url_for ,flash, jsonify,copy_current_request_context
 from flask_sqlalchemy import SQLAlchemy
-from model import db, Trainings, Fragen, Ebp, Rangordnungstest, Benutzer, Proben, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung
-from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, ModifyForm, TrainingsViewForm
+from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen
+from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, ModifyForm, TrainingsViewForm, ViewPaar_vergleich
 from uuid import uuid4
-import json
+from threading import Thread
+import time
+
 
 app = Flask(__name__)
 app.debug = True
@@ -73,7 +75,8 @@ def login():
         user = Benutzer.query.filter_by(benutzername=username).first()
 
         if user and user.passwort == password:
-            session['username'] = username
+            session['username'] = user.benutzername
+            session['role'] = user.rolle
             if user.rolle == True:
                 return redirect(url_for('professor_dashboard'))
             else:
@@ -112,15 +115,37 @@ def student_waitingroom():
     If the user is logged in as a student, they are shown the page with the training they are assigned to.
     If the user is not logged in as a student, they are redirected to the login page.
     """
-    if 'username' in session:
-        username = session['username']
-        user = Benutzer.query.filter_by(benutzername=username).first()
-        
-        if user.rolle == False:
-            training = user.training_id
-            return render_template('student_waitingroom.html', training=training)
-    return redirect(url_for('login'))
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    while True:
+        user = Benutzer.query.filter_by(benutzername=session['username']).first()
+        if user.rolle == False and user.training_id:
+            return redirect(url_for('training_page'))
+    
+    """
 
+    training_available = False  # A flag to signal if training is available
+
+    @copy_current_request_context
+    def check_training(role):
+        nonlocal training_available
+        if role == False:
+            while True:
+                user = Benutzer.query.filter_by(benutzername=session['username']).first()
+                if user and user.training_id:
+                    training_available = True
+                    break
+                time.sleep(1)
+    
+    role = session['role']
+    Thread(target=check_training, args=(role,)).start()
+
+    if training_available:
+        return redirect(url_for('training_page'))
+
+    return render_template('student_waitingroom.html')
+    """
 @app.route('/Error')
 def error():
     """
@@ -177,13 +202,17 @@ def create_training():
     A training can consist of multiple question_types.
     When a training is created all the data is saved to the database.
     """
+
+    #TODO: Die anderen fragentypen hinzufügen
+
     form = CreateTrainingForm()
+
     #if form.validate_on_submit():
     if request.method == "POST" and form.data["submit"] == True:
         if form.ebp_questions or form.rangordnungstest_questions or form.auswahltest_questions or form.dreieckstest_questions or form.geruchserkennung_questions or form.hed_beurteilung_questions or form.konz_reihe_questions or form.paar_vergleich_questions or form.profilprüfung_questions:
             print("Form validated successfully")
-            question_ids = []
-            question_types = ['ebp', 'rangordnungstest', 'auswahltest', 'dreieckstest', 'geruchserkennung', 'hed_beurteilung', 'konz_reihe', 'paar_vergleich', 'profilprüfung']
+            fragen_ids = []
+            fragen_typen = []
 
             for question_form in form.ebp_questions:
                 proben_id = question_form.proben_id.data
@@ -193,10 +222,8 @@ def create_training():
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='ebp', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)
+                fragen_ids.append(test.id)
+                fragen_typen.append("ebp")
 
             for question_form in form.rangordnungstest_questions:
                 probenreihe_id = question_form.probenreihe_id.data
@@ -206,11 +233,8 @@ def create_training():
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='rangordnungstest', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)
-                
+                fragen_ids.append(test.id)
+                fragen_typen.append("rangordnungstest")
                 
             for question_form in form.auswahltest_questions:
                 probenreihe_id = question_form.probenreihe_id.data
@@ -220,24 +244,22 @@ def create_training():
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='auswahltest', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)
-            
-            for question_form in form.dreieckstest_questions:
-                probenreihe_id = question_form.probenreihe_id.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-                lösung = question_form.lösung.data
+                fragen_ids.append(test.id)
+                fragen_typen.append("auswahltest")
 
-                test = Dreieckstest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id, lösung=lösung)
+            for question_form in form.dreieckstest_questions:
+                probenreihe_id_1 = question_form.probenreihe_id_1.data
+                probenreihe_id_2 = question_form.probenreihe_id_2.data
+                aufgabenstellung_id = question_form.aufgabenstellung_id.data
+                lösung_1 = question_form.lösung_1.data
+                lösung_2 = question_form.lösung_2.data
+
+                test = Dreieckstest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id_1=probenreihe_id_1, probenreihe_id_2=probenreihe_id_2, lösung_1=lösung_1, lösung_2=lösung_2)
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='dreieckstest', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)   
+                fragen_ids.append(test.id)
+                fragen_typen.append("dreieckstest") 
                 
             for question_form in form.geruchserkennung_questions:
                 proben_id = question_form.proben_id.data
@@ -247,10 +269,8 @@ def create_training():
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='geruchserkennung', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id) 
+                fragen_ids.append(test.id)
+                fragen_typen.append("geruchserkennungtest")
             
             for question_form in form.hed_beurteilung_questions:
                 probenreihe_id = question_form.probenreihe_id.data
@@ -260,10 +280,8 @@ def create_training():
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='hed_beurteilung', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)
+                fragen_ids.append(test.id)
+                fragen_typen.append("hed_beurteilung")
                 
             for question_form in form.konz_reihe_questions:
                 probenreihe_id = question_form.probenreihe_id.data
@@ -273,24 +291,22 @@ def create_training():
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='konz_reihe', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)
+                fragen_ids.append(test.id)
+                fragen_typen.append("konz_reihe")
                 
             for question_form in form.paar_vergleich_questions:
-                probenreihe_id = question_form.probenreihe_id.data
+                probenreihe_id_1 = question_form.probenreihe_id_1.data
+                probenreihe_id_2 = question_form.probenreihe_id_2.data
                 aufgabenstellung_id = question_form.aufgabenstellung_id.data
-                lösung = question_form.lösung.data
+                lösung_1 = question_form.lösung_1.data
+                lösung_2 = question_form.lösung_2.data
 
-                test = Paar_vergleich(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id, lösung=lösung)
+                test = Paar_vergleich(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id_1=probenreihe_id_1, probenreihe_id_2=probenreihe_id_2, lösung_1=lösung_1, lösung_2=lösung_2)
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='paar_vergleich', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)
+                fragen_ids.append(test.id)
+                fragen_typen.append("paar_vergleich")
             
             for question_form in form.profilprüfung_questions:
                 proben_id = question_form.proben_id.data
@@ -301,24 +317,16 @@ def create_training():
                 db.session.add(test)
                 db.session.commit()
 
-                question = Fragen(fragen_typ='profilprüfung', fragen_id=test.id)
-                db.session.add(question)
-                db.session.commit()
-                question_ids.append(question.id)
+                fragen_ids.append(test.id)
+                fragen_typen.append("profilprüfung")
             
-
-            references_fragen = []
-            for question_type, question_id in zip(question_types, question_ids):
-                references_fragen.append({'type': question_type, 'id': question_id})
-            references_fragen_json = json.dumps(references_fragen)
-            
-            # Save the arrays in the training
             training = Trainings(
-                name=form.name.data, 
-                reference=[references_fragen_json]            )
+                name=form.name.data,
+                fragen_ids = fragen_ids,
+                fragen_typen = fragen_typen
+            )
             db.session.add(training)
             db.session.commit()
-            
 
             return redirect(url_for('professor_dashboard'))
 
@@ -447,8 +455,8 @@ def select_training(training):
 
 
 
-@app.route('/training_page/<training>', methods=['GET', 'POST'])
-def training_page(training):
+@app.route('/training_page/', methods=['GET', 'POST'])
+def training_page():
     '''
     This function handles the training page for a selected training.
     If the user is not logged in, they are redirected to the login page.
@@ -456,16 +464,22 @@ def training_page(training):
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    questions = get_questions(training)
-    
-    
-    print(questions) 
-        
-         
+    if request.method == 'POST':
+        pass
 
-    # Render the first question
-  
-    return render_template('training_page.html', training=training)
+    training = Trainings.query.filter_by(id=Benutzer.query.filter_by(benutzername=session['username']).first().training_id).first()
+    question_index = session.get('question_index', 0)
+    if not question_index:
+        session['question_index'] = 0
+    question_type = training.fragen_typen[question_index]
+    if question_type:
+        if question_type == "paar_vergleich":
+            form = ViewPaar_vergleich()
+            question = Paar_vergleich.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung)
+    return redirect(url_for('login'))
+
 
 
 
@@ -479,51 +493,28 @@ def dashboard():
     """
     This function handles the main dashboard page.
     """
-    return render_template('dashboard.html')
-
-
-
-   
-def get_questions(training_id):
-    
-    questionlist=[]
-    # Select all references to questions in the given training by their ID and type
-    question_refs = Trainings.query.filter_by(id=training_id).all()
-    # Retrieve the questions using their ID and type
- 
-    print(Trainings.reference)
-    
-   # question = get_question_by_id_and_type(Trainings.reference.id, Trainings.reference.type)
-   # questionlist.append(question)
-
-    return questionlist
-   
-def get_question_by_id_and_type(question_id, question_type):
-    # Retrieve the question using its ID and type
-    if question_type == 'ebp':
-        question = Ebp.objects.get(id=question_id)
-    elif question_type == 'rangordnungstest':
-        question = Rangordnungstest.objects.get(id=question_id)
-    elif question_type == 'auswahltest':
-        question = Auswahltest.objects.get(id=question_id)
-    elif question_type == 'dreieckstest':
-        question = Dreieckstest.objects.get(id=question_id)
-    elif question_type == 'geruchserkennung':
-        question = Geruchserkennung.objects.get(id=question_id)
-    elif question_type == 'hed_beurteilung':
-        question = Hed_beurteilung.objects.get(id=question_id)
-    elif question_type == 'konz_reihe':
-        question = Konz_reihe.objects.get(id=question_id)
-    elif question_type == 'paar_vergleich':
-        question = Paar_vergleich.objects.get(id=question_id)
-    elif question_type == 'profilprüfung':
-        question = Profilprüfung.objects.get(id=question_id)
+    if 'username' not in session:
+        return render_template('login.html')
+    if Benutzer.query.filter_by(benutzername=session.get('username')).first().rolle == True:
+        return redirect(url_for('professor_dashboard'))
     else:
-        raise ValueError('Invalid question type')
+        return redirect(url_for('student_waitingroom'))
 
-    return question
-
-
+"""
+def get_questions(training):
+    questionlist = []
+    questions = multiplechoice_aufgaben.query.all()
+    for q in questions:
+        question = {
+            'id': q.id,
+            'question': q.question,
+            'options': [q.option1, q.option2, q.option3, q.option4],
+            'answer': q.answer
+        }
+        print(question)
+        questionlist.append(question)
+    return questionlist
+"""
 
 
       
