@@ -141,6 +141,9 @@ class TrainingsViewForm(FlaskForm):
         super(TrainingsViewForm, self).__init__(*args, **kwargs)
         self.trainings.choices = [(t.id, t.name) for t in Trainings.query.all()]
 
+###################################
+#---View Forms for the students---#
+###################################
 
 class ViewProfilprüfung(FlaskForm):
     skalenwerte = FieldList(IntegerField('Skalenwert'))

@@ -118,10 +118,18 @@ def student_waitingroom():
     if 'username' not in session:
         return redirect(url_for('login'))
     
+    user = Benutzer.query.filter_by(benutzername=session['username']).first()
+    if user.rolle == False and user.training_id:
+        return redirect(url_for('training_page')) 
     while True:
         user = Benutzer.query.filter_by(benutzername=session['username']).first()
-        if user.rolle == False and user.training_id:
-            return redirect(url_for('training_page'))
+        if user.rolle == True:
+            return redirect(url_for('professor_dashboard'))
+        else:
+            if user.training_id:
+                return redirect(url_for('training_page'))
+        time.sleep(1)
+        return render_template('student_waitingroom.html')
     
     """
 
