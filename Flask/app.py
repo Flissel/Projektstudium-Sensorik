@@ -501,12 +501,11 @@ def dashboard():
     """
     This function handles the main dashboard page.
     """
+    print(session)
     if 'username' not in session:
         return render_template('login.html')
-    if Benutzer.query.filter_by(benutzername=session.get('username')).first().rolle == True:
-        return redirect(url_for('professor_dashboard'))
-    else:
-        return redirect(url_for('student_waitingroom'))
+        
+    return render_template('dashboard.html')
 
 """
 def get_questions(training):
