@@ -152,4 +152,3 @@ class Dreieckstest(db.Model):
     probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     lösung_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
     lösung_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-
