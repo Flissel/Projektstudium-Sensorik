@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Sample</title>
+  <style>
+    /* Add your custom styling here */
+  </style>
+</head>
+<body>
+  <h1>Edit Sample</h1>
+  
+  <form method="POST" action="{{ url_for('edit_sample', sample_id=sample.id) }}">
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Proben Nr</th>
+        <th>Probenname</th>
+        <th>Farbe</th>
+        <th>Farbintensität</th>
+        <th>Geruch</th>
+        <th>Geschmack</th>
+        <th>Textur</th>
+        <th>Konsistenz</th>
+      </tr>
+      <tr>
+        <td>{{ sample.id }}</td>
+        <td><input type="number" name="proben_nr" value="{{ sample.proben_nr }}" required></td>
+        <td><input type="text" name="probenname" value="{{ sample.probenname }}" required></td>
+        <td><input type="text" name="farbe" value="{{ sample.farbe }}"></td>
+        <td><input type="number" name="farbintensitaet " value="{{ sample.farbintensitaet  }}"></td>
+        <td><input type="text" name="geruch" value="{{ sample.geruch }}"></td>
+        <td><input type="text" name="geschmack" value="{{ sample.geschmack }}"></td>
+        <td><input type="text" name="textur" value="{{ sample.textur }}"></td>
+        <td><input type="text" name="konsistenz" value="{{ sample.konsistenz }}"></td>
+      </tr>
+    </table>
+    <button type="submit">Save</button>
+  </form>
+  <button onclick="openNewSampleWindow()">Hinzufügen</button>
+
+  <script>
+    function openNewSampleWindow() {
+      window.open("{{ url_for('create_sample') }}", "_blank", "width=400,height=500");
+    }
+  </script>
+  
+
+</body>
+</html>
