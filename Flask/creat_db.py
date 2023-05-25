@@ -76,6 +76,7 @@ CREATE TABLE benutzer (
     passwort TEXT NOT NULL,
     rolle BOOLEAN NOT NULL,
     training_id INTEGER,
+    aktiv BOOLEAN NOT NULL DEFAULT false,
     FOREIGN KEY (training_id) REFERENCES trainings (id) ON DELETE CASCADE
 );
 

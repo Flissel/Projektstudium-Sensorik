@@ -20,6 +20,8 @@ TODO: Probenreihen erstellen @Professordash board -> Proben hinzüfügen -> Tabe
 
 TODO: Edit Button für Trainings
 
+@Training_progress 
+        - zeige Fortschritt an 
 
 ENDE PROJEKT 
 TODO: Migration 

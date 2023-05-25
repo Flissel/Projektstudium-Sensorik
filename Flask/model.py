@@ -62,7 +62,7 @@ class Benutzer(db.Model):
     passwort = db.Column(db.Text, nullable=False)
     rolle = db.Column(db.Boolean, nullable=False)
     training_id = db.Column(db.Integer, db.ForeignKey('trainings.id', ondelete='CASCADE'))
-
+    aktiv = db.Column(db.Boolean, nullable=False)
 
 """
 Fragetyp Tabellen (ebp, rangordnungstest, Auswahltest etc.)

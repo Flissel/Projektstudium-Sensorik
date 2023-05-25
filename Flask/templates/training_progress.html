@@ -1,29 +1,21 @@
 {% extends 'base.html' %}
 
-{% block title %}Training Progress{% endblock %}
-
-<!-- TODO:  -->
-
-{% block content %}
-  <h1>Training Progress</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Student</th>
-        <th>Training</th>
-        <th>Completed Tasks</th>
-        <th>Progress</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for student in studenten %}
-        <tr>
-          <td>{{ student.name }}</td>
-          <td>{{ student.training }}</td>
-          <td>{{ student.anzahl_aufgaben }}</td>
-          <td>{{ student.praktikum_id }}%</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Progress and Results</title>
+</head>
+<body>
+    <h1>User Progress and Results</h1>
+    {% if 'results' in session %}
+        {% for training, data in session['results'].items() %}
+            <h2>{{ training }}</h2>
+            <p>Progress: {{ data['progress'] * 100 }}%</p>
+            <p>Score: {{ data['score'] }}%</p>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</body>
+</html>
