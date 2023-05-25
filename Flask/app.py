@@ -451,11 +451,57 @@ def training_page():
 
 @app.route('/professor_dashboard/training_progress')
 def training_progress():
-    #TODO get all logged in users
-    #TODO calculate the progress of each user absolving a training 
-    #TODO show the training progress of each user
-    #TODO give the requred data to the template
-    return render_template('training_progress.html')
+    # get all logged in users
+    users = Benutzer.query.all()
+
+    # calculate the progress of each user absolving a training
+    user_progress = []
+    for user in users:
+        progress = calculate_training_progress(user)
+        user_progress.append((user, progress))
+
+    # show the training progress of each user
+    for user, progress in user_progress:
+        print(f"{user.username}: {progress}")
+
+    # give the required data to the template
+    return render_template('training_progress.html', user_progress=user_progress)
+
+def calculate_training_progress(user):
+    completed_tasks = 0
+    total_tasks = 0
+
+    training = Trainings.query.get(user.training_id)
+
+    if training:
+        total_tasks = len(training.fragen_ids)
+
+        for fragen_id in training.fragen_ids:
+            if check_task_completion(user, fragen_id):
+                completed_tasks += 1
+
+    if total_tasks > 0:
+        progress = (completed_tasks / total_tasks) * 100
+    else:
+        progress = 0
+
+    return progress
+
+
+def check_task_completion(user, fragen_id):
+    task_type = Aufgabenstellungen.query.get(fragen_id).aufgabentyp
+
+    if task_type == 'paar_vergleich':
+        task = Paar_vergleich.query.filter_by(aufgabenstellung_id=fragen_id).first()
+        if task:
+            # Assuming user_responses is a relationship between User and Paar_vergleich models
+            user_response = task.user_responses.filter_by(user_id=user.id).first()
+            if user_response:
+                return True
+
+    # Add conditions for other task types as needed
+
+    return False
 
 @app.route('/')
 def dashboard():
@@ -467,6 +513,83 @@ def dashboard():
         return render_template('login.html')
         
     return render_template('dashboard.html')
+@app.route('/view_samples/')
+def view_samples():
+    # Logic to retrieve sample data
+    samples = Proben.query.all()
+    return render_template('view_samples.html', samples=samples)
+
+
+
+
+# Route for editing a sample
+@app.route('/edit_sample/<sample_id>', methods=['GET', 'POST'])
+def edit_sample(sample_id):
+    sample = Proben.query.get(sample_id)
+
+    if request.method == 'POST':
+        form_data = request.form
+        print(form_data)
+        update_sample_in_database(sample_id, form_data)
+        return redirect(url_for('view_samples'))
+
+    return render_template('edit_sample.html', sample=sample)
+
+
+
+
+# Helper function to fetch a sample from the database
+def fetch_sample_from_database(sample_id):
+    sample = Proben.query.get(sample_id)
+    
+    return sample
+
+# Helper function to update a sample in the database
+def update_sample_in_database(sample_id, form_data):
+    try:
+        sample = Proben.query.get(sample_id)
+        if sample is None:
+            raise ValueError("Sample not found in the database.")
+        
+
+        sample.probenname = form_data.get('probenname')
+        sample.proben_nr = form_data.get('proben_nr')
+        sample.farbe = form_data.get('farbe')
+        sample.farbintensität = form_data.get('farbintensität')
+        sample.geruch = form_data.get('geruch')
+        sample.geschmack = form_data.get('geschmack')
+        sample.textur = form_data.get('textur')
+        sample.konsistenz = form_data.get('konsistenz')
+
+        db.session.commit()
+    except Exception as e:
+        print(f"Error updating sample: {e}")
+        db.session.rollback()
+
+@app.route('/create_sample', methods=['GET', 'POST'])
+def create_sample():
+    if request.method == 'POST':
+        form_data = request.form
+        # Logic to create a new sample based on form data
+        create_sample_in_database(form_data)
+        return redirect(url_for('view_samples'))
+
+    return render_template('create_sample.html')
+def create_sample_in_database(form_data):
+    proben_nr = form_data.get('proben_nr')
+    probenname = form_data.get('probenname')
+    farbe = form_data.get('farbe')
+    farbintensität = form_data.get('farbintensitaet')
+    geruch = form_data.get('geruch')
+    geschmack = form_data.get('geschmack')
+    textur = form_data.get('textur')
+    konsistenz = form_data.get('konsistenz')
+
+    sample = Proben(proben_nr=proben_nr, probenname=probenname, farbe=farbe, farbintensitaet=farbintensität,
+                    geruch=geruch, geschmack=geschmack, textur=textur, konsistenz=konsistenz)
+
+    db.session.add(sample)
+    db.session.commit()
 
 if __name__ == '__main__':
     app.run(debug=True)

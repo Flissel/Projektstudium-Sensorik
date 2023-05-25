@@ -1,6 +1,6 @@
 body {
-  background-color: #ffffff; /* white */
-  color: #000000; /* black */
+  background-color: #f5f5f5;
+  color: #333333;
   font-family: Arial, sans-serif;
   font-size: 16px;
   margin: 0;
@@ -11,32 +11,31 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 75%;  /* Increased from 50% to 75% */
-  margin: 0 auto;  /* Center the container */
+  width: 75%;
+  margin: 0 auto;
 }
 
 form {
-  background-color: #ffffff; /* white */
-  border-radius: 2px;
-  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
-  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
   text-align: center;
   margin: 0 auto;
   width: 100%;
+  max-width: 400px;
 }
-
 
 label {
   display: block;
   margin-bottom: 10px;
-  margin-top: 10px;
 }
-/*
+
 input[type="text"],
 input[type="password"],
 button[type="submit"] {
   border: 1px solid #cccccc;
-  border-radius: 3px;
+  border-radius: 4px;
   font-size: 16px;
   margin-bottom: 10px;
   padding: 10px;
@@ -53,10 +52,10 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background-color: #228b22;
 }
-*/
 
 .green-box {
   background-color: #32cd32;
+  color: #ffffff;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -76,7 +75,7 @@ button[type="submit"]:hover {
 }
 
 .green-box a {
-  color: #ffffff; /* white */
+  color: #ffffff;
   text-decoration: none;
   font-weight: bold;
   font-size: 16px;
@@ -106,11 +105,11 @@ button[type="submit"]:hover {
 .professor-link,
 .student-link {
   background-color: #32cd32;
-  border-radius: 5px;
-  color: #fff;
+  border-radius: 4px;
+  color: #ffffff;
   display: block;
-  font-size: 24px;
-  padding: 15px 20px;
+  font-size: 18px;
+  padding: 12px 20px;
   text-decoration: none;
   text-transform: uppercase;
   transition: background-color 0.3s ease;
@@ -121,11 +120,12 @@ button[type="submit"]:hover {
   background-color: #228b22;
 }
 
-
-
 .card-header {
   background-color: #eaecee;
   color: #000000;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .card-body {
@@ -143,131 +143,28 @@ button[type="submit"]:hover {
   box-shadow: 0 0 0 0.2rem rgba(10, 201, 42, 0.733);
 }
 
-.delete-button {
-  width: 100px;
-  height: 50px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  background: red;
-  border: none;
-  border-radius: 5px;
-  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-  background: #e62222;
- }
- 
- .delete-button, .delete-button span {
-  transition: 200ms;
- }
- 
- .delete-button .text {
-  transform: translateX(0px);
-  color: white;
-  font-weight: bold;
- }
- 
- .delete-button .icon {
-  position: absolute;
-  border-left: 1px solid #c41b1b;
-  transform: translateX(60px);
-  height: 40px;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
- }
- 
- .delete-button svg {
-  width: 15px;
-  fill: #eee;
- }
- 
- .delete-button:hover {
-  background: #ff3636;
- }
- 
- .delete-button:hover .text {
-  color: transparent;
- }
- 
- .delete-button:hover .icon {
-  width: 90px;
-  border-left: none;
-  transform: translateX(0);
- }
- 
- .delete-button:focus {
-  outline: none;
- }
- 
- .delete-button:active .icon svg {
-  transform: scale(0.8);
- }
-
- .choose-button {
+.edit-button {
   width: 120px;
-  height: 50px;
+  height: 40px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  background: #32cd32;
+  justify-content: center;
+  background-color: #1e90ff;
   border: none;
-  border-radius: 5px;
-  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-  background: #32cd32;
- }
- 
- .choose-button, .choose-button span {
-  transition: 200ms;
- }
- 
- .choose-button .text {
-  transform: translateX(0px);
-  color: white;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 16px;
   font-weight: bold;
- }
- 
- .choose-button .icon {
-  position: absolute;
-  border-left: 1px solid #1daf00;
-  transform: translateX(80px);
-  height: 40px;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
- }
- 
- .choose-button svg {
-  width: 15px;
-  fill: #eee;
- }
- 
- .choose-button:hover {
-  background: #32cd32;
- }
- 
- .choose-button:hover .text {
-  color: transparent;
- }
- 
- .choose-button:hover .icon {
-  width: 110px;
-  border-left: none;
-  transform: translateX(0);
- }
- 
- .choose-button:focus {
-  outline: none;
- }
- 
- .choose-button:active .icon svg {
-  transform: scale(0.8);
- }
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
 
- .question_type {
-  display: inline-flex;
-  margin-right: 10px;
-  margin-bottom: 15px;
-  justify-content: center;
- }
+.edit-button:hover {
+  background-color: #4169e1;
+}
+
+.edit-button:focus {
+  outline: none;
+}

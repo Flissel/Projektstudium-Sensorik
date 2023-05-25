@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>View Samples</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>View Samples</h1>  
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Proben Nr</th>
+      <th>Probenname</th>
+      <th>Farbe</th>
+      <th>Farbintensität</th>
+      <th>Geruch</th>
+      <th>Geschmack</th>
+      <th>Textur</th>
+      <th>Konsistenz</th>
+      <th>Action</th>
+    </tr>
+    {% for sample in samples %}
+    <tr>
+      <td>{{ sample.id }}</td>
+      <td>{{ sample.proben_nr }}</td>
+      <td>{{ sample.probenname }}</td>
+      <td>{{ sample.farbe }}</td>
+      <td>{{ sample.farbintensitaet  }}</td>
+      <td>{{ sample.geruch }}</td>
+      <td>{{ sample.geschmack }}</td>
+      <td>{{ sample.textur }}</td>
+      <td>{{ sample.konsistenz }}</td>
+      <td><a href="{{ url_for('edit_sample', sample_id=sample.id) }}">Edit</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  
+</body>
+</html>
