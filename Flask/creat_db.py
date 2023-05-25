@@ -215,20 +215,6 @@ INSERT INTO public.probenreihen(
 	id, name, proben_ids)
 	VALUES (1, 'Testreihe', ARRAY[1,1]);
 
-INSERT INTO public.trainings(
-	id, name, fragen_ids, fragen_typen)
-	VALUES
-    (2,'Test',ARRAY[1],ARRAY['ebp']),
-    (3,'Test1',ARRAY[1],ARRAY['rangordnungstest']),
-    (4,'Test2',ARRAY[1],ARRAY['auswahltest']),
-    (5,'Test3',ARRAY[1],ARRAY['dreieckstest']),
-    (6,'Test4',ARRAY[1],ARRAY['geruchserkennungtest']),
-    (7,'Test5',ARRAY[1],ARRAY['hed_beurteilung']),
-    (8,'Test6',ARRAY[1],ARRAY['konz_reihe']),
-    (9,'Test7',ARRAY[2],ARRAY['paar_vergleich']),
-    (10,'Test8',ARRAY[1],ARRAY['profilprüfung']);
-
-
 INSERT INTO public.prüfvarianten(
 	id, prüfname)
 	VALUES 
