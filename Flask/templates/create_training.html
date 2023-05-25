@@ -157,10 +157,10 @@
                             {{kriteria.label(class="form-label")}}{{loop.index}} 
                             {{kriteria(class="form-control")}}
                         {% endfor %}
-                        <button type="submit" class="btn btn-success" name="kriteria" value="add {{loop.index -1}}">
+                        <button type="submit" class="btn btn-success" name="kriteria" value="add {{loop.index0}}">
                           <i class="fas fa-trash-alt mr-1"></i>Kriterium hinzufügen
                         </button>
-                        <button type="submit" class="btn btn-danger" name="kriteria" value="remove {{loop.index -1}}">
+                        <button type="submit" class="btn btn-danger" name="kriteria" value="remove {{loop.index0}}">
                           <i class="fas fa-trash-alt mr-1"></i>Kriterium entfernen
                         </button>
                         <br>

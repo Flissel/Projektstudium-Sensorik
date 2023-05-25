@@ -8,7 +8,7 @@ from model import Trainings, Aufgabenstellungen, Probenreihen, Proben, Benutzer,
 class CreateProfilprüfung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     proben_id = SelectField('Probe', choices=[])
-    kriterien = FieldList(StringField("Kriterium"))
+    criteria = FieldList(StringField("Kriterium"))
 
     def __init__(self, *args, **kwargs):
         super(CreateProfilprüfung, self).__init__(*args, **kwargs)
@@ -128,14 +128,14 @@ class CreateTrainingForm(FlaskForm):
     paar_vergleich_questions = FieldList(FormField(CreatePaar_vergleich))
     profilprüfung_questions = FieldList(FormField(CreateProfilprüfung))
     add_question = SubmitField('Frage hinzufügen')
-    remove_ebp_question = FieldList(FormField(SubmitField('Frage entfernen')))
-    remove_rangordnungstest_question = FieldList(FormField(SubmitField('Frage entfernen')))
-    remove_auswahltest_question = FieldList(FormField(SubmitField('Frage entfernen')))
-    remove_dreieckstest_question = FieldList(FormField(SubmitField('Frage entfernen')))
-    remove_geruchserkennung_question = FieldList(FormField(SubmitField('Frage entfernen')))
-    remove_hed_beurteilung_question = FieldList(FormField(SubmitField('Frage entfernen')))
-    remove_konz_reihe_question = FieldList(FormField(SubmitField('Frage entfernen')))
-    remove_profilprüfung_question = FieldList(FormField(SubmitField('Frage entfernen')))
+    remove_ebp_question = FieldList(SubmitField('Frage entfernen'))
+    remove_rangordnungstest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_auswahltest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_dreieckstest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_geruchserkennung_question = FieldList(SubmitField('Frage entfernen'))
+    remove_hed_beurteilung_question = FieldList(SubmitField('Frage entfernen'))
+    remove_konz_reihe_question = FieldList(SubmitField('Frage entfernen'))
+    remove_profilprüfung_question = FieldList(SubmitField('Frage entfernen'))
     create_training = SubmitField('Trainings erstellen')
     
 

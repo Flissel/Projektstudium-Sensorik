@@ -40,7 +40,7 @@ class Proben(db.Model):
     proben_nr = db.Column(db.Integer, unique=True, nullable=False)
     probenname = db.Column(db.String(255), nullable=False)
     farbe = db.Column(db.Text)
-    farbintensitaet  = db.Column(db.Integer)
+    farbintensität  = db.Column(db.Integer)
     geruch = db.Column(db.Text)
     geschmack = db.Column(db.Text)
     textur = db.Column(db.Text)
