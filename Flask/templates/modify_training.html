@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header text-white" style="background-color: #32cd32;">
+            <h2>Create Training</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="create-training-form" action="create_training">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }} 
+                    {{ form.name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{form.question_types[0].question_type.label(class="form-label")}} 
+                    {{form.question_types[0].question_type(class="form-control")}}
+                </div>
+                <div class="form-group d-flex justify-content-between align-items-center">
+                    {{form.question_types[0].add(class="btn btn-success")}} 
+                </div>
+                <div class="ebp_forms">
+                    {% for question in form.ebp_questions %}
+                    <div class="form-group">
+                        <h3>Einfach beschreibende Prüfung - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.proben_id.label(class="form-label")}} 
+                        {{question.proben_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete ebp {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="rangordnungstest_forms">
+                    {% for question in form.rangordnungstest_questions %}
+                    <div class="form-group">
+                        <h3>Rangordnungstest - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}}
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete rang {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="auswahltest_forms">
+                    {% for question in form.auswahltest_questions %}
+                    <div class="form-group">
+                        <h3>Auswahltest - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete auswahltest {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="dreieckstest_forms">
+                    {% for question in form.dreieckstest_questions %}
+                    <div class="form-group">
+                        <h3>Dreieckstest - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id_1.label(class="form-label")}} 
+                        {{question.probenreihe_id_1(class="form-control")}}
+                        {{question.lösung_1.label(class="form-label")}} 
+                        {{question.lösung_1(class="form-control")}}
+                        {{question.probenreihe_id_2.label(class="form-label")}}
+                        {{question.probenreihe_id_2(class="form-control")}}
+                        {{question.lösung_2.label(class="form-label")}} 
+                        {{question.lösung_2(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete dreieckstest {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="geruchserkennung_forms">
+                    {% for question in form.geruchserkennung_questions %}
+                    <div class="form-group">
+                        <h3>Geruchserkennungstest - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.proben_id.label(class="form-label")}} 
+                        {{question.proben_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete geruchserkennung {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="hed_beurteilung_forms">
+                    {% for question in form.hed_beurteilung_questions %}
+                    <div class="form-group">
+                        <h3>Hedonische Beurteilung - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete hed_beurteilung {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="konz_reihe_forms">
+                    {% for question in form.konz_reihe_questions %}
+                    <div class="form-group">
+                        <h3>Konzentrationsreihe - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete konz_reihe {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="paar_vergleich_forms">
+                    {% for question in form.paar_vergleich_questions %}
+                    <div class="form-group">
+                        <h3>Paarweise Vergleichsprüfung - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id_1.label(class="form-label")}} 
+                        {{question.probenreihe_id_1(class="form-control")}}
+                        {{question.lösung_1.label(class="form-label")}}
+                        {{question.lösung_1(class="form-control")}}
+                        {{question.probenreihe_id_2.label(class="form-label")}} 
+                        {{question.probenreihe_id_2(class="form-control")}}
+                        {{question.lösung_2.label(class="form-label")}}
+                        {{question.lösung_2(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete paar_vergleich {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="profilprüfung_forms">
+                    {% for question in form.profilprüfung_questions %}
+                    <div class="form-group">
+                        <h3>Profilprüfung - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.proben_id.label(class="form-label")}} 
+                        {{question.proben_id(class="form-control")}}
+                        {% for kriteria in question.kriterien %}
+                            {{kriteria.label(class="form-label")}}{{loop.index}} 
+                            {{kriteria(class="form-control")}}
+                        {% endfor %}
+                        <button type="submit" class="btn btn-success" name="kriteria" value="add {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Kriterium hinzufügen
+                        </button>
+                        <button type="submit" class="btn btn-danger" name="kriteria" value="remove {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Kriterium entfernen
+                        </button>
+                        <br>
+                        <button type="submit" class="btn btn-danger" name="action" value="delete profilprüfung {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <!-- Set "form_id" to prevent double submitting -->
+                {{form.submit(class="btn btn-primary btn-block", id="form_submit", style="background-color: #32cd32;")}}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header text-white" style="background-color: #32cd32;">
+            <h2>Create Training</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="create-training-form" action="{{ url_for('modify_training', training_id=training_id) }}">
+
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }} 
+                    {{ form.name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{form.question_types[0].question_type.label(class="form-label")}} 
+                    {{form.question_types[0].question_type(class="form-control")}}
+                </div>
+                <div class="form-group d-flex justify-content-between align-items-center">
+                    {{form.question_types[0].add(class="btn btn-success")}} 
+                </div>
+                <div class="ebp_forms">
+                    {% for question in form.ebp_questions %}
+                    <div class="form-group">
+                        <h3>Einfach beschreibende Prüfung - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.proben_id.label(class="form-label")}} 
+                        {{question.proben_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete ebp {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="rangordnungstest_forms">
+                    {% for question in form.rangordnungstest_questions %}
+                    <div class="form-group">
+                        <h3>Rangordnungstest - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}}
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete rang {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="auswahltest_forms">
+                    {% for question in form.auswahltest_questions %}
+                    <div class="form-group">
+                        <h3>Auswahltest - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete auswahltest {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="dreieckstest_forms">
+                    {% for question in form.dreieckstest_questions %}
+                    <div class="form-group">
+                        <h3>Dreieckstest - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id_1.label(class="form-label")}} 
+                        {{question.probenreihe_id_1(class="form-control")}}
+                        {{question.lösung_1.label(class="form-label")}} 
+                        {{question.lösung_1(class="form-control")}}
+                        {{question.probenreihe_id_2.label(class="form-label")}}
+                        {{question.probenreihe_id_2(class="form-control")}}
+                        {{question.lösung_2.label(class="form-label")}} 
+                        {{question.lösung_2(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete dreieckstest {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="geruchserkennung_forms">
+                    {% for question in form.geruchserkennung_questions %}
+                    <div class="form-group">
+                        <h3>Geruchserkennungstest - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.proben_id.label(class="form-label")}} 
+                        {{question.proben_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete geruchserkennung {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="hed_beurteilung_forms">
+                    {% for question in form.hed_beurteilung_questions %}
+                    <div class="form-group">
+                        <h3>Hedonische Beurteilung - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete hed_beurteilung {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="konz_reihe_forms">
+                    {% for question in form.konz_reihe_questions %}
+                    <div class="form-group">
+                        <h3>Konzentrationsreihe - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete konz_reihe {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="paar_vergleich_forms">
+                    {% for question in form.paar_vergleich_questions %}
+                    <div class="form-group">
+                        <h3>Paarweise Vergleichsprüfung - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.probenreihe_id_1.label(class="form-label")}} 
+                        {{question.probenreihe_id_1(class="form-control")}}
+                        {{question.lösung_1.label(class="form-label")}}
+                        {{question.lösung_1(class="form-control")}}
+                        {{question.probenreihe_id_2.label(class="form-label")}} 
+                        {{question.probenreihe_id_2(class="form-control")}}
+                        {{question.lösung_2.label(class="form-label")}}
+                        {{question.lösung_2(class="form-control")}}
+                        <button type="submit" class="btn btn-danger" name="action" value="delete paar_vergleich {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <div class="profilprüfung_forms">
+                    {% for question in form.profilprüfung_questions %}
+                    <div class="form-group">
+                        <h3>Profilprüfung - {{ loop.index }}</h3>
+                        {{question.aufgabenstellung_id.label(class="form-label")}} 
+                        {{question.aufgabenstellung_id(class="form-control")}}
+                        {{question.proben_id.label(class="form-label")}} 
+                        {{question.proben_id(class="form-control")}}
+                        {% for kriteria in question.kriterien %}
+                            {{kriteria.label(class="form-label")}}{{loop.index}} 
+                            {{kriteria(class="form-control")}}
+                        {% endfor %}
+                        <button type="submit" class="btn btn-success" name="kriteria" value="add {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Kriterium hinzufügen
+                        </button>
+                        <button type="submit" class="btn btn-danger" name="kriteria" value="remove {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Kriterium entfernen
+                        </button>
+                        <br>
+                        <button type="submit" class="btn btn-danger" name="action" value="delete profilprüfung {{loop.index -1}}">
+                          <i class="fas fa-trash-alt mr-1"></i>Löschen
+                        </button>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+                <!-- Set "form_id" to prevent double submitting -->
+                {{form.submit(class="btn btn-primary btn-block", id="form_submit", style="background-color: #32cd32;")}}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

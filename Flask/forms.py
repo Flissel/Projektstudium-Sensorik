@@ -5,25 +5,10 @@ from wtforms.validators import DataRequired
 from model import Trainings, Aufgabenstellungen, Probenreihen, Proben, Benutzer,Paar_vergleich, Probenreihen
 
 
-class ModifyForm(FlaskForm):
-    question_type = SelectField("Fragentyp", choices=[
-                ('ebp', 'Einfach beschreibende Prüfung'), 
-                ('rangordnungstest', 'Rangordnungstest'), 
-                ('auswahltest', 'Auswahltest'),
-                ('dreieckstest', 'Dreieckstest'),
-                ('geruchserkennung', 'Geruchserkennung'),
-                ('hed_beurteilung', 'Hedonische Beurteilung'),
-                ('konz_reihe', 'Konzentrationsreihe'),
-                ('paar_vergleich', 'Paarweise Vergleichstest'),
-                ('profilprüfung', 'Profilprüfung')
-            ]
-        , default="ebp")
-    add = SubmitField("Hinzufügen")
-    
 class CreateProfilprüfung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     proben_id = SelectField('Probe', choices=[])
-    kriterien = FieldList(StringField("Kriterium"))
+    criteria = FieldList(StringField("Kriterium"))
 
     def __init__(self, *args, **kwargs):
         super(CreateProfilprüfung, self).__init__(*args, **kwargs)
@@ -121,7 +106,18 @@ class CreateEbpForm(FlaskForm):
 
 class CreateTrainingForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    question_types = FieldList(FormField(ModifyForm), min_entries=1)
+    question_types = question_type = SelectField("Fragentyp", choices=[
+                ('ebp', 'Einfach beschreibende Prüfung'), 
+                ('rangordnungstest', 'Rangordnungstest'), 
+                ('auswahltest', 'Auswahltest'),
+                ('dreieckstest', 'Dreieckstest'),
+                ('geruchserkennung', 'Geruchserkennung'),
+                ('hed_beurteilung', 'Hedonische Beurteilung'),
+                ('konz_reihe', 'Konzentrationsreihe'),
+                ('paar_vergleich', 'Paarweise Vergleichstest'),
+                ('profilprüfung', 'Profilprüfung')
+            ]
+        , default="ebp")
     ebp_questions = FieldList(FormField(CreateEbpForm))
     rangordnungstest_questions = FieldList(FormField(CreateRangordnungstestForm))
     auswahltest_questions = FieldList(FormField(CreateAuswahltest))
@@ -131,7 +127,17 @@ class CreateTrainingForm(FlaskForm):
     konz_reihe_questions = FieldList(FormField(CreateKonz_reihe))
     paar_vergleich_questions = FieldList(FormField(CreatePaar_vergleich))
     profilprüfung_questions = FieldList(FormField(CreateProfilprüfung))
-    submit = SubmitField('Trainings erstellen')
+    add_question = SubmitField('Frage hinzufügen')
+    remove_ebp_question = FieldList(SubmitField('Frage entfernen'))
+    remove_rangordnungstest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_auswahltest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_dreieckstest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_geruchserkennung_question = FieldList(SubmitField('Frage entfernen'))
+    remove_hed_beurteilung_question = FieldList(SubmitField('Frage entfernen'))
+    remove_konz_reihe_question = FieldList(SubmitField('Frage entfernen'))
+    remove_profilprüfung_question = FieldList(SubmitField('Frage entfernen'))
+    create_training = SubmitField('Trainings erstellen')
+    
 
 class TrainingsViewForm(FlaskForm):
     trainings = SelectField('Trainings', choices=[])
@@ -140,6 +146,13 @@ class TrainingsViewForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(TrainingsViewForm, self).__init__(*args, **kwargs)
         self.trainings.choices = [(t.id, t.name) for t in Trainings.query.all()]
+
+
+
+
+
+
+
 
 ###################################
 #---View Forms for the students---#
