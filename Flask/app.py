@@ -1,7 +1,9 @@
 
 from flask import Flask, render_template, request, session, redirect, url_for ,flash, request
-from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen
-from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, TrainingsViewForm, ViewPaar_vergleich
+
+from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, robenreihen, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen
+from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, ModifyForm, TrainingsViewForm, ViewPaar_vergleich
+
 from uuid import uuid4
 from flask_socketio import SocketIO, join_room, leave_room
 import time
@@ -805,7 +807,8 @@ def dashboard():
 def view_samples():
     # Logic to retrieve sample data
     samples = Proben.query.all()
-    return render_template('view_samples.html', samples=samples)
+    sampleChain = Probenreihen.query.all()
+    return render_template('view_samples.html', samples=samples , sampleChain=sampleChain)
 
 
 
@@ -863,7 +866,54 @@ def create_sample():
         return redirect(url_for('view_samples'))
 
     return render_template('create_sample.html')
+@app.route('/create_sample_chain', methods=['GET', 'POST'])
+def create_sample_chain():
+    """
+    Creates a new sample chain and adds it to the database if the request method is POST.
+    If the request method is GET, renders the create_sample_chain.html template with a list of all samples.
+    
+    Parameters:
+    None
+    
+    Returns:
+    If the request method is POST, redirects to the view_samples endpoint.
+    If the request method is GET, renders the create_sample_chain.html template with a list of all samples.
+    """
+    if request.method == 'POST':
+        name = request.form['name']
+        selected_proben_ids = request.form['proben_ids'].split(',')
+        
+        proben_ids = []
+        for proben_id in selected_proben_ids:
+            if proben_id:
+                proben = Proben.query.get(proben_id)
+                if proben:
+                    proben_ids.append(proben_id)
+
+        # Create a new Probenreihen instance
+        sample_chain = Probenreihen(name=name, proben_ids=proben_ids)
+        
+        # Add the new sample chain to the database
+        db.session.add(sample_chain)
+        db.session.commit()
+
+        flash('Sample chain created successfully!')
+        return redirect(url_for('view_samples'))
+    samples = Proben.query.all()
+    # If the request method is GET, render the create_sample_chain.html template
+    return render_template('create_sample_chain.html',samples = samples)
+
+
+
+
 def create_sample_in_database(form_data):
+    """
+    Creates a new sample record in the database with the given form data.
+
+    :param form_data: A dictionary containing the form data.
+    :type form_data: dict
+    :return: None
+    """
     proben_nr = form_data.get('proben_nr')
     probenname = form_data.get('probenname')
     farbe = form_data.get('farbe')

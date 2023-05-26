@@ -16,7 +16,9 @@
   </style>
 </head>
 <body>
-  <h1>View Samples</h1>  
+  <h1>View Samples</h1>
+  
+  <h2>Samples</h2>
   <table>
     <tr>
       <th>ID</th>
@@ -28,7 +30,7 @@
       <th>Geschmack</th>
       <th>Textur</th>
       <th>Konsistenz</th>
-      <th>Action</th>
+      <th>bearbeiten</th>
     </tr>
     {% for sample in samples %}
     <tr>
@@ -45,6 +47,36 @@
     </tr>
     {% endfor %}
   </table>
+ <button onclick="openNewSampleWindow()">Hinzufügen</button>
+
+  <h2>Probenreihen</h2>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Proben IDs</th>
+    </tr>
+    {% for probenreihe in sampleChain %}
+    <tr>
+      <td>{{ probenreihe.id }}</td>
+      <td>{{ probenreihe.name }}</td>
+      <td>{{ probenreihe.proben_ids }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <button onclick="openNewSampleChainWindow()">Hinzufügen</button>
+
+ 
+  <script>
+    function openNewSampleWindow() {
+      window.open("{{ url_for('create_sample') }}", "_blank", "width=400,height=500");
+    }
+  </script>  
   
+   <script>
+    function openNewSampleChainWindow() {
+      window.open("{{ url_for('create_sample_chain') }}", "_blank", "width=400,height=500");
+    }
+  </script>  
 </body>
 </html>
