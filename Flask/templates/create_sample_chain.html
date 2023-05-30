@@ -11,31 +11,36 @@
     th, td {
       padding: 8px;
       text-align: left;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #31c214;
     }
     .selected {
-      background-color: #ddd;
+      background-color: #746fbb;
     }
   </style>
   <script>
-    var selectedProbenIds = [];
+  var selectedProbenIds = [];
 
-    function toggleProbenId(probenId) {
-      var index = selectedProbenIds.indexOf(probenId);
-      if (index === -1) {
-        selectedProbenIds.push(probenId);
-      } else {
-        selectedProbenIds.splice(index, 1);
-      }
-    }
+function toggleProbenId(sample) {
+  var index = selectedProbenIds.indexOf(sample.id);
+  if (index === -1) {
+    selectedProbenIds.push(sample.id);
+  } else {
+    selectedProbenIds.splice(index, 1);
+  }
+}
 
-    function addSelectedProbenIds() {
-      var selectedRows = document.querySelectorAll('.selected');
-      selectedRows.forEach(function(row) {
-        var probenId = row.cells[0].innerText;
-        toggleProbenId(probenId);
-      });
+function addSelectedProbenIds() {
+  var selectedRows = document.querySelectorAll('.selected');
+  selectedRows.forEach(function(row) {
+    var sampleId = row.cells[0].innerText;
+    var index = selectedProbenIds.indexOf(sampleId);
+    if (index !== -1) {
+      var probenIds = selectedProbenIds[index];
+      row.cells[1].innerText = probenIds; // Assumes the "Proben IDs" column is the second column
     }
+  });
+}
+
   </script>
 </head>
 <body>

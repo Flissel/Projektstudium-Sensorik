@@ -592,7 +592,7 @@ def create_sample_chain():
     if request.method == 'POST':
         name = request.form['name']
         selected_proben_ids = request.form['proben_ids'].split(',')
-        
+        print(selected_proben_ids)
         proben_ids = []
         for proben_id in selected_proben_ids:
             if proben_id:
@@ -602,13 +602,14 @@ def create_sample_chain():
 
         # Create a new Probenreihen instance
         sample_chain = Probenreihen(name=name, proben_ids=proben_ids)
-        
+        print(sample_chain)
         # Add the new sample chain to the database
         db.session.add(sample_chain)
         db.session.commit()
 
         flash('Sample chain created successfully!')
         return redirect(url_for('view_samples'))
+    
     samples = Proben.query.all()
     # If the request method is GET, render the create_sample_chain.html template
     return render_template('create_sample_chain.html',samples = samples)
