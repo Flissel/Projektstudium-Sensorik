@@ -750,11 +750,57 @@ def training_page():
         session['question_index'] = 0
     question_type = training.fragen_typen[question_index]
     if question_type:
+        if question_type == "auswahltest":
+            form = ViewAuswahltest()
+            question = Auswahltest.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            probenreihen_id = Probenreihen.query.get(question.probenreihen_id)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id=probenreihen_id)
+        if question_type == "dreieckstest":
+            form = ViewDreieckstest()
+            question = Dreieckstest.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            probenreihen_id_1 = Probenreihen.query.get(question.probenreihen_id_1)
+            probenreihen_id_2 = Probenreihen.query.get(question.probenreihen_id_2)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id_1=probenreihen_id_1, probenreihen_id_2=probenreihen_id_2)
+        if question_type == "geruchserkennung":
+            form = ViewGeruchserkennung()
+            question = Geruchserkennung.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            proben_id = Proben.query.get(question.proben_id)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, proben_id=proben_id)
+        if question_type == "hed_beurteilung":
+            form = ViewHed_beurteilung()
+            question = Hed_beurteilung.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            probenreihen_id = Probenreihen.query.get(question.probenreihen_id)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id=probenreihen_id)
+        if question_type == "konz_reihe":
+            form = ViewKonz_reihe()
+            question = Konz_reihe.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            probenreihen_id = Probenreihen.query.get(question.probenreihen_id)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id=probenreihen_id)
+        if question_type == "ebp":
+            form = ViewEbp()
+            question = Ebp.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            proben_id = Proben.query.get(question.proben_id)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, proben_id=proben_id)
+        if question_type == "rangordnungstest":
+            form = ViewRangordnungstest()
+            question = Rangordnungstest.query.filter_by(id=training.fragen_ids[question_index]).first()
+            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+            probenreihen_id = Probenreihen.query.get(question.probenreihen_id)
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id=probenreihen_id)
         if question_type == "paar_vergleich":
             form = ViewPaar_vergleich()
             question = Paar_vergleich.query.filter_by(id=training.fragen_ids[question_index]).first()
             aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung)
+            probenreihen_id_1 = Probenreihen.query.get(question.probenreihen_id_1)
+            probenreihen_id_2 = Probenreihen.query.get(question.probenreihen_id_2)
+            
+            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id_1=probenreihen_id_1, probenreihen_id_2=probenreihen_id_2)
     return redirect(url_for('login'))
 
 @app.route('/professor_dashboard/training_progress')

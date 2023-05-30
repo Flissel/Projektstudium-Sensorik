@@ -157,6 +157,8 @@ class TrainingsViewForm(FlaskForm):
 ###################################
 
 class ViewProfilprüfung(FlaskForm):
+    proben_id = SelectField('Proben ID', choices=[])
+    kriterien = SelectField('Kriterium', choices=[])
     skalenwerte = FieldList(IntegerField('Skalenwert'))
 
 class ViewPaar_vergleich(FlaskForm):
@@ -185,9 +187,10 @@ class ViewPaar_vergleich(FlaskForm):
 
 
 
-class Konz_reihe(FlaskForm):
+class ViewKonz_reihe(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
+    antworten = FieldList(StringField('Antwort'))
 
     def __init__(self, *args, **kwargs):
         super(CreateKonz_reihe, self).__init__(*args, **kwargs)
@@ -197,6 +200,7 @@ class Konz_reihe(FlaskForm):
 class Hed_beurteilung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probe', choices=[])
+    einordnung = FieldList(SelectField('Einordnung', choices=[]))
 
     def __init__(self, *args, **kwargs):
         super(CreateHed_beurteilung, self).__init__(*args, **kwargs)
@@ -206,6 +210,8 @@ class Hed_beurteilung(FlaskForm):
 class Geruchserkennung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     proben_id = SelectField('Probe', choices=[])
+    ohne_auswahl = StringField('Geruchserkennung ohne Auswahl')
+    mit_auswahl = SelectField('Geruchserkennung mit Auswahl', choices=[])
     # Eventuell dem Professor die Möglichkeit geben die Auswahl für jede Frage selbst zu definieren.
     # Momentan ist Auswahlliste in "geruchsauswahl" Tabelle gespeichert
     # Eventuell Möglichkeit einräumen diese Liste zu verändern
@@ -221,6 +227,10 @@ class Dreieckstest(FlaskForm):
     probenreihe_id_2 = SelectField('Probenreihe 2', choices=[])
     lösung_1 = SelectField('Lösungsprobe 1', choices=[])
     lösung_2 = SelectField('Lösungsprobe 2', choices=[])
+    abweichende_probe_1 = SelectField('Welches ist die abweichende Probe ?', choices=[])
+    abweichende_probe_2 = SelectField('Welches ist die abweichende Probe ?', choices=[])
+    beschreibung_1 = StringField('Beschreibung des unterschieds')
+    beschreibung_2 = StringField('Beschreibung des unterschieds')
 
 
     def __init__(self, *args, **kwargs):
@@ -235,6 +245,7 @@ class Dreieckstest(FlaskForm):
 class Auswahltest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
+    einordnung = FieldList(SelectField('Einordnung', choices=[]))
 
     def __init__(self, *args, **kwargs):
         super(CreateAuswahltest, self).__init__(*args, **kwargs)
@@ -244,6 +255,7 @@ class Auswahltest(FlaskForm):
 class RangordnungstestForm(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
+    antworten = FieldList(IntegerField('Antwort'))
 
     def __init__(self, *args, **kwargs):
         super(CreateRangordnungstestForm, self).__init__(*args, **kwargs)
@@ -253,6 +265,11 @@ class RangordnungstestForm(FlaskForm):
 class EbpForm(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     proben_id = SelectField('Proben ID', choices=[])
+    aussehen_farbe = StringField('Farbe')
+    geruch = StringField('Geruch')
+    geschmack = StringField('Geschmack')
+    textur = StringField('Textur')
+    konsistenz = StringField('Konsistenz')
 
     def __init__(self, *args, **kwargs):
         super(CreateEbpForm, self).__init__(*args, **kwargs)

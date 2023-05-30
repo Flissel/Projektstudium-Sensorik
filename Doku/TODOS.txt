@@ -18,7 +18,7 @@ TODO: Probenreihen erstellen @Professordash board -> Proben hinzüfügen -> Tabe
         - Model (done) 
         - HTML  (Felix)
 
-TODO: Edit Button für Trainings
+TODO: Edit Button für Trainings(done)
 
 @Training_progress 
         - zeige Fortschritt an 
