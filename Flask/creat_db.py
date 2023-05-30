@@ -209,7 +209,17 @@ INSERT INTO public.benutzer(
 
 INSERT INTO public.proben(
 	id, proben_nr, probenname, farbe, farbintensität , geruch, geschmack, textur, konsistenz)
-	VALUES (1, 999, 'Schwarzdorn', 'Schwarz', 100, 'erdig', 'salzig', 'rau', 'fest');
+	VALUES 
+    (1, 999, 'Schwarzdorn', 'Schwarz', 100, 'erdig', 'salzig', 'rau', 'fest'),
+    (2, 345, 'Mondlicht', 'Silber', 50, 'sanft', 'leicht süßlich', 'glatt', 'zart'),
+    (3, 721, 'Feuerherz', 'Rot', 80, 'intensiv', 'fruchtig', 'wärmend', 'weich'),
+    (4, 567, 'Waldesrauschen', 'Grün', 70, 'frisch', 'holzig', 'beruhigend', 'knackig'),
+    (5, 123, 'Sternenstaub', 'Gold', 60, 'zauberhaft', 'glitzernd', 'seidig', 'leicht'),
+    (6, 888, 'Eiskristall', 'Blau', 90, 'klar', 'kühlend', 'glänzend', 'spröde'),
+    (7, 432, 'Sonnenglanz', 'Gelb', 75, 'strahlend', 'frisch', 'lebhaft', 'knusprig'),
+    (8, 654, 'Nebelschwade', 'Grau', 40, 'geheimnisvoll', 'nebelig', 'hauchdünn', 'leicht'),
+    (9, 777, 'Klangwelle', 'Violett', 85, 'schwingend', 'sphärisch', 'sanft', 'glatt'),
+    (10, 222, 'Blütenregen', 'Rosa', 55, 'zart', 'blumig', 'fallend', 'leicht');
 
 INSERT INTO public.probenreihen(
 	id, name, proben_ids)

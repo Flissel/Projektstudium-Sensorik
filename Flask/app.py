@@ -322,52 +322,85 @@ def modify_training(training_id=None, value=None):
 
             flash("Training erfolgreich erstellt", "success")
             return redirect(url_for('professor_dashboard'))
-            
+    index = 0       
     for question in training_question_types:
-        index = 0
         if question == "ebp":
             form.ebp_questions.append_entry()
             form.ebp_questions[-1].proben_id.data = Ebp.query.filter_by(id=training_questions[index]).first().proben_id
+            form.ebp_questions[-1].proben_id.default = Ebp.query.filter_by(id=training_questions[index]).first().proben_id
             form.ebp_questions[-1].aufgabenstellung_id.data = Ebp.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.ebp_questions[-1].aufgabenstellung_id.default = Ebp.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.ebp_questions[-1].form.process()
         if question == "rangordnungstest":
             form.rangordnungstest_questions.append_entry()
             form.rangordnungstest_questions[-1].probenreihe_id.data = Rangordnungstest.query.filter_by(id=training_questions[index]).first().probenreihe_id
+            form.rangordnungstest_questions[-1].probenreihe_id.default = Rangordnungstest.query.filter_by(id=training_questions[index]).first().probenreihe_id
             form.rangordnungstest_questions[-1].aufgabenstellung_id.data = Rangordnungstest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.rangordnungstest_questions[-1].aufgabenstellung_id.default = Rangordnungstest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.rangordnungstest_questions[-1].form.process()
         if question == "auswahltest":
             form.auswahltest_questions.append_entry()
             form.auswahltest_questions[-1].probenreihe_id.data = Auswahltest.query.filter_by(id=training_questions[index]).first().probenreihe_id
+            form.auswahltest_questions[-1].probenreihe_id.default = Auswahltest.query.filter_by(id=training_questions[index]).first().probenreihe_id
             form.auswahltest_questions[-1].aufgabenstellung_id.data = Auswahltest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.auswahltest_questions[-1].aufgabenstellung_id.default = Auswahltest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.auswahltest_questions[-1].form.process()
         if question == "dreieckstest":
             form.dreieckstest_questions.append_entry()
             form.dreieckstest_questions[-1].probenreihe_id_1.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().probenreihe_id_1
+            form.dreieckstest_questions[-1].probenreihe_id_1.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().probenreihe_id_1
             form.dreieckstest_questions[-1].probenreihe_id_2.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().probenreihe_id_2
+            form.dreieckstest_questions[-1].probenreihe_id_2.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().probenreihe_id_2
             form.dreieckstest_questions[-1].aufgabenstellung_id.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.dreieckstest_questions[-1].aufgabenstellung_id.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
             form.dreieckstest_questions[-1].lösung_1.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().lösung_1
+            form.dreieckstest_questions[-1].lösung_1.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().lösung_1
             form.dreieckstest_questions[-1].lösung_2.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().lösung_2
+            form.dreieckstest_questions[-1].lösung_2.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().lösung_2
+            form.dreieckstest_questions[-1].form.process()
         if question == "geruchserkennung":
             form.geruchserkennung_questions.append_entry()
             form.geruchserkennung_questions[-1].proben_id.data = Geruchserkennung.query.filter_by(id=training_questions[index]).first().proben_id
+            form.geruchserkennung_questions[-1].proben_id.default = Geruchserkennung.query.filter_by(id=training_questions[index]).first().proben_id
             form.geruchserkennung_questions[-1].aufgabenstellung_id.data = Geruchserkennung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.geruchserkennung_questions[-1].aufgabenstellung_id.default = Geruchserkennung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.geruchserkennung_questions[-1].form.process()
         if question == "hed_beurteilung":
             form.hed_beurteilung_questions.append_entry()
             form.hed_beurteilung_questions[-1].probenreihe_id.data = Hed_beurteilung.query.filter_by(id=training_questions[index]).first().probenreihe_id
+            form.hed_beurteilung_questions[-1].probenreihe_id.default = Hed_beurteilung.query.filter_by(id=training_questions[index]).first().probenreihe_id
             form.hed_beurteilung_questions[-1].aufgabenstellung_id.data = Hed_beurteilung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.hed_beurteilung_questions[-1].aufgabenstellung_id.default = Hed_beurteilung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.hed_beurteilung_questions[-1].form.process()
         if question == "konz_reihe":
             form.konz_reihe_questions.append_entry()
             form.konz_reihe_questions[-1].probenreihe_id.data = Konz_reihe.query.filter_by(id=training_questions[index]).first().probenreihe_id
+            form.konz_reihe_questions[-1].probenreihe_id.default = Konz_reihe.query.filter_by(id=training_questions[index]).first().probenreihe_id
             form.konz_reihe_questions[-1].aufgabenstellung_id.data = Konz_reihe.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.konz_reihe_questions[-1].aufgabenstellung_id.default = Konz_reihe.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.konz_reihe_questions[-1].form.process()
         if question == "paar_vergleich":
             form.paar_vergleich_questions.append_entry()
             form.paar_vergleich_questions[-1].probenreihe_id_1.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().probenreihe_id_1
+            form.paar_vergleich_questions[-1].probenreihe_id_1.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().probenreihe_id_1
             form.paar_vergleich_questions[-1].probenreihe_id_2.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().probenreihe_id_2
+            form.paar_vergleich_questions[-1].probenreihe_id_2.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().probenreihe_id_2
             form.paar_vergleich_questions[-1].aufgabenstellung_id.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.paar_vergleich_questions[-1].aufgabenstellung_id.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
             form.paar_vergleich_questions[-1].lösung_1.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().lösung_1
+            form.paar_vergleich_questions[-1].lösung_1.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().lösung_1
             form.paar_vergleich_questions[-1].lösung_2.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().lösung_2
+            form.paar_vergleich_questions[-1].lösung_2.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().lösung_2
+            form.paar_vergleich_questions[-1].form.process()
         if question == "profilprüfung":
             form.profilprüfung_questions.append_entry()
             form.profilprüfung_questions[-1].proben_id.data = Profilprüfung.query.filter_by(id=training_questions[index]).first().proben_id
+            form.profilprüfung_questions[-1].proben_id.default = Profilprüfung.query.filter_by(id=training_questions[index]).first().proben_id
             form.profilprüfung_questions[-1].aufgabenstellung_id.data = Profilprüfung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
+            form.profilprüfung_questions[-1].aufgabenstellung_id.default = Profilprüfung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
             form.profilprüfung_questions[-1].kriterien.data = Profilprüfung.query.filter_by(id=training_questions[index]).first().kriterien
+            form.profilprüfung_questions[-1].kriterien.default = Profilprüfung.query.filter_by(id=training_questions[index]).first().kriterien
+            form.profilprüfung_questions[-1].form.process()
         index += 1
     
     return render_template('modify_training.html', form=form, training_id=training_id)
