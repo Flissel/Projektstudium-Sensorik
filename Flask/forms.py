@@ -8,7 +8,7 @@ from model import Trainings, Aufgabenstellungen, Probenreihen, Proben, Benutzer,
 class CreateProfilprüfung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     proben_id = SelectField('Probe', choices=[])
-    criteria = FieldList(StringField("Kriterium"))
+    kriterien = FieldList(StringField("Kriterium"))
 
     def __init__(self, *args, **kwargs):
         super(CreateProfilprüfung, self).__init__(*args, **kwargs)
@@ -76,7 +76,6 @@ class CreateDreieckstest(FlaskForm):
         self.lösung_1.choices = [(p.id, p.probenname) for p in Proben.query.all()]
         self.lösung_2.choices = [(p.id, p.probenname) for p in Proben.query.all()]
 
-
 class CreateAuswahltest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
@@ -106,7 +105,7 @@ class CreateEbpForm(FlaskForm):
 
 class CreateTrainingForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    question_types = question_type = SelectField("Fragentyp", choices=[
+    question_types = SelectField("Fragentyp", choices=[
                 ('ebp', 'Einfach beschreibende Prüfung'), 
                 ('rangordnungstest', 'Rangordnungstest'), 
                 ('auswahltest', 'Auswahltest'),
@@ -138,7 +137,6 @@ class CreateTrainingForm(FlaskForm):
     remove_profilprüfung_question = FieldList(SubmitField('Frage entfernen'))
     create_training = SubmitField('Trainings erstellen')
     
-
 class TrainingsViewForm(FlaskForm):
     trainings = SelectField('Trainings', choices=[])
     delete = SubmitField('Löschen')

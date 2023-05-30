@@ -7,14 +7,6 @@ db = SQLAlchemy()
 Allgemeine Tabllen (benutzer, proben, trainings etc.)
 """
 
-"""
-class Fragen(db.Model):
-    __tablename__ = 'fragen'
-
-    id = db.Column(db.Integer, primary_key=True)
-    fragen_typ = db.Column(db.String(255), nullable=False)
-    fragen_id = db.Column(db.Integer, nullable=False)
-"""
     
 class Aufgabenstellungen(db.Model):
     __tablename__ = 'aufgabenstellungen'

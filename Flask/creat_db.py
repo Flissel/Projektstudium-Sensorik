@@ -55,7 +55,7 @@ CREATE TABLE proben (
     proben_nr INTEGER UNIQUE NOT NULL,
     probenname VARCHAR(255) NOT NULL,
     farbe TEXT,
-    farbintensitaet  INTEGER,
+    farbintensität  INTEGER,
     geruch TEXT,
     geschmack TEXT,
     textur TEXT,
@@ -208,7 +208,7 @@ INSERT INTO public.benutzer(
     (4, 'Student3', '123', False, NULL);
 
 INSERT INTO public.proben(
-	id, proben_nr, probenname, farbe, farbintensitaet , geruch, geschmack, textur, konsistenz)
+	id, proben_nr, probenname, farbe, farbintensität , geruch, geschmack, textur, konsistenz)
 	VALUES (1, 999, 'Schwarzdorn', 'Schwarz', 100, 'erdig', 'salzig', 'rau', 'fest');
 
 INSERT INTO public.probenreihen(
