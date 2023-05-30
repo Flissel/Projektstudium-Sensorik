@@ -1,6 +1,6 @@
 @Trainingpage 
 TODO: Restlichen Aufgabentypen anzeigen lassen 
-        - Form (Jan) 
+        - Form (Jan) (Vorerst erledigt. Test steht aus.)
         - HMTL (Jan)
         - Ausgabe Speichern // wie? (SPÄTER)
 TODO: 
