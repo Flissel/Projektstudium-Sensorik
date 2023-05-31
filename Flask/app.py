@@ -477,7 +477,7 @@ def select_training(training):
     for student in students:
         student.training = training
         db.session.commit()
-    return redirect(url_for('training_progress', question=get_questions(training), students=students))                                  
+    return redirect(url_for('training_progress'))                                  
 
 
 
