@@ -11,52 +11,51 @@
     th, td {
       padding: 8px;
       text-align: left;
-      border-bottom: 1px solid #31c214;
+      border-bottom: 1px solid #ddd;
     }
     .selected {
       background-color: #746fbb;
     }
+    .sample-table-body {
+      height: 200px;
+      overflow-y: auto;
+    }
   </style>
   <script>
-  var selectedProbenIds = [];
+    var selectedProbenIds = [];
 
-function toggleProbenId(sample) {
-  var index = selectedProbenIds.indexOf(sample.id);
-  if (index === -1) {
-    selectedProbenIds.push(sample.id);
-  } else {
-    selectedProbenIds.splice(index, 1);
-  }
-}
-
-function addSelectedProbenIds() {
-  var selectedRows = document.querySelectorAll('.selected');
-  selectedRows.forEach(function(row) {
-    var sampleId = row.cells[0].innerText;
-    var index = selectedProbenIds.indexOf(sampleId);
-    if (index !== -1) {
-      var probenIds = selectedProbenIds[index];
-      row.cells[1].innerText = probenIds; // Assumes the "Proben IDs" column is the second column
+    function toggleProbenId(sample) {
+      var index = selectedProbenIds.indexOf(sample.id);
+      if (index === -1) {
+        selectedProbenIds.push(sample.id);
+      } else {
+        selectedProbenIds.splice(index, 1);
+      }
     }
-  });
-}
 
+    function addSelectedProbenIds() {
+      var selectedRows = document.querySelectorAll('.selected');
+      selectedRows.forEach(function(row) {
+        var sampleId = row.cells[0].innerText;
+        var index = selectedProbenIds.indexOf(sampleId);
+        if (index !== -1) {
+          row.cells[1].innerText = selectedProbenIds.join(','); // Update the table cell with selected IDs
+        }
+      });
+
+      document.getElementById("proben_ids").value = selectedProbenIds.join(',');
+    }
+
+    function createSampleChain() {
+      addSelectedProbenIds(); // Update selected IDs before form submission
+      document.getElementById("create_sample_chain_form").submit(); // Submit the form
+    }
   </script>
 </head>
 <body>
   <h1>Create Sample Chain</h1>
-  
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <ul class="flash-messages">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
 
-  <form method="POST" action="{{ url_for('create_sample_chain') }}">
+  <form id="create_sample_chain_form" method="POST" action="{{ url_for('create_sample_chain') }}">
     <label for="name">Name:</label>
     <input type="text" name="name" id="name" required>
 
@@ -73,25 +72,19 @@ function addSelectedProbenIds() {
         <th>Textur</th>
         <th>Konsistenz</th>
       </tr>
-      {% for sample in samples %}
-        <tr onclick="toggleProbenId('{{ sample.id }}'); this.classList.toggle('selected');">
-          <td>{{ sample.id }}</td>
-          <td>{{ sample.proben_nr }}</td>
-          <td>{{ sample.probenname }}</td>
-          <td>{{ sample.farbe }}</td>
-          <td>{{ sample.farbintensitaet }}</td>
-          <td>{{ sample.geruch }}</td>
-          <td>{{ sample.geschmack }}</td>
-          <td>{{ sample.textur }}</td>
-          <td>{{ sample.konsistenz }}</td>
-        </tr>
-      {% endfor %}
+      <tbody class="sample-table-body">
+        {% for probenreihe in sampleChain %}
+          <tr onclick="toggleProbenId('{{ probenreihe.id }}'); this.classList.toggle('selected');">
+            <td>{{ probenreihe.id }}</td>
+            <td>{{ probenreihe.proben_ids }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
     </table>
 
-    <input type="hidden" name="proben_ids" value="{{ selectedProbenIds|join(',') }}">
+    <input type="hidden" name="proben_ids" id="proben_ids">
 
-    <button type="button" onclick="addSelectedProbenIds()">Add Selected Samples</button>
-    <button type="submit">Create Sample Chain</button>
+    <button type="button" onclick="createSampleChain()">Create Sample Chain</button>
   </form>
 </body>
 </html>
