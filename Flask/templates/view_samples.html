@@ -14,6 +14,43 @@
       border-bottom: 1px solid #ddd;
     }
   </style>
+  <script>
+    function deleteSample(sampleId) {
+      // Send an AJAX request to the server to delete the sample with the given ID
+      fetch("/delete_sample/" + sampleId, {
+        method: "DELETE"
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log("Sample deleted successfully.");
+          location.reload(); // Refresh the page
+        } else {
+          console.error("Failed to delete sample.");
+        }
+      })
+      .catch(error => {
+        console.error("An error occurred while deleting the sample:", error);
+      });
+    }
+    
+    function deleteSampleChain(sampleChainId) {
+      // Send an AJAX request to the server to delete the sample chain with the given ID
+      fetch("/delete_sample_chain/" + sampleChainId, {
+        method: "DELETE"
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log("Sample chain deleted successfully.");
+          location.reload(); // Refresh the page
+        } else {
+          console.error("Failed to delete sample chain.");
+        }
+      })
+      .catch(error => {
+        console.error("An error occurred while deleting the sample chain:", error);
+      });
+    }
+  </script>  
 </head>
 <body>
   <h1>View Samples</h1>
@@ -30,7 +67,8 @@
       <th>Geschmack</th>
       <th>Textur</th>
       <th>Konsistenz</th>
-      <th>bearbeiten</th>
+      <th>Edit</th>
+      <th>Delete</th>
     </tr>
     {% for sample in samples %}
     <tr>
@@ -38,44 +76,44 @@
       <td>{{ sample.proben_nr }}</td>
       <td>{{ sample.probenname }}</td>
       <td>{{ sample.farbe }}</td>
-      <td>{{ sample.farbintensität  }}</td>
+      <td>{{ sample.farbintensität }}</td>
       <td>{{ sample.geruch }}</td>
       <td>{{ sample.geschmack }}</td>
       <td>{{ sample.textur }}</td>
       <td>{{ sample.konsistenz }}</td>
       <td><a href="{{ url_for('edit_sample', sample_id=sample.id) }}">Edit</a></td>
+      <td><button onclick="deleteSample('{{ sample.id }}')">Delete</button></td>
     </tr>
     {% endfor %}
   </table>
- <button onclick="openNewSampleWindow()">Hinzufügen</button>
+  <button onclick="openNewSampleWindow()">Hinzufügen</button>
 
   <h2>Probenreihen</h2>
   <table>
     <tr>
-      <th>ID</th>
+      
       <th>Name</th>
       <th>Proben IDs</th>
+      <th>Delete</th>
     </tr>
     {% for probenreihe in sampleChain %}
-    <tr>
-      <td>{{ probenreihe.id }}</td>
+    <tr>  
       <td>{{ probenreihe.name }}</td>
       <td>{{ probenreihe.proben_ids }}</td>
+      <td><button onclick="deleteSampleChain('{{ probenreihe.id }}')">Delete</button></td>
     </tr>
     {% endfor %}
   </table>
   <button onclick="openNewSampleChainWindow()">Hinzufügen</button>
+    
 
- 
   <script>
     function openNewSampleWindow() {
-      window.open("{{ url_for('create_sample') }}", "_blank", "width=400,height=500");
+      window.open("{{ url_for('create_sample') }}", "_blank", "width=600,height=600");
     }
-  </script>  
-  
-   <script>
+    
     function openNewSampleChainWindow() {
-      window.open("{{ url_for('create_sample_chain') }}", "_blank", "width=400,height=500");
+      window.open("{{ url_for('create_sample_chain') }}", "_blank", "width=600,height=600");
     }
   </script>  
 </body>

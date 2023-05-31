@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, session, redirect, url_for ,flash, request
+from flask import Flask, jsonify, render_template, request, session, redirect, url_for ,flash, request
 
 from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Probenreihen, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen
 from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, TrainingsViewForm, ViewPaar_vergleich, ViewAuswahltest, ViewDreieckstest, ViewEbp, ViewGeruchserkennung, ViewHed_beurteilung, ViewKonz_reihe, ViewProfilprüfung, ViewRangordnungstest
@@ -703,6 +703,9 @@ def create_training():
 
 
 
+
+
+
 @app.route('/training_page/', methods=['GET', 'POST'])
 def training_page():
     '''
@@ -837,6 +840,10 @@ def check_task_completion(user, fragen_id):
 
     return False
 
+
+
+
+
 @app.route('/')
 def dashboard():
     """
@@ -854,9 +861,6 @@ def view_samples():
     sampleChain = Probenreihen.query.all()
     return render_template('view_samples.html', samples=samples , sampleChain=sampleChain)
 
-
-
-
 # Route for editing a sample
 @app.route('/edit_sample/<sample_id>', methods=['GET', 'POST'])
 def edit_sample(sample_id):
@@ -869,9 +873,6 @@ def edit_sample(sample_id):
         return redirect(url_for('view_samples'))
 
     return render_template('edit_sample.html', sample=sample)
-
-
-
 
 # Helper function to fetch a sample from the database
 def fetch_sample_from_database(sample_id):
@@ -926,7 +927,8 @@ def create_sample_chain():
     if request.method == 'POST':
         name = request.form['name']
         selected_proben_ids = request.form['proben_ids'].split(',')
-        
+        proben_ids = request.form.get('proben_ids')
+        print(proben_ids, selected_proben_ids, "h")
         proben_ids = []
         for proben_id in selected_proben_ids:
             if proben_id:
@@ -948,7 +950,27 @@ def create_sample_chain():
     return render_template('create_sample_chain.html',samples = samples)
 
 
-
+# Delete a sample
+@app.route('/delete_sample/<sample_id>', methods=['DELETE'])
+def delete_sample(sample_id):
+    sample = Proben.query.get(sample_id)
+    if sample:
+        # TODO: Delete the sample from the database
+        db.session.delete(sample)
+        db.session.commit()
+        return jsonify({'message': 'Sample deleted successfully'})
+    else:
+        return jsonify({'message': 'Sample not found'})
+# Delete a sample chain
+@app.route('/delete_sample_chain/<sample_chain_id>', methods=['DELETE'])
+def delete_sample_chain(sample_chain_id):
+    sample_chain = Probenreihen.query.get(sample_chain_id)
+    if sample_chain:
+        db.session.delete(sample_chain)
+        db.session.commit()
+        return jsonify({'message': 'Sample chain deleted successfully'})
+    else:
+        return jsonify({'message': 'Sample chain not found'})
 
 def create_sample_in_database(form_data):
     """
