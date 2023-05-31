@@ -85,7 +85,7 @@ def student_waitingroom():
   
     user = Benutzer.query.filter_by(benutzername=session['username']).first()
 
-    if user.rolle == False and user.training_id and user.aktiv == True:
+    if user.rolle == False and user.training_id != None and user.aktiv == True:
       
         return redirect(url_for('training_page')) 
     while True:
@@ -397,35 +397,52 @@ def professor_dashboard():
         "profilprüfung": Profilprüfung
     }
     
+        
     if request.method == 'POST' and session.get('form_id') == request.form.get('form_id') and form.trainings.choices: #prevent double submitting and empty submit
+        
         session.pop('form_id', None)
-        if 'select' in request.form:
+        
+        if request.method == 'POST':
+            form_id = request.form.get('form_id')
+            action = request.form.get('action')
+
+        # Debug print statements
+            print('Form ID:', form_id)
+            print('Action:', action)
+            print('Form data:', request.form)
+            index = int(action.split(' ')[1])
+        if 'select' in request.form['action']:
             students = Benutzer.query.filter_by(rolle=False).all()
-            index = int(request.form['select'])
+            
+            print("hi")
             for student in students:
                 student.training_id = form.trainings.choices[index][0]
                 db.session.commit()
-        if 'delete' in request.form:
-            index = int(request.form['delete'])
+
+        if 'delete' in request.form['action']:
+            
             training = Trainings.query.filter_by(id=form.trainings.choices[index][0]).first()
             for i in range(len(training.fragen_ids)):
                 db.session.delete(question_types_map[training.fragen_typen[i]].query.filter_by(id=training.fragen_ids[i]).first())
                 db.session.commit()
+                
             db.session.delete(training)
             db.session.commit()
-        redirect(url_for('professor_dashboard'))
-        if 'modify' in request.form:
-            index = int(request.form['modify'])
+            return redirect(url_for('professor_dashboard'))
+        
+        if 'modify' in request.form['action']:
+            
             return redirect(url_for('modify_training', training_id=form.trainings.choices[index][0]))
         
-
+    
     if 'username' in session:
         username = session['username']
         user = Benutzer.query.filter_by(benutzername=username).first()
         if user.rolle == True:
             form.trainings = Trainings.query.all()
             form_id = str(uuid4()) #Create "form_id"
-            session['form_id'] = form_id #Add "form_id" to session
+            session['form_id'] = form_id
+             #Add "form_id" to session
             return render_template('professor_dashboard.html', form=form, form_id=form_id)
         elif user.rolle == False:
             return redirect(url_for('student_waitingroom'))
@@ -438,11 +455,13 @@ def select_training(training):
     It sets the 'training' attribute of all students to the selected training.
     After updating the database, it redirects to the training page for the selected training.
     """
-    students = Benutzer.query.filter_by(rolle=False).all()
+    students = Benutzer.query.filter_by(rolle=False,aktiv=True).all()
+    print(students)
     for student in students:
         student.training = training
         db.session.commit()
-    return redirect(url_for('training_progress', question=get_questions(training), students=students))                                  
+    return redirect(url_for('training_progress', students=students))  
+                            
 
 
 
@@ -913,22 +932,11 @@ def create_sample():
     return render_template('create_sample.html')
 @app.route('/create_sample_chain', methods=['GET', 'POST'])
 def create_sample_chain():
-    """
-    Creates a new sample chain and adds it to the database if the request method is POST.
-    If the request method is GET, renders the create_sample_chain.html template with a list of all samples.
-    
-    Parameters:
-    None
-    
-    Returns:
-    If the request method is POST, redirects to the view_samples endpoint.
-    If the request method is GET, renders the create_sample_chain.html template with a list of all samples.
-    """
     if request.method == 'POST':
         name = request.form['name']
-        selected_proben_ids = request.form['proben_ids'].split(',')
-        proben_ids = request.form.get('proben_ids')
-        print(proben_ids, selected_proben_ids, "h")
+        selected_proben_ids = request.form.getlist('proben_ids[]')  # Use getlist to retrieve all selected IDs
+
+        # Process the selected proben IDs
         proben_ids = []
         for proben_id in selected_proben_ids:
             if proben_id:
@@ -945,9 +953,10 @@ def create_sample_chain():
 
         flash('Sample chain created successfully!')
         return redirect(url_for('view_samples'))
+    
     samples = Proben.query.all()
-    # If the request method is GET, render the create_sample_chain.html template
-    return render_template('create_sample_chain.html',samples = samples)
+    return render_template('create_sample_chain.html', samples=samples)
+
 
 
 # Delete a sample

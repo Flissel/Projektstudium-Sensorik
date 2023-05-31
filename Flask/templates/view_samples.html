@@ -16,7 +16,6 @@
   </style>
   <script>
     function deleteSample(sampleId) {
-      // Send an AJAX request to the server to delete the sample with the given ID
       fetch("/delete_sample/" + sampleId, {
         method: "DELETE"
       })
@@ -34,7 +33,6 @@
     }
     
     function deleteSampleChain(sampleChainId) {
-      // Send an AJAX request to the server to delete the sample chain with the given ID
       fetch("/delete_sample_chain/" + sampleChainId, {
         method: "DELETE"
       })
@@ -86,12 +84,11 @@
     </tr>
     {% endfor %}
   </table>
-  <button onclick="openNewSampleWindow()">Hinzufügen</button>
+  <button onclick="window.location.href='{{ url_for('create_sample') }}'">Hinzufügen</button>
 
   <h2>Probenreihen</h2>
   <table>
     <tr>
-      
       <th>Name</th>
       <th>Proben IDs</th>
       <th>Delete</th>
@@ -104,17 +101,6 @@
     </tr>
     {% endfor %}
   </table>
-  <button onclick="openNewSampleChainWindow()">Hinzufügen</button>
-    
-
-  <script>
-    function openNewSampleWindow() {
-      window.open("{{ url_for('create_sample') }}", "_blank", "width=600,height=600");
-    }
-    
-    function openNewSampleChainWindow() {
-      window.open("{{ url_for('create_sample_chain') }}", "_blank", "width=600,height=600");
-    }
-  </script>  
+  <button onclick="window.location.href='{{ url_for('create_sample_chain') }}'">Hinzufügen</button>
 </body>
 </html>
