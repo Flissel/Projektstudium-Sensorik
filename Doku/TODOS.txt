@@ -1,6 +1,6 @@
 @Trainingpage 
 TODO: Restlichen Aufgabentypen anzeigen lassen 
-        - Form (Jan) 
+        - Form (Jan) (Vorerst erledigt. Test steht aus.)
         - HMTL (Jan)
         - Ausgabe Speichern // wie? (SPÄTER)
 TODO: 
@@ -12,7 +12,7 @@ TODO: Registery erfolgreich.
         (Felix) 
         CheckBox Prof anmeldung 
 
-TODO: Edit Button für Trainings
+TODO: Edit Button für Trainings(done)
 
 @Training_progress 
         - zeige Fortschritt an 

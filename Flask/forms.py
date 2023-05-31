@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask import request, session
 from wtforms import StringField, IntegerField, SubmitField, SelectField, FieldList, FormField, HiddenField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, NumberRange
 from model import Trainings, Aufgabenstellungen, Probenreihen, Proben, Benutzer,Paar_vergleich, Probenreihen
 
 
@@ -91,7 +91,6 @@ class CreateDreieckstest(FlaskForm):
         self.lösung_1.choices = [(p.id, p.probenname) for p in Proben.query.all()]
         self.lösung_2.choices = [(p.id, p.probenname) for p in Proben.query.all()]
 
-
 class CreateAuswahltest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
@@ -121,7 +120,18 @@ class CreateEbpForm(FlaskForm):
 
 class CreateTrainingForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    question_types = FieldList(FormField(ModifyForm), min_entries=1)
+    question_types = SelectField("Fragentyp", choices=[
+                ('ebp', 'Einfach beschreibende Prüfung'), 
+                ('rangordnungstest', 'Rangordnungstest'), 
+                ('auswahltest', 'Auswahltest'),
+                ('dreieckstest', 'Dreieckstest'),
+                ('geruchserkennung', 'Geruchserkennung'),
+                ('hed_beurteilung', 'Hedonische Beurteilung'),
+                ('konz_reihe', 'Konzentrationsreihe'),
+                ('paar_vergleich', 'Paarweise Vergleichstest'),
+                ('profilprüfung', 'Profilprüfung')
+            ]
+        , default="ebp")
     ebp_questions = FieldList(FormField(CreateEbpForm))
     rangordnungstest_questions = FieldList(FormField(CreateRangordnungstestForm))
     auswahltest_questions = FieldList(FormField(CreateAuswahltest))
@@ -131,8 +141,17 @@ class CreateTrainingForm(FlaskForm):
     konz_reihe_questions = FieldList(FormField(CreateKonz_reihe))
     paar_vergleich_questions = FieldList(FormField(CreatePaar_vergleich))
     profilprüfung_questions = FieldList(FormField(CreateProfilprüfung))
-    submit = SubmitField('Trainings erstellen')
-
+    add_question = SubmitField('Frage hinzufügen')
+    remove_ebp_question = FieldList(SubmitField('Frage entfernen'))
+    remove_rangordnungstest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_auswahltest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_dreieckstest_question = FieldList(SubmitField('Frage entfernen'))
+    remove_geruchserkennung_question = FieldList(SubmitField('Frage entfernen'))
+    remove_hed_beurteilung_question = FieldList(SubmitField('Frage entfernen'))
+    remove_konz_reihe_question = FieldList(SubmitField('Frage entfernen'))
+    remove_profilprüfung_question = FieldList(SubmitField('Frage entfernen'))
+    create_training = SubmitField('Trainings erstellen')
+    
 class TrainingsViewForm(FlaskForm):
     trainings = SelectField('Trainings', choices=[])
     delete = SubmitField('Löschen')
@@ -146,6 +165,8 @@ class TrainingsViewForm(FlaskForm):
 ###################################
 
 class ViewProfilprüfung(FlaskForm):
+    proben_id = SelectField('Proben ID', choices=[])
+    kriterien = SelectField('Kriterium', choices=[])
     skalenwerte = FieldList(IntegerField('Skalenwert'))
 
 class ViewPaar_vergleich(FlaskForm):
@@ -174,46 +195,54 @@ class ViewPaar_vergleich(FlaskForm):
 
 
 
-class Konz_reihe(FlaskForm):
+class ViewKonz_reihe(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
+    antworten = FieldList(StringField('Antwort'))
 
     def __init__(self, *args, **kwargs):
-        super(CreateKonz_reihe, self).__init__(*args, **kwargs)
+        super(ViewKonz_reihe, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="konz_reihe").all()]
         self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
 
-class Hed_beurteilung(FlaskForm):
+class ViewHed_beurteilung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probe', choices=[])
+    einordnung = FieldList(SelectField('Einordnung', choices=[]))
 
     def __init__(self, *args, **kwargs):
-        super(CreateHed_beurteilung, self).__init__(*args, **kwargs)
+        super(ViewHed_beurteilung, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="hed_beurteilung").all()]
         self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
 
-class Geruchserkennung(FlaskForm):
+class ViewGeruchserkennung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     proben_id = SelectField('Probe', choices=[])
+    ohne_auswahl = StringField('Geruchserkennung ohne Auswahl')
+    mit_auswahl = SelectField('Geruchserkennung mit Auswahl', choices=[])
     # Eventuell dem Professor die Möglichkeit geben die Auswahl für jede Frage selbst zu definieren.
     # Momentan ist Auswahlliste in "geruchsauswahl" Tabelle gespeichert
     # Eventuell Möglichkeit einräumen diese Liste zu verändern
 
     def __init__(self, *args, **kwargs):
-        super(CreateGeruchserkennung, self).__init__(*args, **kwargs)
+        super(ViewGeruchserkennung, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="geruchserkennung").all()]
         self.proben_id.choices = [(p.id, p.probenname) for p in Proben.query.all()]
 
-class Dreieckstest(FlaskForm):
+class ViewDreieckstest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id_1 = SelectField('Probenreihe 1', choices=[])
     probenreihe_id_2 = SelectField('Probenreihe 2', choices=[])
     lösung_1 = SelectField('Lösungsprobe 1', choices=[])
     lösung_2 = SelectField('Lösungsprobe 2', choices=[])
+    abweichende_probe_1 = SelectField('Welches ist die abweichende Probe ?', choices=[])
+    abweichende_probe_2 = SelectField('Welches ist die abweichende Probe ?', choices=[])
+    beschreibung_1 = StringField('Beschreibung des unterschieds')
+    beschreibung_2 = StringField('Beschreibung des unterschieds')
 
 
     def __init__(self, *args, **kwargs):
-        super(CreateDreieckstest, self).__init__(*args, **kwargs)
+        super(ViewDreieckstest, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="dreieckstest").all()]
         self.probenreihe_id_1.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
         self.probenreihe_id_2.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
@@ -221,29 +250,37 @@ class Dreieckstest(FlaskForm):
         self.lösung_2.choices = [(p.id, p.probenname) for p in Proben.query.all()]
 
 
-class Auswahltest(FlaskForm):
+class ViewAuswahltest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
+    einordnung = FieldList(SelectField('Einordnung', choices=[]))
 
     def __init__(self, *args, **kwargs):
-        super(CreateAuswahltest, self).__init__(*args, **kwargs)
+        super(ViewAuswahltest, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="auswahltest").all()]
         self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
 
-class RangordnungstestForm(FlaskForm):
+class ViewRangordnungstest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
+    antworten = FieldList(IntegerField('Rang:', validators=[NumberRange(min=1, max=10)]))
 
     def __init__(self, *args, **kwargs):
-        super(CreateRangordnungstestForm, self).__init__(*args, **kwargs)
+        super(ViewRangordnungstest, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="rangordnungstest").all()]
         self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+        self.antworten.validators = [NumberRange(min=1, max=len(self.probenreihe_id.choices))]
 
-class EbpForm(FlaskForm):
+class ViewEbp(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     proben_id = SelectField('Proben ID', choices=[])
+    aussehen_farbe = StringField('Farbe')
+    geruch = StringField('Geruch')
+    geschmack = StringField('Geschmack')
+    textur = StringField('Textur')
+    konsistenz = StringField('Konsistenz')
 
     def __init__(self, *args, **kwargs):
-        super(CreateEbpForm, self).__init__(*args, **kwargs)
+        super(ViewEbp, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="ebp").all()]
         self.proben_id.choices = [(p.id, p.probenname) for p in Proben.query.all()]

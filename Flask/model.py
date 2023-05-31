@@ -7,14 +7,6 @@ db = SQLAlchemy()
 Allgemeine Tabllen (benutzer, proben, trainings etc.)
 """
 
-"""
-class Fragen(db.Model):
-    __tablename__ = 'fragen'
-
-    id = db.Column(db.Integer, primary_key=True)
-    fragen_typ = db.Column(db.String(255), nullable=False)
-    fragen_id = db.Column(db.Integer, nullable=False)
-"""
     
 class Aufgabenstellungen(db.Model):
     __tablename__ = 'aufgabenstellungen'
@@ -52,7 +44,7 @@ class Probenreihen(db.Model):
 
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     name = db.Column(db.Text)
-    proben_ids = db.Column(ARRAY(db.Integer, db.ForeignKey('proben.id', ondelete='CASCADE')))
+    proben_ids = db.Column(ARRAY(db.Integer, db.ForeignKey('proben.id')))
 
 class Benutzer(db.Model):
     __tablename__ = 'benutzer'
@@ -61,7 +53,7 @@ class Benutzer(db.Model):
     benutzername = db.Column(db.Text, nullable=False)
     passwort = db.Column(db.Text, nullable=False)
     rolle = db.Column(db.Boolean, nullable=False)
-    training_id = db.Column(db.Integer, db.ForeignKey('trainings.id', ondelete='CASCADE'))
+    training_id = db.Column(db.Integer, db.ForeignKey('trainings.id'))
     aktiv = db.Column(db.Boolean, nullable=False)
 
 """
