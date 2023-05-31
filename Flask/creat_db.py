@@ -77,7 +77,7 @@ CREATE TABLE benutzer (
     rolle BOOLEAN NOT NULL,
     training_id INTEGER,
     aktiv BOOLEAN NOT NULL DEFAULT false,
-    FOREIGN KEY (training_id) REFERENCES trainings (id) ON DELETE CASCADE
+    FOREIGN KEY (training_id) REFERENCES trainings (id)
 );
 
 -- Create the dreieckstest table
@@ -223,7 +223,18 @@ INSERT INTO public.proben(
 
 INSERT INTO public.probenreihen(
 	id, name, proben_ids)
-	VALUES (1, 'Testreihe', ARRAY[1,1]);
+	VALUES 
+    (1, 'Testreihe', ARRAY[1,1]),
+    (2, 'Testreihe 2', ARRAY[7, 8, 9]),
+    (3, 'Testreihe 3', ARRAY[5, 1, 4]),
+    (4, 'Testreihe 4', ARRAY[3, 4, 5]),
+    (5, 'Testreihe 5', ARRAY[6, 7, 8]),
+    (6, 'Testreihe 6', ARRAY[9, 2]),
+    (7, 'Testreihe 7', ARRAY[1, 2]),
+    (8, 'Testreihe 8', ARRAY[3, 4]),
+    (9, 'Testreihe 9', ARRAY[5, 6]),
+    (10, 'Testreihe 10', ARRAY[7, 8]),
+    (11, 'Testreihe 11', ARRAY[9, 3]);
 
 INSERT INTO public.prüfvarianten(
 	id, prüfname)
