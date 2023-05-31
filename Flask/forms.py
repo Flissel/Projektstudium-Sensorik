@@ -5,21 +5,6 @@ from wtforms.validators import DataRequired, NumberRange
 from model import Trainings, Aufgabenstellungen, Probenreihen, Proben, Benutzer,Paar_vergleich, Probenreihen
 
 
-class ModifyForm(FlaskForm):
-    question_type = SelectField("Fragentyp", choices=[
-                ('ebp', 'Einfach beschreibende Prüfung'), 
-                ('rangordnungstest', 'Rangordnungstest'), 
-                ('auswahltest', 'Auswahltest'),
-                ('dreieckstest', 'Dreieckstest'),
-                ('geruchserkennung', 'Geruchserkennung'),
-                ('hed_beurteilung', 'Hedonische Beurteilung'),
-                ('konz_reihe', 'Konzentrationsreihe'),
-                ('paar_vergleich', 'Paarweise Vergleichstest'),
-                ('profilprüfung', 'Profilprüfung')
-            ]
-        , default="ebp")
-    add = SubmitField("Hinzufügen")
-    
 class CreateProfilprüfung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     proben_id = SelectField('Probe', choices=[])
@@ -159,6 +144,13 @@ class TrainingsViewForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(TrainingsViewForm, self).__init__(*args, **kwargs)
         self.trainings.choices = [(t.id, t.name) for t in Trainings.query.all()]
+
+
+
+
+
+
+
 
 ###################################
 #---View Forms for the students---#

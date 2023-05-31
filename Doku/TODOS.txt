@@ -9,8 +9,14 @@ TODO:
 
 @registery
 TODO: Registery erfolgreich. 
-        (Felix) 
-        CheckBox Prof anmeldung 
+        (Felix)
+
+
+@dashboard 
+TODO: Probenreihen erstellen @Professordash board -> Proben hinzüfügen -> Tabel für alle proben mit edit, delete, new button 
+        - Form  (Felix)
+        - Model (done) 
+        - HTML  (Felix)
 
 TODO: Edit Button für Trainings(done)
 
@@ -24,7 +30,6 @@ TODO: Requirments schreiben
 
 TODO: AUSWERTUNG     ??    
 TODO: Server  (Victoria)
-
 
 
 
