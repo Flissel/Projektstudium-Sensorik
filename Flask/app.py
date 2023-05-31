@@ -5,9 +5,10 @@ from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Proben
 from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, TrainingsViewForm, ViewPaar_vergleich, ViewAuswahltest, ViewDreieckstest, ViewEbp, ViewGeruchserkennung, ViewHed_beurteilung, ViewKonz_reihe, ViewProfilprüfung, ViewRangordnungstest
 
 from uuid import uuid4
-from flask_socketio import SocketIO, join_room, leave_room
+
 import time
-from datetime import datetime, timedelta
+
+from wtforms import SubmitField
 
 app = Flask(__name__)
 app.debug = True
@@ -18,42 +19,7 @@ db.init_app(app)
 def zip_lists(a, b):
     return zip(a, b)
 
-
 app.jinja_env.filters['zip_lists'] = zip_lists
-
-socketio = SocketIO(app)
-
-
-# Dictionary to store active users and their last activity time
-active_users = {}
-
-@socketio.on('connect')
-def on_connect():
-    user_id = request.sid
-    join_room(user_id)
-    active_users[user_id] = datetime.now()
-
-@socketio.on('disconnect')
-def on_disconnect():
-    user_id = request.sid
-    leave_room(user_id)
-    if user_id in active_users:
-        del active_users[user_id]
-
-def sign_out_inactive_users():
-    now = datetime.now()
-    for user_id, last_activity_time in active_users.items():
-        if (now - last_activity_time) > timedelta(minutes=0.15):
-            user = get_user_by_id(user_id)
-            user.aktiv = False
-            print("user.aktiv")
-            
-            leave_room(user_id)
-            del active_users[user_id]
-            db.session.commit()
-
-def get_user_by_id(user_id):
-    return Benutzer.query.filter_by(id=user_id).first()
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -77,7 +43,7 @@ def login():
             else:
                 user.aktiv = True
                 db.session.commit()
-                print("!")
+                
                 return redirect(url_for('student_waitingroom'))
         else:
             return render_template('login.html', error='Invalid username or password')
@@ -120,7 +86,7 @@ def student_waitingroom():
     user = Benutzer.query.filter_by(benutzername=session['username']).first()
 
     if user.rolle == False and user.training_id and user.aktiv == True:
-        print("!1")
+      
         return redirect(url_for('training_page')) 
     while True:
         user = Benutzer.query.filter_by(benutzername=session['username']).first()
@@ -243,7 +209,7 @@ def modify_training(training_id=None, value=None):
                 db.session.add(test)
                 db.session.commit()
 
-                fragen_ids.append(test.id)
+                fragen_ids.append(test.id) 
                 fragen_typen.append("geruchserkennungtest")
             
             for question_form in form.hed_beurteilung_questions:
@@ -419,16 +385,32 @@ def professor_dashboard():
     If the user is not logged in, they are redirected to the login page.
     """
     form = TrainingsViewForm()
+    question_types_map = {
+        "ebp": Ebp,
+        "rangordnungstest": Rangordnungstest,
+        "auswahltest": Auswahltest,
+        "dreieckstest": Dreieckstest,
+        "geruchserkennung": Geruchserkennung,
+        "hed_beurteilung": Hed_beurteilung,
+        "konz_reihe": Konz_reihe,
+        "paar_vergleich": Paar_vergleich,
+        "profilprüfung": Profilprüfung
+    }
+    
     if request.method == 'POST' and session.get('form_id') == request.form.get('form_id') and form.trainings.choices: #prevent double submitting and empty submit
         session.pop('form_id', None)
-        action = request.form.get('action')
-        if action.startswith("select"):
+        if 'select' in request.form:
             students = Benutzer.query.filter_by(rolle=False).all()
+            index = int(request.form['select'])
             for student in students:
-                student.training_id = form.trainings.choices[int(action.split(" ")[1])][0]
+                student.training_id = form.trainings.choices[index][0]
                 db.session.commit()
-        if action.startswith("delete"):
-            training = Trainings.query.filter_by(id=form.trainings.choices[int(action.split(" ")[1])][0]).first()
+        if 'delete' in request.form:
+            index = int(request.form['delete'])
+            training = Trainings.query.filter_by(id=form.trainings.choices[index][0]).first()
+            for i in range(len(training.fragen_ids)):
+                db.session.delete(question_types_map[training.fragen_typen[i]].query.filter_by(id=training.fragen_ids[i]).first())
+                db.session.commit()
             db.session.delete(training)
             db.session.commit()
         redirect(url_for('professor_dashboard'))
@@ -460,7 +442,7 @@ def select_training(training):
     for student in students:
         student.training = training
         db.session.commit()
-    return redirect(url_for('training_progress'))                                  
+    return redirect(url_for('training_progress', question=get_questions(training), students=students))                                  
 
 
 
@@ -475,11 +457,43 @@ def create_training():
     #TODO: Die anderen fragentypen hinzufügen
 
     form = CreateTrainingForm()
+    question_types_map = {
+    "ebp": form.ebp_questions,
+    "rangordnungstest": form.rangordnungstest_questions,
+    "auswahltest": form.auswahltest_questions,
+    "dreieckstest": form.dreieckstest_questions,
+    "geruchserkennung": form.geruchserkennung_questions,
+    "hed_beurteilung": form.hed_beurteilung_questions,
+    "konz_reihe": form.konz_reihe_questions,
+    "paar_vergleich": form.paar_vergleich_questions,
+    "profilprüfung": form.profilprüfung_questions,
+}
 
-    #if form.validate_on_submit():
-    if request.method == "POST" and form.data["submit"] == True:
-        if form.ebp_questions or form.rangordnungstest_questions or form.auswahltest_questions or form.dreieckstest_questions or form.geruchserkennung_questions or form.hed_beurteilung_questions or form.konz_reihe_questions or form.paar_vergleich_questions or form.profilprüfung_questions:
-            print("Form validated successfully")
+    if form.validate_on_submit():
+        
+        if 'add_question' in request.form:
+            question_type = form.question_types.data
+            if question_type in question_types_map:
+                question_types_map[question_type].append_entry()
+
+        for question_type in question_types_map.keys():
+            if 'delete_{}_question'.format(question_type) in request.form:
+                index_to_remove = int(request.form['delete_{}_question'.format(question_type)])
+                question_types_map[question_type].entries.pop(index_to_remove)
+        
+        if 'criteria' in request.form:
+            actions = request.form['kriteria'].split(' ',2)
+            operation = actions[0]
+            index = int(actions[1])
+            
+            if operation == 'add':
+                form.profilprüfung_questions[index].criteria.append_entry()    
+            elif operation == 'remove':
+                form.profilprüfung_questions[index].criteria.entries.pop()
+                
+        if 'submit' in request.form:
+            
+            
             fragen_ids = []
             fragen_typen = []
 
@@ -598,26 +612,7 @@ def create_training():
             db.session.commit()
 
             return redirect(url_for('professor_dashboard'))
-
-    if request.method == "POST" and form.question_types[0].data["add"] == True:
-        if form.question_types[0].data["question_type"] == "ebp":
-            form.ebp_questions.append_entry()
-        if form.question_types[0].data["question_type"] == "rangordnungstest":
-            form.rangordnungstest_questions.append_entry()
-        if form.question_types[0].data["question_type"] == "auswahltest":
-            form.auswahltest_questions.append_entry()
-        if form.question_types[0].data["question_type"] == "dreieckstest":
-            form.dreieckstest_questions.append_entry()
-        if form.question_types[0].data["question_type"] == "geruchserkennung":
-            form.geruchserkennung_questions.append_entry()
-        if form.question_types[0].data["question_type"] == "hed_beurteilung":
-            form.hed_beurteilung_questions.append_entry()
-        if form.question_types[0].data["question_type"] == "konz_reihe":
-            form.konz_reihe_questions.append_entry()
-        if form.question_types[0].data["question_type"] == "paar_vergleich":
-            form.paar_vergleich_questions.append_entry()
-        if form.question_types[0].data["question_type"] == "profilprüfung":
-            form.profilprüfung_questions.append_entry()
+    """       
     if request.method == "POST" and request.form.get('action'):
         action = request.form.get('action').split(" ", 2)
         print(action[2])
@@ -695,6 +690,7 @@ def create_training():
                 form.profilprüfung_questions.append(item)
 
         form.question_types[0].data["submit"] = False
+    """
     if request.method == "POST" and request.form.get('kriteria'):
         action = request.form.get('kriteria').split(' ',2)
         if action[0] == 'add':
@@ -930,7 +926,7 @@ def create_sample_chain():
     if request.method == 'POST':
         name = request.form['name']
         selected_proben_ids = request.form['proben_ids'].split(',')
-        print(selected_proben_ids)
+        
         proben_ids = []
         for proben_id in selected_proben_ids:
             if proben_id:
@@ -940,14 +936,13 @@ def create_sample_chain():
 
         # Create a new Probenreihen instance
         sample_chain = Probenreihen(name=name, proben_ids=proben_ids)
-        print(sample_chain)
+        
         # Add the new sample chain to the database
         db.session.add(sample_chain)
         db.session.commit()
 
         flash('Sample chain created successfully!')
         return redirect(url_for('view_samples'))
-    
     samples = Proben.query.all()
     # If the request method is GET, render the create_sample_chain.html template
     return render_template('create_sample_chain.html',samples = samples)
