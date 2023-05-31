@@ -12,6 +12,23 @@ Training Page
             <form method="POST" id="paar-vergleich-form" action="answer_question">
                 <h2>Paarweiser Vergleich</h2>
                 <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+                <h3>Probenreihe 1:</h3>
+                <table>
+                {% for probe in probenreihen_id_1.proben_ids %}
+                  <tr>
+                {{Proben.query.get(probe).proben_nr}} {{ Proben.query.get(probe).probenname}}<br>
+                </tr>
+                {% endfor %}
+                </table>
+                <h3>Probenreihe 2:</h3>
+                <table>
+                {% for probe in probenreihen_id_2.proben_ids %}
+                  <tr>
+                {{Proben.query.get(probe).proben_nr}} {{ Proben.query.get(probe).probenname}}<br>
+                </tr>
+                {% endfor %}
+                </table>
+                <br><br>
                 <div>
                 {{ form.proben_id_1.label }} {{ form.proben_id_1(class="form-control") }}
               </div>
@@ -23,6 +40,41 @@ Training Page
               </div>
             </form>
             {% endif %}
+            {% if question_type == 'ebp' %}
+            <form method="POST" id="ebp-form" action="answer_ebp">
+                <h2>Einfach beschreibende Prüfung</h2>
+                <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+                <h3>Probe:</h3>
+                {{ proben_id.proben_nr }} {{ proben_id.probenname }}
+                <br><br>
+                <div>
+                {{ form.aussehen_farbe.label }} {{ form.aussehen_farbe(class="form-control") }}
+                {{ form.geruch.label }} {{ form.geruch(class="form-control") }}
+                {{ form.geschmack.label }} {{ form.geschmack(class="form-control") }}
+                {{ form.textur.label }} {{ form.textur(class="form-control") }}
+                {{ form.konsistenz.label }} {{ form.konsistenz(class="form-control") }}
+              {% endif %}
+              {% if question_type == 'rangordnungstest' %}
+              <form method="POST" id="rangordnungstest-form" action="answer_rangordnungstest">
+                  <h2>Rangordnungstest</h2>
+                  <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+                  <h3>Probenreihe:</h3>
+                  <table>
+                  {% for probe in probenreihen_id.proben_ids %}
+                    <tr>
+                  {{Proben.query.get(probe).proben_nr}} {{ Proben.query.get(probe).probenname}}<br>
+                  </tr>
+                  {% endfor %}
+                  </table>
+                  <br><br>
+                  {% for probe_id, antwort_field in probenreihen_id.proben_ids|zip_lists(form.antworten) %}
+                    Rang:
+                    {{ Proben.query.get(probe_id).proben_nr }} {{ Proben.query.get(probe_id).probenname }}<br>
+                    {{ antwort_field(class="form-control") }}
+                {% endfor %}
+
+                {% endif %}
+
         </div>
         <div class="card-body">
             <form method="post">

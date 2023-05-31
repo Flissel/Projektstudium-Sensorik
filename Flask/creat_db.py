@@ -55,7 +55,7 @@ CREATE TABLE proben (
     proben_nr INTEGER UNIQUE NOT NULL,
     probenname VARCHAR(255) NOT NULL,
     farbe TEXT,
-    farbintensitaet  INTEGER,
+    farbintensität  INTEGER,
     geruch TEXT,
     geschmack TEXT,
     textur TEXT,
@@ -77,7 +77,7 @@ CREATE TABLE benutzer (
     rolle BOOLEAN NOT NULL,
     training_id INTEGER,
     aktiv BOOLEAN NOT NULL DEFAULT false,
-    FOREIGN KEY (training_id) REFERENCES trainings (id) ON DELETE CASCADE
+    FOREIGN KEY (training_id) REFERENCES trainings (id)
 );
 
 -- Create the dreieckstest table
@@ -208,12 +208,33 @@ INSERT INTO public.benutzer(
     (4, 'Student3', '123', False, NULL);
 
 INSERT INTO public.proben(
-	id, proben_nr, probenname, farbe, farbintensitaet , geruch, geschmack, textur, konsistenz)
-	VALUES (1, 999, 'Schwarzdorn', 'Schwarz', 100, 'erdig', 'salzig', 'rau', 'fest');
+	id, proben_nr, probenname, farbe, farbintensität , geruch, geschmack, textur, konsistenz)
+	VALUES 
+    (1, 999, 'Schwarzdorn', 'Schwarz', 100, 'erdig', 'salzig', 'rau', 'fest'),
+    (2, 345, 'Mondlicht', 'Silber', 50, 'sanft', 'leicht süßlich', 'glatt', 'zart'),
+    (3, 721, 'Feuerherz', 'Rot', 80, 'intensiv', 'fruchtig', 'wärmend', 'weich'),
+    (4, 567, 'Waldesrauschen', 'Grün', 70, 'frisch', 'holzig', 'beruhigend', 'knackig'),
+    (5, 123, 'Sternenstaub', 'Gold', 60, 'zauberhaft', 'glitzernd', 'seidig', 'leicht'),
+    (6, 888, 'Eiskristall', 'Blau', 90, 'klar', 'kühlend', 'glänzend', 'spröde'),
+    (7, 432, 'Sonnenglanz', 'Gelb', 75, 'strahlend', 'frisch', 'lebhaft', 'knusprig'),
+    (8, 654, 'Nebelschwade', 'Grau', 40, 'geheimnisvoll', 'nebelig', 'hauchdünn', 'leicht'),
+    (9, 777, 'Klangwelle', 'Violett', 85, 'schwingend', 'sphärisch', 'sanft', 'glatt'),
+    (10, 222, 'Blütenregen', 'Rosa', 55, 'zart', 'blumig', 'fallend', 'leicht');
 
 INSERT INTO public.probenreihen(
 	id, name, proben_ids)
-	VALUES (1, 'Testreihe', ARRAY[1,1]);
+	VALUES 
+    (1, 'Testreihe', ARRAY[1,1]),
+    (2, 'Testreihe 2', ARRAY[7, 8, 9]),
+    (3, 'Testreihe 3', ARRAY[5, 1, 4]),
+    (4, 'Testreihe 4', ARRAY[3, 4, 5]),
+    (5, 'Testreihe 5', ARRAY[6, 7, 8]),
+    (6, 'Testreihe 6', ARRAY[9, 2]),
+    (7, 'Testreihe 7', ARRAY[1, 2]),
+    (8, 'Testreihe 8', ARRAY[3, 4]),
+    (9, 'Testreihe 9', ARRAY[5, 6]),
+    (10, 'Testreihe 10', ARRAY[7, 8]),
+    (11, 'Testreihe 11', ARRAY[9, 3]);
 
 INSERT INTO public.prüfvarianten(
 	id, prüfname)
