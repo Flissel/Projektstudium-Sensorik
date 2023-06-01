@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <h1 class="text-center mb-4">Create Task</h1>
+        <form method="POST" action="{{ url_for('create_task') }}">
+          <div class="form-group">
+            <label for="aufgabenstellung">Task:</label>
+            <textarea class="form-control" id="aufgabenstellung" name="aufgabenstellung" rows="5"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Create Task</button>
+          <a href="{{ url_for('manage_aufgabenstellungen') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

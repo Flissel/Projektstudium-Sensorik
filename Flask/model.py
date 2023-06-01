@@ -15,6 +15,10 @@ class Aufgabenstellungen(db.Model):
     aufgabenstellung = db.Column(db.Text, nullable=False)
     aufgabentyp = db.Column(db.Text, nullable=False)
     prüfvarianten_id = db.Column(db.Integer, db.ForeignKey('prüfvarianten', ondelete='CASCADE'))
+class Prüfvarianten(db.Model):
+    __tablename__ = 'prüfvarianten'
+    prüfvarianten_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    prüfname = db.Column(db.Text, nullable=False)
 
 class Trainings(db.Model):
     __tablename__ = 'trainings'
