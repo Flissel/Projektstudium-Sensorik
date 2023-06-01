@@ -407,9 +407,6 @@ def professor_dashboard():
             action = request.form.get('action')
 
         # Debug print statements
-            print('Form ID:', form_id)
-            print('Action:', action)
-            print('Form data:', request.form)
             index = int(action.split(' ')[1])
         if 'select' in request.form['action']:
             students = Benutzer.query.filter_by(rolle=False).all()
@@ -860,9 +857,6 @@ def check_task_completion(user, fragen_id):
     return False
 
 
-
-
-
 @app.route('/')
 def dashboard():
     """
@@ -956,8 +950,6 @@ def create_sample_chain():
     
     samples = Proben.query.all()
     return render_template('create_sample_chain.html', samples=samples)
-
-
 
 # Delete a sample
 @app.route('/delete_sample/<sample_id>', methods=['DELETE'])
