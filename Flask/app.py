@@ -715,10 +715,77 @@ def create_training():
             form.profilprüfung_questions[int(action[1])].kriterien = form.profilprüfung_questions[int(action[1])].kriterien[0:len(form.profilprüfung_questions[int(action[1])].kriterien) -1]
     print("Form validated unsuccessful")
     return render_template('create_training.html', form=form)
-                            
 
 
+@app.route('/delete_task/<int:task_id>', methods=['POST'])
+def delete_task(task_id):
+    if 'username' not in session:
+        return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
+    
+    task = Aufgabenstellungen.query.get(task_id)
+    
+    if task is None:
+        # Handle case when the task with the specified task_id is not found
+        flash("Task not found.", "error")
+    else:
+        db.session.delete(task)
+        db.session.commit()
+        flash("Task deleted successfully.", "success")
+    
+    return redirect(url_for('manage_aufgabenstellungen'))                           
+@app.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
+def edit_task(task_id):
+    if 'username' not in session:
+        return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
+    
+    task = Aufgabenstellungen.query.get(task_id)
+    
+    if task is None:
+        # Handle case when the task with the specified task_id is not found
+        flash("Task not found.", "error")
+        return redirect(url_for('manage_aufgabenstellungen'))
+    
+    if request.method == 'POST':
+        aufgabenstellung = request.form.get('aufgabenstellung')
+        
+        # Perform necessary operations to update the task using 'aufgabenstellung'
+        task.aufgabenstellung = aufgabenstellung
+        db.session.commit()
+        
+        # Redirect to the task list page after updating the task
+        flash("Task updated successfully.", "success")
+        return redirect(url_for('task_list'))
+    
+    return render_template('edit_task.html', task=task)
+@app.route('/create_task/', methods=['GET', 'POST'])
+def create_task():
+    if 'username' not in session:
+        return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
+    
+    if request.method == 'POST':
+        aufgabenstellung = request.form.get('aufgabenstellung')
+        
+        # Perform necessary operations to create a new task using 'aufgabenstellung'
+        # Example code to create a new task using SQLAlchemy
+        task = Aufgabenstellungen(aufgabenstellung=aufgabenstellung)
+        
+        db.session.add(task)
+        db.session.commit()
+        
+        # Redirect to the task list page after creating the task
+        flash("Task created successfully.", "success")
+        return redirect(url_for('task_list'))
+    
+    return render_template('create_task.html')
 
+@app.route('/professor_dashboard/manage_aufgabenstellungen/', methods=['GET', 'POST'])
+def manage_aufgabenstellungen():
+    if 'username' not in session:
+        return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
+    # Retrieve the data from the database (Example: fetching tasks from the database)
+    tasks = Aufgabenstellungen.query.all()
+    prüfvariante = request.form.getlist('prüfvariante')
+    return render_template('manage_aufgabenstellungen.html', tasks=tasks , prüfvariante=prüfvariante)
 
 
 
