@@ -1,102 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Create Sample</title>
-  <style>
-    body {
-      background-color: #f5f5f5;
-      color: #333333;
-      font-family: Arial, sans-serif;
-      font-size: 16px;
-      margin: 0;
-      padding: 0;
-    }
+{% extends 'base.html' %}
 
-    h1 {
-      margin-top: 20px;
-      text-align: center;
-    }
+{% block content %}
+  <h1 class="document-title">Proben erstellen</h1>
 
-    .form-row {
-      display: flex;
-      margin-bottom: 10px;
-    }
-
-    .form-label {
-      flex-basis: 200px;
-      padding: 10px;
-    }
-
-    .form-input {
-      flex-grow: 1;
-      padding: 10px;
-      border: 1px solid #cccccc;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-
-    button[type="submit"] {
-      display: block;
-      margin: 10px auto;
-      background-color: #32cd32;
-      border: none;
-      color: #ffffff;
-      cursor: pointer;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 4px;
-    }
-
-    button[type="submit"]:hover {
-      background-color: #228b22;
-    }
-  </style>
   <script>
     window.onload = function() {
       // Resize the window to fit the content
       window.resizeTo(1050, document.body.scrollHeight + 400);
     };
   </script>
-</head>
-<body>
-  <h1>Create Sample</h1>
   
   <form method="POST" action="{{ url_for('create_sample') }}">
     <div class="form-row">
-      <label class="form-label">Proben Nr:</label>
-      <input class="form-input" type="number" name="proben_nr" required>
+      <label class="form-label" for="proben_nr">Proben Nr:</label>
+      <input class="form-input" type="number" id="proben_nr" name="proben_nr" required>
     </div>
     <div class="form-row">
-      <label class="form-label">Probenname:</label>
-      <input class="form-input" type="text" name="probenname" required>
+      <label class="form-label" for="probenname">Probenname:</label>
+      <input class="form-input" type="text" id="probenname" name="probenname" required>
     </div>
     <div class="form-row">
-      <label class="form-label">Farbe:</label>
-      <input class="form-input" type="text" name="farbe">
+      <label class="form-label" for="farbe">Farbe:</label>
+      <input class="form-input" type="text" id="farbe" name="farbe">
     </div>
     <div class="form-row">
-      <label class="form-label">Farbintensität:</label>
-      <input class="form-input" type="number" name="farbintensitaet">
+      <label class="form-label" for="farbintensitaet">Farbintensität:</label>
+      <input class="form-input" type="number" id="farbintensitaet" name="farbintensitaet">
     </div>
     <div class="form-row">
-      <label class="form-label">Geruch:</label>
-      <input class="form-input" type="text" name="geruch">
+      <label class="form-label" for="geruch">Geruch:</label>
+      <input class="form-input" type="text" id="geruch" name="geruch">
     </div>
     <div class="form-row">
-      <label class="form-label">Geschmack:</label>
-      <input class="form-input" type="text" name="geschmack">
+      <label class="form-label" for="geschmack">Geschmack:</label>
+      <input class="form-input" type="text" id="geschmack" name="geschmack">
     </div>
     <div class="form-row">
-      <label class="form-label">Textur:</label>
-      <input class="form-input" type="text" name="textur">
+      <label class="form-label" for="textur">Textur:</label>
+      <input class="form-input" type="text" id="textur" name="textur">
     </div>
     <div class="form-row">
-      <label class="form-label">Konsistenz:</label>
-      <input class="form-input" type="text" name="konsistenz">
+      <label class="form-label" for="konsistenz">Konsistenz:</label>
+      <input class="form-input" type="text" id="konsistenz" name="konsistenz">
     </div>
-    <button type="submit">Create</button>
+    <button type="submit">Hinzufügen</button>
   </form>
-  
-</body>
-</html>
+{% endblock %}

@@ -7,7 +7,7 @@
         <div class="card mt-5 shadow-lg">
           <div class="card-body">
             <h1 class="card-title text-center">Welcome, Professor!</h1>
-            <h3 class="text-center">Select a training to start:</h3>
+            <h3 class="text-center">Wählen Sie das zu bearbeitende Praktikum:</h3>
             <hr>
             <form method="POST" action="{{ url_for('professor_dashboard') }}">
               <input type="hidden" name="form_id" value="{{ form_id }}">
@@ -38,26 +38,42 @@
         <div class="card mt-5 shadow-lg">
           <div class="card-body">
             <h3 class="card-title">Proben anzeigen</h3>
-            <p>Instructions or information about viewing samples...</p>
-            <a href="{{ url_for('view_samples') }}" class="btn btn-success">View Samples</a>
+            <p>Hier können Sie Proben erstellen, bearbeiten oder löschen...</p>
+            <a href="{{ url_for('view_samples') }}" class="btn btn-success">Proben anzeigen</a>
           </div>
         </div>
         <div class="card mt-5 shadow-lg">
           <div class="card-body">
-            <h3 class="card-title">Praktikum hinzufügen</h3>
-            <p>Instructions or information about adding a new training...</p>
+            <h3 class="card-title">Praktikum hinzufügen</h3>
+            <p>Hier können Sie individuelle Praktika erstellen und speichern.</p>
             <a href="{{ url_for('create_training') }}" class="btn btn-success">
-              <i class="fas fa-plus mr-1"></i>Start adding
+              <i class="fas fa-plus mr-1"></i>Neues Praktikum erstellen
             </a>
           </div>
         </div>
         <div class="card mt-5 shadow-lg">
           <div class="card-body">
             <h3 class="card-title">Aufgabenstellungen verwalten</h3>
-            <p>Instructions or information about managing Aufgabenstellungen...</p>
+            <p>Hier können Sie Aufgabenstellungen und Prüfvarianten erstellen, löschen und ändern.</p>
             <a href="{{ url_for('manage_aufgabenstellungen') }}" class="btn btn-success">
               <i class="fas fa-cogs mr-1"></i>Aufgabenstellungen verwalten
             </a>
+          </div>
+        </div>
+        <div class="card mt-5 shadow-lg">
+          <div class="card-body">
+            <h3 class="card-title">Log</h3>
+            <div class="log-section">
+              {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                  <ul>
+                    {% for message in messages %}
+                      <li>{{ message }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              {% endwith %}
+            </div>
           </div>
         </div>
       </div>
