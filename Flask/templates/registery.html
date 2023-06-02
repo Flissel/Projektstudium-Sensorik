@@ -1,17 +1,35 @@
 {% extends 'base.html' %}
-
-{% block title %}
-Registration
-{% endblock %}
-
 {% block content %}
-  <h1>Registration Form</h1>
+  <h1 class="document-title">Registration Form</h1>
+
   <form action="/register" method="post">
+    <div class="error-message">
+      {% if error %}
+        <p>{{ error }}</p>
+      {% endif %}
+    </div>
+  
     <label>Username:</label>
     <input type="text" name="username" required><br><br>
     <label>Password:</label>
     <input type="password" name="password" required><br><br>
+    <div class="form-group">
+      <input type="checkbox" id="professor" name="professor">
+      <label for="professor">Professor</label>
+    </div><br>
+    <div id="professorPasswordWrapper" style="display: none;">
+      <label>Professor Password:</label>
+      <input type="password" name="professor_password"><br><br>
+    </div>
     <button type="submit">Register</button>
   </form>
-{% endblock %}
 
+  <script>
+    var professorCheckbox = document.getElementById('professor');
+    var professorPasswordWrapper = document.getElementById('professorPasswordWrapper');
+
+    professorCheckbox.addEventListener('change', function() {
+      professorPasswordWrapper.style.display = this.checked ? 'block' : 'none';
+    });
+  </script>
+{% endblock %}

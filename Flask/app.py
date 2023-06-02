@@ -1,7 +1,7 @@
 
 from flask import Flask, jsonify, render_template, request, session, redirect, url_for ,flash, request
 
-from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Probenreihen, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen
+from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Probenreihen, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen,Prüfvarianten
 from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, TrainingsViewForm, ViewPaar_vergleich, ViewAuswahltest, ViewDreieckstest, ViewEbp, ViewGeruchserkennung, ViewHed_beurteilung, ViewKonz_reihe, ViewProfilprüfung, ViewRangordnungstest
 
 from uuid import uuid4
@@ -38,12 +38,12 @@ def login():
             session['username'] = user.benutzername
             session['role'] = user.rolle
             if user.rolle == True:
-               
+                flash('User ' + user.benutzername + ' wurde als Professor angemeldet', 'success')
                 return redirect(url_for('professor_dashboard'))
             else:
                 user.aktiv = True
                 db.session.commit()
-                
+                flash('User ' + user.benutzername + ' wurde als Student angemeldet', 'success')
                 return redirect(url_for('student_waitingroom'))
         else:
             return render_template('login.html', error='Invalid username or password')
@@ -60,16 +60,35 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
-        
-        new_user = Benutzer(benutzername=username, passwort=password, rolle=False, aktiv=False)
+        professor_password = request.form.get('professor_password')
+       
+
+        # Check if the user wants to register as a professor and if the professor password is correct
+        is_professor = 'professor' in request.form
+        if is_professor and professor_password != 'your_expected_password':
+            print("hi")
+            return render_template('registery.html', error='Incorrect professor password')
+
+        # Check if the username is already taken
+        existing_user = Benutzer.query.filter_by(benutzername=username).first()
+        if existing_user:
+            print("hi2")
+            return render_template('registery.html', error='Username already taken')
+
+        # Set the role based on whether the user is registering as a professor or not
+        role = is_professor
+
+        # Create a new user object and assign the values
+        new_user = Benutzer(benutzername=username, passwort=password, rolle=role, aktiv=False)
+
         db.session.add(new_user)
         db.session.commit()
-        
+
         flash(f"User '{username}' has been added to the database!", 'success')
         return redirect(url_for('login'))
-    
+
     return render_template('registery.html')
+
 
 @app.route('/student_waitingroom')
 def student_waitingroom():
@@ -94,8 +113,10 @@ def student_waitingroom():
             return redirect(url_for('professor_dashboard'))
         else:
             if user.training_id and user.aktiv == True:
+                flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')   
                 return redirect(url_for('training_page'))
         time.sleep(1)
+        flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')
         return render_template('student_waitingroom.html')
 
 @app.route('/Error')
@@ -761,36 +782,49 @@ def edit_task(task_id):
 def create_task():
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
-    
+
+    aufgabentypen = db.session.query(Aufgabenstellungen.aufgabentyp).distinct().all()
+    prüfvarianten = Prüfvarianten.query.all()
+
     if request.method == 'POST':
         aufgabenstellung = request.form.get('aufgabenstellung')
+        aufgabentyp = request.form.get('aufgabentyp')
+        prüfvariante = request.form.get('prüfvariante')
         
-        # Perform necessary operations to create a new task using 'aufgabenstellung'
-        # Example code to create a new task using SQLAlchemy
-        task = Aufgabenstellungen(aufgabenstellung=aufgabenstellung)
-        
+        # Perform necessary operations to create a new task using 'aufgabenstellung', 'aufgabentyp', and 'prüfvariante'
+        prüfvar = Prüfvarianten(prüfname=prüfvariante) 
+        db.session.add(prüfvar)
+        db.session.commit()
+        prüfvar = Prüfvarianten.query.order_by(Prüfvarianten.id.desc()).first()
+        task = Aufgabenstellungen(aufgabenstellung=aufgabenstellung, aufgabentyp=aufgabentyp, prüfvarianten_id=prüfvar.id)
+       
         db.session.add(task)
         db.session.commit()
-        
+
         # Redirect to the task list page after creating the task
         flash("Task created successfully.", "success")
-        return redirect(url_for('task_list'))
-    
-    return render_template('create_task.html')
+        return redirect(url_for('manage_aufgabenstellungen'))
+
+    return render_template('create_task.html', aufgabentypen=aufgabentypen, prüfvarianten=prüfvarianten)
+
+
 
 @app.route('/professor_dashboard/manage_aufgabenstellungen/', methods=['GET', 'POST'])
 def manage_aufgabenstellungen():
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
-    # Retrieve the data from the database (Example: fetching tasks from the database)
+
     tasks = Aufgabenstellungen.query.all()
-    prüfvariante = request.form.getlist('prüfvariante')
-    return render_template('manage_aufgabenstellungen.html', tasks=tasks , prüfvariante=prüfvariante)
+    prüfvarianten_list = Prüfvarianten.query.all()
+    prüfnamen = [prüf.prüfname for prüf in prüfvarianten_list]
+
+    return render_template('manage_aufgabenstellungen.html', tasks=tasks, prüfnamen=prüfnamen)
+
 
 
 
 @app.route('/training_page/', methods=['GET', 'POST'])
-def training_page():
+def training_page():  
     '''
     This function handles the training page for a selected training.
     If the user is not logged in, they are redirected to the login page.
@@ -868,7 +902,7 @@ def training_page():
             kriterien = Profilprüfung.query.filter_by(id=training.fragen_ids[question_index]).first().kriterien
             return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id_1=probenreihen_id_1, probenreihen_id_2=probenreihen_id_2, Proben=Proben)
     return render_template('login.html')
-
+#-----------------------------------#
 @app.route('/professor_dashboard/training_progress')
 def training_progress():
     # get all logged in users
@@ -907,7 +941,6 @@ def calculate_training_progress(user):
 
     return progress
 
-
 def check_task_completion(user, fragen_id):
     task_type = Aufgabenstellungen.query.get(fragen_id).aufgabentyp
 
@@ -922,7 +955,7 @@ def check_task_completion(user, fragen_id):
     # Add conditions for other task types as needed
 
     return False
-
+#-----------------------------------#
 
 @app.route('/')
 def dashboard():
@@ -940,7 +973,6 @@ def view_samples():
     samples = Proben.query.all()
     sampleChain = Probenreihen.query.all()
     return render_template('view_samples.html', samples=samples , sampleChain=sampleChain)
-
 # Route for editing a sample
 @app.route('/edit_sample/<sample_id>', methods=['GET', 'POST'])
 def edit_sample(sample_id):
@@ -953,13 +985,6 @@ def edit_sample(sample_id):
         return redirect(url_for('view_samples'))
 
     return render_template('edit_sample.html', sample=sample)
-
-# Helper function to fetch a sample from the database
-def fetch_sample_from_database(sample_id):
-    sample = Proben.query.get(sample_id)
-    
-    return sample
-
 # Helper function to update a sample in the database
 def update_sample_in_database(sample_id, form_data):
     try:
@@ -967,11 +992,10 @@ def update_sample_in_database(sample_id, form_data):
         if sample is None:
             raise ValueError("Sample not found in the database.")
         
-
         sample.probenname = form_data.get('probenname')
         sample.proben_nr = form_data.get('proben_nr')
         sample.farbe = form_data.get('farbe')
-        sample.farbintensität = form_data.get('farbintensität')
+        sample.farbintensität = form_data.get('farbintensitaet')
         sample.geruch = form_data.get('geruch')
         sample.geschmack = form_data.get('geschmack')
         sample.textur = form_data.get('textur')
@@ -981,7 +1005,6 @@ def update_sample_in_database(sample_id, form_data):
     except Exception as e:
         print(f"Error updating sample: {e}")
         db.session.rollback()
-
 @app.route('/create_sample', methods=['GET', 'POST'])
 def create_sample():
     if request.method == 'POST':
@@ -1017,7 +1040,6 @@ def create_sample_chain():
     
     samples = Proben.query.all()
     return render_template('create_sample_chain.html', samples=samples)
-
 # Delete a sample
 @app.route('/delete_sample/<sample_id>', methods=['DELETE'])
 def delete_sample(sample_id):

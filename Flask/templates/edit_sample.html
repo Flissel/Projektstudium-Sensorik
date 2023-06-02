@@ -1,8 +1,9 @@
+{% extends 'base.html' %}
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Edit Sample</title>
+  <h1 class="document-title">Proben editieren</h1>
   <style>
     /* Add your custom styling here */
   </style>
@@ -28,7 +29,7 @@
         <td><input type="number" name="proben_nr" value="{{ sample.proben_nr }}" required></td>
         <td><input type="text" name="probenname" value="{{ sample.probenname }}" required></td>
         <td><input type="text" name="farbe" value="{{ sample.farbe }}"></td>
-        <td><input type="number" name="farbintensitaet " value="{{ sample.farbintensitaet  }}"></td>
+        <td><input type="number" name="farbintensitaet" value="{{ sample.farbintensitaet  }}"></td>
         <td><input type="text" name="geruch" value="{{ sample.geruch }}"></td>
         <td><input type="text" name="geschmack" value="{{ sample.geschmack }}"></td>
         <td><input type="text" name="textur" value="{{ sample.textur }}"></td>
