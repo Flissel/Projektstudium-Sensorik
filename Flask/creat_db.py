@@ -77,6 +77,7 @@ CREATE TABLE benutzer (
     rolle BOOLEAN NOT NULL,
     training_id INTEGER,
     aktiv BOOLEAN NOT NULL DEFAULT false,
+    last_activity TIMESTAMP,
     FOREIGN KEY (training_id) REFERENCES trainings (id)
 );
 
@@ -143,11 +144,11 @@ CREATE TABLE auswahltest (
 CREATE TABLE geruchserkennung (
     id SERIAL PRIMARY KEY,
     aufgabenstellung_id INTEGER,
-    proben_id INTEGER NOT NULL,
+    probenreihe_id INTEGER NOT NULL,
     geruch_ohne_auswahl TEXT,
     geruch_mit_auswahl TEXT,
     bemerkung TEXT,
-    FOREIGN KEY (proben_id) REFERENCES proben (id) ON DELETE CASCADE,
+    FOREIGN KEY (probenreihe_id) REFERENCES probenreihen (id) ON DELETE CASCADE,
     FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 

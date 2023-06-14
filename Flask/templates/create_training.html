@@ -89,8 +89,8 @@
                         <h3>Geruchserkennungstest - {{ loop.index }}</h3>
                         {{question.aufgabenstellung_id.label(class="form-label")}} 
                         {{question.aufgabenstellung_id(class="form-control")}}
-                        {{question.proben_id.label(class="form-label")}} 
-                        {{question.proben_id(class="form-control")}}
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
                         <button type="submit" name="delete_geruchserkennungstest_question" value="{{loop.index0}}">Frage entfernen</button>
                     </div>
                     <hr>

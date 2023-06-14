@@ -1,21 +1,40 @@
 
 from flask import Flask, jsonify, render_template, request, session, redirect, url_for ,flash, request
-
 from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Probenreihen, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen,Prüfvarianten
-from forms import CreateTrainingForm, CreateEbpForm, CreateRangordnungstestForm, TrainingsViewForm, ViewPaar_vergleich, ViewAuswahltest, ViewDreieckstest, ViewEbp, ViewGeruchserkennung, ViewHed_beurteilung, ViewKonz_reihe, ViewProfilprüfung, ViewRangordnungstest
-
+from forms import *
 from uuid import uuid4
-
-import time
-
-from wtforms import SubmitField
+from datetime import datetime
+from jinja2 import Environment
 
 app = Flask(__name__)
+
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/praktikum_db'
 app.config['SECRET_KEY'] = 'secret_key'
+
 db.init_app(app)
 
+INACTIVITY_THRESHOLD = 3600 # 1 hour in seconds
+
+@app.before_request
+def check_inactive_user():
+    
+    if 'username' in session:
+        user = Benutzer.query.filter_by(benutzername=session['username']).first()
+
+        last_activity = user.last_activity if user else None
+       
+        if last_activity is not None:
+            inactive_duration = (datetime.now() - last_activity).total_seconds()
+
+            if inactive_duration >= INACTIVITY_THRESHOLD:
+                # Log out the inactive user by clearing the session or performing any other necessary logout actions
+                user.aktiv = False
+                user.training_id = None
+                db.session.commit()
+                session.clear()
+                return redirect('/login')  # Redirect the user to the login page
+            
 def zip_lists(a, b):
     return zip(a, b)
 
@@ -41,7 +60,9 @@ def login():
                 flash('User ' + user.benutzername + ' wurde als Professor angemeldet', 'success')
                 return redirect(url_for('professor_dashboard'))
             else:
+                user.last_activity = datetime.now()
                 user.aktiv = True
+                user.training_id = None
                 db.session.commit()
                 flash('User ' + user.benutzername + ' wurde als Student angemeldet', 'success')
                 return redirect(url_for('student_waitingroom'))
@@ -49,6 +70,19 @@ def login():
             return render_template('login.html', error='Invalid username or password')
 
     return render_template('login.html')
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    
+    if 'username' in session:
+        # Update user's status to inactive
+        user = Benutzer.query.filter_by(benutzername=session['username']).first()
+        user.aktiv = False
+        db.session.commit()
+        session.clear()
+        flash('User ' + user.benutzername + ' wurde abgemeldet', 'success')
+        
+    return redirect(url_for('login')) 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -66,13 +100,13 @@ def register():
         # Check if the user wants to register as a professor and if the professor password is correct
         is_professor = 'professor' in request.form
         if is_professor and professor_password != 'your_expected_password':
-            print("hi")
+           
             return render_template('registery.html', error='Incorrect professor password')
 
         # Check if the username is already taken
         existing_user = Benutzer.query.filter_by(benutzername=username).first()
         if existing_user:
-            print("hi2")
+           
             return render_template('registery.html', error='Username already taken')
 
         # Set the role based on whether the user is registering as a professor or not
@@ -88,7 +122,6 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('registery.html')
-
 
 @app.route('/student_waitingroom')
 def student_waitingroom():
@@ -115,7 +148,7 @@ def student_waitingroom():
             if user.training_id and user.aktiv == True:
                 flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')   
                 return redirect(url_for('training_page'))
-        time.sleep(1)
+        
         flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')
         return render_template('student_waitingroom.html')
 
@@ -126,8 +159,7 @@ def error():
     """
     return render_template('Error.html')
 
-@app.route('/modify_training/<int:training_id>', methods=['GET', 'POST'])
-def modify_training(training_id=None, value=None):
+
     form = CreateTrainingForm()
     question_types_map = {
         "ebp": form.ebp_questions,
@@ -406,18 +438,19 @@ def professor_dashboard():
     If the user is not logged in, they are redirected to the login page.
     """
     form = TrainingsViewForm()
+   
     question_types_map = {
-        "ebp": Ebp,
-        "rangordnungstest": Rangordnungstest,
-        "auswahltest": Auswahltest,
-        "dreieckstest": Dreieckstest,
-        "geruchserkennung": Geruchserkennung,
-        "hed_beurteilung": Hed_beurteilung,
-        "konz_reihe": Konz_reihe,
-        "paar_vergleich": Paar_vergleich,
-        "profilprüfung": Profilprüfung
+    "ebp": Ebp,
+    "rangordnungstest": Rangordnungstest,
+    "auswahltest": Auswahltest,
+    "dreieckstest": Dreieckstest,
+    "geruchserkennungtest": Geruchserkennung,
+    "hed_beurteilung": Hed_beurteilung,
+    "konz_reihe": Konz_reihe,
+    "paar_vergleich": Paar_vergleich,
+    "profilprüfung": Profilprüfung
     }
-    
+
         
     if request.method == 'POST' and session.get('form_id') == request.form.get('form_id') and form.trainings.choices: #prevent double submitting and empty submit
         
@@ -430,17 +463,20 @@ def professor_dashboard():
         # Debug print statements
             index = int(action.split(' ')[1])
         if 'select' in request.form['action']:
-            students = Benutzer.query.filter_by(rolle=False).all()
+            students = Benutzer.query.filter_by(rolle=False, aktiv=True).all()
             
-            print("hi")
             for student in students:
                 student.training_id = form.trainings.choices[index][0]
+                flash(f'Praktikum {form.trainings.choices[index][1]} für user: {student.benutzername} wurde ausgewählt.', 'success')
                 db.session.commit()
 
         if 'delete' in request.form['action']:
             
             training = Trainings.query.filter_by(id=form.trainings.choices[index][0]).first()
+            
             for i in range(len(training.fragen_ids)):
+                print(question_types_map[training.fragen_typen[i]].query.filter_by(id=training.fragen_ids[i]).first())
+
                 db.session.delete(question_types_map[training.fragen_typen[i]].query.filter_by(id=training.fragen_ids[i]).first())
                 db.session.commit()
                 
@@ -465,6 +501,11 @@ def professor_dashboard():
         elif user.rolle == False:
             return redirect(url_for('student_waitingroom'))
     return redirect(url_for('login'))
+#-----------------------------------#
+
+@app.route('/modify_training/<int:training_id>', methods=['GET', 'POST'])
+def modify_training(training_id=None, value=None):
+    sdf = Trainings.query.filter_by(id=training_id).first()
 
 @app.route('/select_training/<training>')
 def select_training(training):
@@ -474,15 +515,14 @@ def select_training(training):
     After updating the database, it redirects to the training page for the selected training.
     """
     students = Benutzer.query.filter_by(rolle=False,aktiv=True).all()
-    print(students)
+    for student in students: 
+        print(student.name, student.aktiv , student.training_id , student.last_activity),
+
     for student in students:
         student.training = training
         db.session.commit()
     return redirect(url_for('training_progress', students=students))  
                             
-
-
-
 @app.route('/professor_dashboard/create_training', methods=['GET', 'POST'])
 def create_training():
     """
@@ -582,10 +622,10 @@ def create_training():
                 fragen_typen.append("dreieckstest") 
                 
             for question_form in form.geruchserkennung_questions:
-                proben_id = question_form.proben_id.data
+                probenreihe_id = question_form.probenreihe_id.data
                 aufgabenstellung_id = question_form.aufgabenstellung_id.data
 
-                test = Geruchserkennung(aufgabenstellung_id=aufgabenstellung_id, proben_id=proben_id)
+                test = Geruchserkennung(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
                 db.session.add(test)
                 db.session.commit()
 
@@ -736,7 +776,7 @@ def create_training():
             form.profilprüfung_questions[int(action[1])].kriterien = form.profilprüfung_questions[int(action[1])].kriterien[0:len(form.profilprüfung_questions[int(action[1])].kriterien) -1]
     print("Form validated unsuccessful")
     return render_template('create_training.html', form=form)
-
+#-----------------------------------#
 
 @app.route('/delete_task/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
@@ -807,8 +847,6 @@ def create_task():
 
     return render_template('create_task.html', aufgabentypen=aufgabentypen, prüfvarianten=prüfvarianten)
 
-
-
 @app.route('/professor_dashboard/manage_aufgabenstellungen/', methods=['GET', 'POST'])
 def manage_aufgabenstellungen():
     if 'username' not in session:
@@ -819,89 +857,350 @@ def manage_aufgabenstellungen():
     prüfnamen = [prüf.prüfname for prüf in prüfvarianten_list]
 
     return render_template('manage_aufgabenstellungen.html', tasks=tasks, prüfnamen=prüfnamen)
+#-----------------------------------#
+def get_form_instance(question_type):
+    if question_type == "paar_vergleich": 
+        return SubmitPaar_vergleich()
+    elif question_type == "auswahltest":
+        return SubmitAuswahltest()
+    elif question_type == "dreieckstest":
+        return SubmitDreieckstest()
+    elif question_type == "geruchserkennungtest":
+        return SubmitGeruchserkennung()
+    elif question_type == "hed_beurteilung":
+        return SubmitHed_beurteilung()
+    elif question_type == "konz_reihe":
+        return SubmitKonz_reihe()
+    elif question_type == "ebp":
+        return SubmitEbpForm()
+    elif question_type == "rangordnungstest":
+        return SubmitRangordnungstest()
+    elif question_type == "profilprüfung":
+        return SubmitProfilprüfung()
+    else:
+        return None
 
+def process_form_submission(question_type, form_data):
+    def paar_vergleich():
+        proben_id_1 = form_data.get("proben_id_1")
+        proben_id_2 = form_data.get("proben_id_2")
+        proben_id_3 = form_data.get("proben_id_3")
+        # Process the form submission for "Paarweiser Vergleich"
+        # Perform the necessary logic for this form type
+        # ...
 
+    def auswahltest():
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Auswahltest"
+        # Perform the necessary logic for this form type
+        # ...
 
+    def dreieckstest():
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Dreieckstest"
+        # Perform the necessary logic for this form type
+        # ...
+
+    def geruchserkennung():
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Geruchserkennung"
+        # Perform the necessary logic for this form type
+        # ...
+
+    def hed_beurteilung():
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Hed_beurteilung"
+        # Perform the necessary logic for this form type
+        # ...
+
+    def konz_reihe():
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Konz_reihe"
+        # Perform the necessary logic for this form type
+        # ...
+
+    def ebp():
+        aussehen_farbe = form_data.get("aussehen_farbe")
+        geruch = form_data.get("geruch")
+        geschmack = form_data.get("geschmack")
+        textur = form_data.get("textur")
+        konsistenz = form_data.get("konsistenz")
+        # Process the form submission for "Einfach beschreibende Prüfung"
+        # Perform the necessary logic for this form type
+        # ...
+
+    def rangordnungstest():
+        antworten = form_data.get("antworten")
+        # Here you can access the additional data directly from the form_data
+        probenreihen_id = form_data.get("probenreihen_id")
+        # Perform the necessary logic for the "Rangordnungstest" form submission
+        # ...
+
+    def profilprüfung():
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Profilprüfung"
+        # Perform the necessary logic for this form type
+        # ...
+
+    form_type_funcs = {
+        "paar_vergleich": paar_vergleich,
+        "auswahltest": auswahltest,
+        "dreieckstest": dreieckstest,
+        "geruchserkennung": geruchserkennung,
+        "hed_beurteilung": hed_beurteilung,
+        "konz_reihe": konz_reihe,
+        "ebp": ebp,
+        "rangordnungstest": rangordnungstest,
+        "profilprüfung": profilprüfung
+    }
+
+    if question_type in form_type_funcs:
+        form_type_funcs[question_type]()
+    else:
+        print(question_type)
+
+    if question_type == "paar_vergleich":
+        proben_id_1 = form_data.get("proben_id_1")
+        proben_id_2 = form_data.get("proben_id_2")
+        proben_id_3 = form_data.get("proben_id_3")
+        # Process the form submission for "Paarweiser Vergleich"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "auswahltest":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Auswahltest"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "dreieckstest":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Dreieckstest"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "geruchserkennung":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Geruchserkennung"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "hed_beurteilung":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Hed_beurteilung"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "konz_reihe":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Konz_reihe"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "ebp":
+        aussehen_farbe = form_data.get("aussehen_farbe")
+        geruch = form_data.get("geruch")
+        geschmack = form_data.get("geschmack")
+        textur = form_data.get("textur")
+        konsistenz = form_data.get("konsistenz")
+        
+        # Process the form submission for "Einfach beschreibende Prüfung"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "rangordnungstest":
+        print("Rangordnungstest")
+        antworten = form_data.get("antworten")
+        # Here you can access the additional data directly from the form_data
+        probenreihen_id = form_data.get("probenreihen_id")
+        # Perform the necessary logic for the "Rangordnungstest" form submission
+        # ...
+    elif question_type == "profilprüfung":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Profilprüfung"
+        # Perform the necessary logic for this form type
+        # ...
+    else:
+        print(question_type)
+    if question_type == "paar_vergleich":
+        proben_id_1 = form_data.get("proben_id_1")
+        proben_id_2 = form_data.get("proben_id_2")
+        proben_id_3 = form_data.get("proben_id_3")
+        # Process the form submission for "Paarweiser Vergleich"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "auswahltest":
+        selected_option = form_data.get("selected_option")
+        print(selected_option)
+        # Process the form submission for "Auswahltest"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "dreieckstest":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Dreieckstest"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "geruchserkennung":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Geruchserkennung"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "hed_beurteilung":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Hed_beurteilung"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "konz_reihe":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Konz_reihe"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "ebp":
+        aussehen_farbe = form_data.get("aussehen_farbe")
+        geruch = form_data.get("geruch")
+        geschmack = form_data.get("geschmack")
+        textur = form_data.get("textur")
+        konsistenz = form_data.get("konsistenz")
+        print("Einfach beschreibende Prüfung", aussehen_farbe, geruch, geschmack, textur, konsistenz)
+        # Process the form submission for "Einfach beschreibende Prüfung"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "rangordnungstest":
+        print("Rangordnungstest")
+        antworten = form_data.get("antworten")
+        # Process the form submission for "Rangordnungstest"
+        # Perform the necessary logic for this form type
+        # ...
+    elif question_type == "profilprüfung":
+        selected_option = form_data.get("selected_option")
+        # Process the form submission for "Profilprüfung"
+        # Perform the necessary logic for this form type
+        # ...
+    else:
+        print(question_type)
+
+def get_question_instance(question_type, question_id):
+
+    session = db.session
+    if question_type == "paar_vergleich":
+        return session.get(Paar_vergleich, question_id)
+    elif question_type == "auswahltest":
+        return session.get(Auswahltest, question_id)
+    elif question_type == "dreieckstest":
+        return session.get(Dreieckstest, question_id)
+    elif question_type == "geruchserkennungtest":
+        return session.get(Geruchserkennung, question_id)
+    elif question_type == "hed_beurteilung":
+        return session.get(Hed_beurteilung, question_id)
+    elif question_type == "konz_reihe":
+        return session.get(Konz_reihe, question_id)
+    elif question_type == "ebp":
+        return session.get(Ebp, question_id)
+    elif question_type == "rangordnungstest":
+        return session.get(Rangordnungstest, question_id)
+    elif question_type == "profilprüfung":
+        return session.get(Profilprüfung, question_id)
+    else:
+        return None
+def get_additional_data(question_type, question):
+    additional_data = {}
+    if question_type == "auswahltest":
+        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
+        additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]        
+    elif question_type == "dreieckstest":
+        probenreihen_id_1 = Probenreihen.query.get(question.probenreihe_id_1)
+        probenreihen_id_2 = Probenreihen.query.get(question.probenreihe_id_2)
+        
+        proben_numbers_1 = [probe.proben_nr for probe in [Proben.query.get(probe) for probe in probenreihen_id_1.proben_ids]]
+        proben_numbers_2 = [probe.proben_nr for probe in [Proben.query.get(probe) for probe in probenreihen_id_2.proben_ids]]
+
+        additional_data["probenreihen_id_1"] = proben_numbers_1
+        additional_data["probenreihen_id_2"] = proben_numbers_2
+    elif question_type == "geruchserkennungtest":
+        
+        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
+        
+        
+        additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids] 
+        
+
+    elif question_type == "hed_beurteilung":
+        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
+        additional_data["probenreihen_id"] = probenreihen_id
+    elif question_type == "konz_reihe":
+        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
+        additional_data["probenreihen_id"] = probenreihen_id
+    elif question_type == "ebp":
+
+        proben_id = Proben.query.get(question.proben_id)
+        additional_data["proben_id"] = proben_id
+
+    elif question_type == "rangordnungstest":
+        
+        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
+        additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]
+
+    elif question_type == "profilprüfung":
+        proben_id = Proben.query.get(question.proben_id)
+        additional_data["proben_id"] = proben_id
+        additional_data["kriterien"] = question.kriterien
+    return additional_data
+
+def print_form_validation_errors(form):
+    for field_name, field in form._fields.items():
+        if field.errors:
+            error_messages = ', '.join(field.errors)
+            print(f"Validation errors for field '{field_name}': {error_messages}")
+        else:
+            print(f"No validation errors for field '{field_name}'")
 
 @app.route('/training_page/', methods=['GET', 'POST'])
-def training_page():  
-    '''
-    This function handles the training page for a selected training.
-    If the user is not logged in, they are redirected to the login page.
-    '''
+def training_page():
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
-   
-    if request.method == 'POST':
-        pass
+    env = Environment()
+    env.globals['enumerate'] = enumerate
 
     training = Trainings.query.filter_by(id=Benutzer.query.filter_by(benutzername=session['username']).first().training_id).first()
+    question_max = len(training.fragen_typen)
     question_index = session.get('question_index', 0)
-    if not question_index:
-        session['question_index'] = 0
+
+    if(question_index >= question_max):
+        question_index = 0
+
+    if question_index == question_max:
+        # Training is already completed, redirect to a new page or perform a specific action
+        return redirect(url_for('complete_training'))
+
     question_type = training.fragen_typen[question_index]
-    if question_type:
-        if question_type == "auswahltest":
-            form = ViewAuswahltest()
-            question = Auswahltest.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id=probenreihen_id, Proben=Proben)
-        if question_type == "dreieckstest":
-            form = ViewDreieckstest()
-            question = Dreieckstest.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            probenreihen_id_1 = Probenreihen.query.get(question.probenreihe_id_1)
-            probenreihen_id_2 = Probenreihen.query.get(question.probenreihe_id_2)
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id_1=probenreihen_id_1, probenreihen_id_2=probenreihen_id_2, Proben=Proben)
-        if question_type == "geruchserkennung":
-            form = ViewGeruchserkennung()
-            question = Geruchserkennung.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            proben_id = Proben.query.get(question.proben_id)
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, proben_id=proben_id)
-        if question_type == "hed_beurteilung":
-            form = ViewHed_beurteilung()
-            question = Hed_beurteilung.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id=probenreihen_id, Proben=Proben)
-        if question_type == "konz_reihe":
-            form = ViewKonz_reihe()
-            question = Konz_reihe.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id=probenreihen_id, Proben=Proben)
-        if question_type == "ebp":
-            form = ViewEbp()
-            question = Ebp.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            proben_id = Proben.query.get(question.proben_id)
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, proben_id=proben_id, Proben=Proben)
-        if question_type == "rangordnungstest":
-            form = ViewRangordnungstest()
-            question = Rangordnungstest.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-            for probe in probenreihen_id.proben_ids:
-                form.antworten.append_entry()
-                
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id=probenreihen_id, Proben=Proben)
-        if question_type == "paar_vergleich":
-            form = ViewPaar_vergleich()
-            question = Paar_vergleich.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            probenreihen_id_1 = Probenreihen.query.get(question.probenreihe_id_1)
-            probenreihen_id_2 = Probenreihen.query.get(question.probenreihe_id_2)
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id_1=probenreihen_id_1, probenreihen_id_2=probenreihen_id_2, Proben=Proben)
-        if question_type == "profilprüfung":
-            form = ViewProfilprüfung()
-            question = Profilprüfung.query.filter_by(id=training.fragen_ids[question_index]).first()
-            aufgabenstellung = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            proben_id = Probenreihen.query.get(question.probenreihe_id_1)
-            kriterien = Profilprüfung.query.filter_by(id=training.fragen_ids[question_index]).first().kriterien
-            return render_template('training_page.html', question=question, question_type=question_type, form=form, aufgabenstellung=aufgabenstellung, probenreihen_id_1=probenreihen_id_1, probenreihen_id_2=probenreihen_id_2, Proben=Proben)
-    return render_template('login.html')
+
+    form = get_form_instance(question_type)
+    question = get_question_instance(question_type, training.fragen_ids[question_index])
+    aufgabenstellung = db.session.get(Aufgabenstellungen, question.aufgabenstellung_id)
+    additional_data = get_additional_data(question_type, question)
+
+    print("additional_data", additional_data)	,
+    print("question_index", question_index)
+    print("question_type", question_type)
+    print("form", form)
+    print("aufgabenstellung", aufgabenstellung)
+    
+    print("form.data", form.data)	
+    print(form.validate_on_submit())
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            process_form_submission(question_type, form.data)
+            session['question_index'] = question_index + 1
+            return redirect(url_for('training_page'))
+        else:
+            print_form_validation_errors(form)
+
+    return render_template('training_page.html', question=question, question_type=question_type, form=form,
+                       aufgabenstellung=aufgabenstellung, question_index=question_index, enumerate=enumerate,
+                       **additional_data)
+
+
+@app.route('/complete_training/', methods=['GET', 'POST'])
+def complete_training():
+    if 'username' not in session:
+       #TODO: display all answers for all questions
+        return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
+    return render_template('complete_training.html')
+
 #-----------------------------------#
 @app.route('/professor_dashboard/training_progress')
 def training_progress():
@@ -956,13 +1255,12 @@ def check_task_completion(user, fragen_id):
 
     return False
 #-----------------------------------#
-
 @app.route('/')
 def dashboard():
     """
     This function handles the main dashboard page.
     """
-    print(session)
+    
     if 'username' not in session:
         return render_template('login.html')
         
@@ -980,7 +1278,7 @@ def edit_sample(sample_id):
 
     if request.method == 'POST':
         form_data = request.form
-        print(form_data)
+        
         update_sample_in_database(sample_id, form_data)
         return redirect(url_for('view_samples'))
 

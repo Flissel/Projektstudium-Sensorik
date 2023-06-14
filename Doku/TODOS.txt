@@ -6,36 +6,25 @@ TODO: Restlichen Aufgabentypen anzeigen lassen
         - Weiter / Zurück  (nächste Frage , Hervorige)
         - Abgabe Bestätigen  (Shoutbox)
 
-
-@registery
-TODO: CheckBox Prof anmeldung ask for pw
-
 TODO: Edit Button für Trainings(done) 
       ----noch nich auf den dashboard sichtbar--- 
 
 @Training_progress 
         - zeige Fortschritt an 
 
-@manage_aufgabenstellungen
-        - new edit delete 
-        - prüfvarianten 
-
 @Professor dashboard
-        - löschen der Tests geht nicht File                             "c:\code\Uni\Projektstudium-Sensorik\Flask\app.py", line 423, in professor_dashboard
-                                                                        db.session.delete(question_types_map[training.fragen_typen[i]].query.filter_by(id=training.fragen_ids[i]).first())
         - vielleicht Inhalt eines Praktikums mit anzeigen lassen (vorschau)
         
 @trainings_page
         - aufgaben werden noch nicht immer angezeigt
-        
+        - Dreieckstest 
 
+        TRaining_id zurücksetzen
 
 ENDE PROJEKT 
 TODO: Migration 
 TODO: Doku fertigstellen (Anforderungen, Gesamtplan, DB_Struktur)
-TODO: Requirments schreiben 
-
-
+TODO: Requirments schreiben     
 TODO: Server  (Victoria)
 
 
