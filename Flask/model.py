@@ -60,7 +60,7 @@ class Benutzer(db.Model):
     rolle = db.Column(db.Boolean, nullable=False)
     training_id = db.Column(db.Integer, db.ForeignKey('trainings.id'))
     aktiv = db.Column(db.Boolean, nullable=False)
-
+    last_activity = db.Column(db.TIMESTAMP)    
 """
 Fragetyp Tabellen (ebp, rangordnungstest, Auswahltest etc.)
 """
@@ -104,7 +104,7 @@ class Geruchserkennung(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, index=True,autoincrement=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    probenreihe_id= db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     geruch_ohne_auswahl = db.Column(db.Text)
     geruch_mit_auswahl = db.Column(db.Text)
     bemerkung = db.Column(db.Text)

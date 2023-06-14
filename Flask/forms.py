@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 from flask import request, session
-from wtforms import StringField, IntegerField, SubmitField, SelectField, FieldList, FormField, HiddenField
+from wtforms import StringField, IntegerField, SubmitField, SelectField, FieldList, FormField, HiddenField,BooleanField
 from wtforms.validators import DataRequired, NumberRange
 from model import Trainings, Aufgabenstellungen, Probenreihen, Proben, Benutzer,Paar_vergleich, Probenreihen
+from wtforms.validators import ValidationError
 
 
 class CreateProfilprüfung(FlaskForm):
@@ -50,15 +51,14 @@ class CreateHed_beurteilung(FlaskForm):
 
 class CreateGeruchserkennung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    proben_id = SelectField('Probe', choices=[])
-    # Eventuell dem Professor die Möglichkeit geben die Auswahl für jede Frage selbst zu definieren.
+    probenreihe_id = SelectField('Probe', choices=[])    # Eventuell dem Professor die Möglichkeit geben die Auswahl für jede Frage selbst zu definieren.
     # Momentan ist Auswahlliste in "geruchsauswahl" Tabelle gespeichert
     # Eventuell Möglichkeit einräumen diese Liste zu verändern
 
     def __init__(self, *args, **kwargs):
         super(CreateGeruchserkennung, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="geruchserkennung").all()]
-        self.proben_id.choices = [(p.id, p.probenname) for p in Proben.query.all()]
+        self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
 
 class CreateDreieckstest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
@@ -252,16 +252,25 @@ class ViewAuswahltest(FlaskForm):
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="auswahltest").all()]
         self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
 
+
+
 class ViewRangordnungstest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id = SelectField('Probenreihe', choices=[])
-    antworten = FieldList(IntegerField('Rang:', validators=[NumberRange(min=1, max=10)]))
+    antworten = FieldList(IntegerField('Rang:'))
+
+    def validate_antworten(self, field):
+        max_value = len(self.probenreihe_id.choices)
+        for answer in field.data:
+            if not 1 <= answer <= max_value:
+                raise ValidationError(f"Invalid value. Rang must be between 1 and {max_value}.")
 
     def __init__(self, *args, **kwargs):
         super(ViewRangordnungstest, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="rangordnungstest").all()]
         self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
-        self.antworten.validators = [NumberRange(min=1, max=len(self.probenreihe_id.choices))]
+
+
 
 class ViewEbp(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
@@ -276,3 +285,90 @@ class ViewEbp(FlaskForm):
         super(ViewEbp, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="ebp").all()]
         self.proben_id.choices = [(p.id, p.probenname) for p in Proben.query.all()]
+
+
+
+#######################################################
+class SubmitEbpForm(FlaskForm):
+    aussehen_farbe = StringField('Farbe')
+    geruch = StringField('Geruch')
+    geschmack = StringField('Geschmack')
+    textur = StringField('Textur')
+    konsistenz = StringField('Konsistenz')
+    csrf_token = HiddenField()
+
+
+class SubmitProfilprüfung(FlaskForm):
+    proben_id = SelectField('Proben ID', choices=[])
+    kriterien = FieldList(SelectField('Kriterium', choices=[]))
+    skalenwerte = FieldList(IntegerField('Skalenwert'), validators=[NumberRange(min=0, max=100)])
+
+    def __init__(self, *args, **kwargs):
+        super(SubmitProfilprüfung, self).__init__(*args, **kwargs)
+        self.proben_id.choices = [(p.id, p.probenname) for p in Proben.query.all()]
+        self.kriterien.choices = [(k, k) for k in ["Kriterium 1", "Kriterium 2", "Kriterium 3"]]  # Update with your actual criteria
+
+class SubmitPaar_vergleich(FlaskForm):
+    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
+    probenreihe_id_1 = SelectField('1. Probenreihe', choices=[])
+    probenreihe_id_2 = SelectField('2. Probenreihe', choices=[])
+    lösung_1 = SelectField('1. Lösungsprobe', choices=[])
+    lösung_2 = SelectField('2. Lösungsprobe', choices=[])
+
+    proben_id_1 = SelectField('Der geschmack welcher Probe ist stärker ausgeprägt ?', choices=[])
+    proben_id_2 = SelectField('Der geschmack welcher Probe ist stärker ausgeprägt ?', choices=[])
+    proben_id_3 = SelectField('Der Geschmack welcher Probe entspricht eher Ihren Erwartungen an das Produkt?', choices=[])
+
+    def __init__(self, *args, **kwargs):
+        super(SubmitPaar_vergleich, self).__init__(*args, **kwargs)
+        # Add choices for the dynamic fields based on the user's selections
+
+class SubmitKonz_reihe(FlaskForm):
+    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
+    probenreihe_id = SelectField('Probenreihe', choices=[])
+    antworten = FieldList(StringField('Antwort'))
+
+    def __init__(self, *args, **kwargs):
+        super(SubmitKonz_reihe, self).__init__(*args, **kwargs)
+        self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="konz_reihe").all()]
+        self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+
+class SubmitHed_beurteilung(FlaskForm):
+    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
+    probenreihe_id = SelectField('Probe', choices=[])
+    einordnung = FieldList(SelectField('Einordnung', choices=[]))
+
+
+
+class SubmitGeruchserkennung(FlaskForm):
+    ohne_auswahl = StringField('Geruchserkennung ohne Auswahl')
+    beschreibung = StringField('Beschreibung des Geruchs')
+    mit_auswahl = StringField('Geruchserkennung mit Auswahl')
+    csrf_token = HiddenField()
+
+ 
+        # Add choices for the dynamic fields based on the user's selections
+
+class SubmitDreieckstest(FlaskForm):
+    beschreibung_1 = StringField('Beschreibung des Unterschieds (1)')
+    beschreibung_2 = StringField('Beschreibung des Unterschieds (2)')
+    antwort_1 = StringField('Ihre Antwort (Probe 1)')
+    antwort_2 = StringField('Ihre Antwort (Probe 2)')
+    csrf_token = HiddenField()
+        # Add choices for the dynamic fields based on the user's selections
+
+class SubmitAuswahltest(FlaskForm):
+    taste_salzig = BooleanField("Salzig")
+    taste_süß = BooleanField("Süß")
+    taste_sauer = BooleanField("Sauer")
+    taste_bitter = BooleanField("Bitter")
+    taste_nicht_erkennen = BooleanField("Nicht zu erkennen")
+    csrf_token = HiddenField()
+    
+
+   
+
+class SubmitRangordnungstest(FlaskForm):
+    antworten = FieldList(IntegerField('Rang:'))
+    csrf_token = HiddenField()
+   
