@@ -8,10 +8,86 @@ Training Page
 <div class="container my-5">
     <div class="card">
         <div class="card-header">
+            {% if question_type == 'profilprüfung' %}
+            <form method="POST" id="profilprüfung-form" action="{{ url_for('training_page') }}">
+                <h2>Profilprüfung</h2>
+                <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+                <br>
+                <h3>Probe:</h3>
+                <table>
+                    <tr>
+                        <th>Probe Nr.</th>
+                        <th>Beschreibung</th>
+                    </tr>
+                    <tr>
+                        <td>{{ proben_id.proben_nr }}</td>
+                        <td>{{ proben_id.anmerkung }}</td>
+                    </tr>
+                </table>
+                <br>
+                <h3>Kriterien:</h3>
+                <table>
+                    <tr>
+                        <th>Kriterium</th>
+                        <th>Wert</th>
+                    </tr>
+                    {% for kriterium in kriterien %}
+                    <tr>
+                        <td>{{ kriterium }}</td>
+                        <td>
+                            <div class="skala-labels">
+                                <span>zu schwach</span>
+                                <span>genau richtig</span>
+                                <span>zu stark</span>
+                            </div>
+                            <input type="range" name="kriterien" min="0" max="10" list="kriterien-list" class="form-control" />
+                            <datalist id="kriterien-list">
+                                <option value="1"></option>
+                                <option value="5"></option>
+                                <option value="10"></option>
+                            </datalist>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <br>
+                {{ form.csrf_token }}
+                <button type="submit">Submit</button>
+            </form>
+            {% endif %}
+
+            {% if question_type == 'hed_beurteilung' %}
+            <h2>Hedonische Beurteilung</h2>
+            <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+            <form method="POST" id="hed-beurteilung-form" action="{{ url_for('training_page') }}">
+                {% for probe in probenreihen_ids %}
+                <br></br>
+                <label>{{ probe.probenname }}</label>
+                <input type="range" name="taste_evaluations-{{ loop.index0 }}-taste" min="1" max="10" step="1" list="taste_scale">
+                    <datalist id="taste_scale">
+                        <option value="1">mag ich überhaupt nicht</option>
+                        <option value="2"></option>
+                        <option value="3"></option>
+                        <option value="4"></option>
+                        <option value="5"></option>
+                        <option value="6"></option>
+                        <option value="7"></option>
+                        <option value="8"></option>
+                        <option value="9"></option>
+                        <option value="10">mag ich besonders gern</option>
+                    </datalist>
+                {% endfor %}
+                <br></br>
+                {{ form.csrf_token }}
+                <button type="submit">Submit</button>
+            </form>
+            {% endif %}
+
             {% if question_type == 'paar_vergleich' %}
             <form method="POST" id="paar-vergleich-form" action="{{ url_for('training_page') }}">
                 <h2>Paarweiser Vergleich</h2>
                 <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+                
                 <h3>Probenreihe 1:</h3>
                 <table>
                     {% for probe in probenreihen_id_1 %}
@@ -21,6 +97,38 @@ Training Page
                     </tr>
                     {% endfor %}
                 </table>
+                <br><br>
+                
+                <h3>Probenreihe 1:</h3>
+                <div>
+                    {{ form.probe_1.label }}
+                    <select name="{{ form.probe_1.name }}" class="form-control">
+                        
+                        {% for probe in probenreihen_id_1 %}
+                        <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    {{ form.probe_2.label }}
+                    <select name="{{ form.probe_2.name }}" class="form-control">
+                        
+                        {% for probe in probenreihen_id_1 %}
+                        <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    {{ form.probe_3.label }}
+                    <select name="{{ form.probe_3.name }}" class="form-control">
+                        <option value="">Wählen Sie eine Probe</option>
+                        {% for probe in probenreihen_id_1 %}
+                        <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <br><br>
                 <h3>Probenreihe 2:</h3>
                 <table>
                     {% for probe in probenreihen_id_2 %}
@@ -30,20 +138,42 @@ Training Page
                     </tr>
                     {% endfor %}
                 </table>
+                
                 <br><br>
+                <h3>Probenreihe 2:</h3>
                 <div>
-                    {{ form.proben_id_1.label }} {{ form.proben_id_1(class="form-control") }}
+                    {{ form.probe_4.label }}
+                    <select name="{{ form.probe_4.name }}" class="form-control">
+                        <option value="">Wählen Sie eine Probe</option>
+                        {% for probe in probenreihen_id_2 %}
+                        <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div>
-                    {{ form.proben_id_2.label }} {{ form.proben_id_2(class="form-control") }}
+                    {{ form.probe_5.label }}
+                    <select name="{{ form.probe_5.name }}" class="form-control">
+                        <option value="">Wählen Sie eine Probe</option>
+                        {% for probe in probenreihen_id_2 %}
+                        <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div>
-                    {{ form.proben_id_3.label }} {{ form.proben_id_3(class="form-control") }}
+                    {{ form.probe_6.label }}
+                    <select name="{{ form.probe_6.name }}" class="form-control">
+                        <option value="">Wählen Sie eine Probe</option>
+                        {% for probe in probenreihen_id_2 %}
+                        <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+                
                 {{ form.csrf_token }}
                 <button type="submit">Submit</button>
             </form>
             {% endif %}
+
 
             {% if question_type == 'ebp' %}
             <form method="POST" id="ebp-form" action="{{ url_for('training_page', question_index=question_index + 1) }}">
@@ -64,7 +194,7 @@ Training Page
                 <button type="submit">Submit</button>
             </form>
             {% endif %}
-
+            
             {% if question_type == 'rangordnungstest' %}
             <form method="POST" id="rangordnungstest-form" action="{{ url_for('training_page', question_index=question_index + 1) }}">
                 <h2>Rangordnungstest</h2>
@@ -80,26 +210,19 @@ Training Page
                 </table>
                 <br><br>
                 <div class="fitting-area">
-                    <div class="fitting-slot" id="fitting-slot-1">
-                        <span class="slot-number">1</span>
+                    {% for i in range(probenreihen_id|length) %}
+                    <div class="fitting-slot" id="fitting-slot-{{ i + 1 }}">
+                        <span class="slot-number">{{ i + 1 }}</span>
+                        <input type="hidden" name="antworten-{{ i + 1 }}" value="SlotNumber_{{ i + 1 }},Probenname_{{ probenreihen_id[i].probenname }},ProbeNR_{{ probenreihen_id[i].proben_nr }}">
                     </div>
-                    <div class="fitting-slot" id="fitting-slot-2">
-                        <span class="slot-number">2</span>
-                    </div>
-                    <div class="fitting-slot" id="fitting-slot-3">
-                        <span class="slot-number">3</span>
-                    </div>
-                    <div class="fitting-slot" id="fitting-slot-4">
-                        <span class="slot-number">4</span>
-                    </div>
-                    <div class="fitting-slot" id="fitting-slot-5">
-                        <span class="slot-number">5</span>
-                    </div>
+                    {% endfor %}
                 </div>
+                
                 <div class="drag-container">
                     {% for probe in probenreihen_id %}
                     <div class="drag-item" draggable="true" data-probe-id="{{ probe.id }}">
                         {{ probe.proben_nr }} {{ probe.probenname }}
+                        <input type="hidden" name="antworten-{{ loop.index }}" value="Probenname_{{ probe.probenname }},ProbeNR_{{ probe.proben_nr }}">
                     </div>
                     {% endfor %}
                 </div>
@@ -108,52 +231,59 @@ Training Page
                 <button type="submit">Submit</button>
             </form>
             {% endif %}
+        
             {% if question_type == 'dreieckstest' %}
             <form method="POST" id="dreieckstest-form" action="{{ url_for('training_page', question_index=question_index + 1) }}">
-            <h2>Dreieckstest</h2>
-            <p>{{ aufgabenstellung.aufgabenstellung }}</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Proben Nummer des Probensatzes</th>
-                        <th>abweichende Probe</th>
-                        <th>Beschreibe den Unterschied</th>
-                       
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ probenreihen_id_1 }}</td>
-                        <td>
-                            <input type="text" name="abweichende_probe_{{ probenreihen_id_1 }}" class="form-control">
-                        </td>
-                        <td>
-                            <input type="text" name="beschreibung_{{ probenreihen_id_1 }}" class="form-control">
-                        </td>
-                      
-                    </tr>
-                    <tr>
-                        <td>{{ probenreihen_id_2 }}</td>
-                        <td>
-                            <input type="text" name="abweichende_probe_{{ probenreihen_id_2 }}" class="form-control">
-                        </td>
-                        <td>
-                            <input type="text" name="beschreibung_{{ probenreihen_id_2 }}" class="form-control">
-                        </td>
-                     
-                    </tr>
-                </tbody>
-            </table>
+                <h2>Dreieckstest</h2>
+                <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Proben Nummer des Probensatzes</th>
+                            <th>abweichende Probe</th>
+                            <th>Beschreibe den Unterschied</th>
+                           
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ probenreihen_id_1 }}</td>
+                            <td>
+                                <select name="abweichende_probe_-{{ probenreihen_id_1 }}" class="form-control">
+                                    {% for value in probenreihen_id_1 %}
+                                        <option value="{{ value }}">{{ value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" name="beschreibung_-{{ probenreihen_id_1 }}" class="form-control">
+                            </td>
+                          
+                        </tr>
+                        <tr>
+                            <td>{{ probenreihen_id_2 }}</td>
+                            <td>
+                                <select name="abweichende_probe_-{{ probenreihen_id_2 }}" class="form-control">
+                                    {% for value in probenreihen_id_1 %}
+                                        <option value="{{ value }}">{{ value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" name="beschreibung_-{{ probenreihen_id_2 }}" class="form-control">
+                            </td>
+                         
+                        </tr>
+                    </tbody>
+                </table>
+                
+                
+                {{ form.csrf_token }}
+                <button type="submit">Submit</button>
+            </form>
+            {% endif %}
             
-            
-            {{ form.csrf_token }}
-            <button type="submit">Submit</button>
-        </form>
-        {% endif %}
-            
-        
-        
-
             {% if question_type == 'auswahltest' %}
             <form method="POST" id="auswahltest-form" action="{{ url_for('training_page', question_index=question_index + 1) }}">
                 <h2>Auswahltest</h2>
@@ -163,39 +293,31 @@ Training Page
                     <tr>
                         <th>Probennummer</th>
                         <th>Probe</th>
-                        <th>Salzig</th>
-                        <th>Süß</th>
-                        <th>Sauer</th>
-                        <th>Bitter</th>
-                        <th>Nicht zu erkennen</th>
+                        <th>salzig</th>
+                        <th>süß</th>
+                        <th>sauer</th>
+                        <th>bitter</th>
+                        <th>nicht zu erkennen</th>
                     </tr>
-                    {% for probe in probenreihen_id %}
-                        <tr>
-                            <td>{{ probe.proben_nr }}</td>
-                            <td>{{ probe.probenname }}</td>
-                            <td>
-                                <input type="checkbox" name="taste-salzig" value="{{ probe.proben_nr }}">
-                            </td>
-                            <td>
-                                <input type="checkbox" name="taste-süß" value="{{ probe.proben_nr }}">
-                            </td>
-                            <td>
-                                <input type="checkbox" name="taste-sauer" value="{{ probe.proben_nr }}">
-                            </td>
-                            <td>
-                                <input type="checkbox" name="taste-bitter" value="{{ probe.proben_nr }}">
-                            </td>
-                            <td>
-                                <input type="checkbox" name="taste-nicht-erkennen" value="{{ probe.proben_nr }}">
-                            </td>
-                        </tr>
+
+                    {% for index in range(form.probe_name|length) %}
+                    <tr>
+                        <td>{{ form.probe_nr[index]() }} </td>
+                        <td>{{ form.probe_name[index]() }}</td>
+                        <td>{{ form.taste_salzig[index]() }}</td>
+                        <td>{{ form.taste_süß[index]() }}</td>
+                        <td>{{ form.taste_sauer[index]() }}</td>
+                        <td>{{ form.taste_bitter[index]() }}</td>
+                        <td>{{ form.taste_nicht_erkennen[index]() }}</td>
+                        <!-- You can add other taste fields here in the same manner -->
+                    </tr>
                     {% endfor %}
                 </table>
-                <br><br>
                 {{ form.csrf_token }}
                 <button type="submit">Submit</button>
             </form>
             {% endif %}
+            
             {% if question_type == 'geruchserkennungtest' %}
             <!-- Geruchserkennung form -->
             <form method="POST" id="geruchserkennung-form" action="{{ url_for('training_page') }}">
@@ -229,38 +351,130 @@ Training Page
                                     <option value="frisch">frisch</option>
                                     <option value="zauberhaft">zauberhaft</option>
                                     <option value="klar">klar</option>
-                                    <option value="strahlend">strahlend</option>
-                                    <option value="geheimnisvoll">geheimnisvoll</option>
-                                    <option value="schwingend">schwingend</option>
-                                    <option value="zart">zart</option>
                                 </select>
-                                <input type="text" name="mit_auswahl_input_{{ probe.proben_nr }}" class="form-control">
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
         
-                <div>
-                    <label for="bemerkungen">Bemerkungen:</label>
-                    <input type="text" name="bemerkungen" id="bemerkungen" class="form-control">
-                </div>
-        
                 {{ form.csrf_token }}
                 <button type="submit">Submit</button>
             </form>
-        {% endif %}
-        
-        
-        
-
+            {% endif %}
         </div>
     </div>
 </div>
+{% if question_type == 'konz_reihe' %}
+<!-- Konz reihe form-->
+<form method="POST" id="hed-beurteilung-form" action="{{ url_for('training_page') }}">
+    
+    <p>{{ aufgabenstellung.aufgabenstellung }}</p>
+
+    <table>
+        <!-- Table for symbols and descriptions -->
+    </table>
+
+    <p>Probenreihe:</p>
+    <table>
+        <tr>
+            <td>{{ probenreihen_id }}</td>
+        </tr>
+    </table>
+    
+    <div>
+        <label for="stammlösung">Stammlösung 1% Zugabe ml/l:</label>
+        <input type="number" name="stammlösung" id="stammlösung" class="form-control" step="0.01" required value="{{ stammlösung|default('') }}">
+    </div>
+    
+    {% if stammlösung is not defined %}
+        <script>
+            var stammlösungValue = prompt("Please enter the value for Stammlösung:");
+            document.getElementById("stammlösung").value = stammlösungValue;
+        </script>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Reihenfolge</th>
+                <th>Wasser</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+                <th>6</th>
+                <th>7</th>
+                <th>8</th>
+                <th>9</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Antwort bzw. Zahl der Kreuze</td>
+                {% for index in range(10) %}
+                    <td>
+                        <select name="probenreihen_id{{ index }}" required>
+                            <option value=""></option>
+                            <option value="O" {% if index == 0 %}selected{% endif %}>O</option>
+                            <option value="?">?</option>
+                            <option value="x">x</option>
+                            <option value="xx">xx</option>
+                            <option value="xxx">xxx</option>
+                        </select>
+                    </td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Stammlösung {{ stammlösung|default('') }}% Zugabe ml/l</td>
+                <td colspan="10">{{ stammlösung|default('') }}</td>
+            </tr>
+            <tr>
+                <td>Konzentration %</td>
+                {% for num in range(5, 51,5) %}
+                    <td>{{ num/10000 }}</td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+    
+    {{ form.csrf_token }}
+    <button type="submit">Submit</button>
+</form>
+    {% endif %}
+
+{% endblock %}
+
 
 {% block scripts %}
 <script>
-    {% if question_type == 'rangordnungstest' %}
+    const stammlösungInput = document.getElementById('stammlösung');
+    const konzentrationFields = document.querySelectorAll('[id^="konzentration"]');
+    
+    stammlösungInput.addEventListener('input', function () {
+        const stammlösungValue = parseFloat(this.value);
+        konzentrationFields.forEach(function (field, index) {
+            field.textContent = (stammlösungValue * (index * 5) / 1000).toFixed(3);
+        });
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.taste-checkbox').on('change', function() {
+        var fieldName = $(this).attr('name');
+        var index = $(this).val();
+        var isChecked = $(this).is(':checked');
+
+    
+        var form = $(this).closest('form'); // Find the parent form element
+        form.data(fieldName + '-' + index, isChecked);
+    });
+});
+</script>
+<script>
+    
     const dragItems = document.querySelectorAll('.drag-item');
     const dropSlots = document.querySelectorAll('.fitting-slot');
 
@@ -282,8 +496,8 @@ Training Page
             slot.appendChild(probe);
         });
     });
-    {% endif %}
+    
 </script>
-{% endblock %}
 
+</script>
 {% endblock %}

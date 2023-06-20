@@ -42,6 +42,7 @@ class Proben(db.Model):
     geschmack = db.Column(db.Text)
     textur = db.Column(db.Text)
     konsistenz = db.Column(db.Text)
+    anmerkung = db.Column(db.Text)
 
 class Probenreihen(db.Model):
 
