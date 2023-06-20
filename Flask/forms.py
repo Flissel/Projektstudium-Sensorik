@@ -299,54 +299,52 @@ class SubmitEbpForm(FlaskForm):
 
 
 class SubmitProfilprüfung(FlaskForm):
-    proben_id = SelectField('Proben ID', choices=[])
-    kriterien = FieldList(SelectField('Kriterium', choices=[]))
-    skalenwerte = FieldList(IntegerField('Skalenwert'), validators=[NumberRange(min=0, max=100)])
-
-    def __init__(self, *args, **kwargs):
-        super(SubmitProfilprüfung, self).__init__(*args, **kwargs)
-        self.proben_id.choices = [(p.id, p.probenname) for p in Proben.query.all()]
-        self.kriterien.choices = [(k, k) for k in ["Kriterium 1", "Kriterium 2", "Kriterium 3"]]  # Update with your actual criteria
+    csrf_token = HiddenField()
+    skalenwerte = FieldList(IntegerField('Skalenwert'))
+  
 
 class SubmitPaar_vergleich(FlaskForm):
-    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id_1 = SelectField('1. Probenreihe', choices=[])
-    probenreihe_id_2 = SelectField('2. Probenreihe', choices=[])
-    lösung_1 = SelectField('1. Lösungsprobe', choices=[])
-    lösung_2 = SelectField('2. Lösungsprobe', choices=[])
-
-    proben_id_1 = SelectField('Der geschmack welcher Probe ist stärker ausgeprägt ?', choices=[])
-    proben_id_2 = SelectField('Der geschmack welcher Probe ist stärker ausgeprägt ?', choices=[])
-    proben_id_3 = SelectField('Der Geschmack welcher Probe entspricht eher Ihren Erwartungen an das Produkt?', choices=[])
-
-    def __init__(self, *args, **kwargs):
+    csrf_token = HiddenField()
+    probe_1 = SelectField('Probe 1', choices=[], validators=[DataRequired()], coerce=int)
+    probe_2 = SelectField('Probe 2', choices=[], validators=[DataRequired()], coerce=int)
+    probe_3 = SelectField('Probe 3', choices=[], validators=[DataRequired()], coerce=int)
+    probe_4 = SelectField('Probe 4', choices=[], validators=[DataRequired()], coerce=int)
+    probe_5 = SelectField('Probe 5', choices=[], validators=[DataRequired()], coerce=int)
+    probe_6 = SelectField('Probe 6', choices=[], validators=[DataRequired()], coerce=int)
+    
+    def __init__(self, probenreihen_id_1, probenreihen_id_2, *args, **kwargs):
         super(SubmitPaar_vergleich, self).__init__(*args, **kwargs)
-        # Add choices for the dynamic fields based on the user's selections
+        
+        self.probe_1.choices = [(probe.proben_nr, probe.proben_nr) for probe in probenreihen_id_1]
+        self.probe_2.choices = [(probe.proben_nr, probe.proben_nr) for probe in probenreihen_id_1]
+        self.probe_3.choices = [(probe.proben_nr, probe.proben_nr) for probe in probenreihen_id_1]
+        self.probe_4.choices = [(probe.proben_nr, probe.proben_nr) for probe in probenreihen_id_2]
+        self.probe_5.choices = [(probe.proben_nr, probe.proben_nr) for probe in probenreihen_id_2]
+        self.probe_6.choices = [(probe.proben_nr, probe.proben_nr) for probe in probenreihen_id_2]
+
+
+   
 
 class SubmitKonz_reihe(FlaskForm):
-    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probenreihe', choices=[])
-    antworten = FieldList(StringField('Antwort'))
+    gemschmack = StringField('erkannte_geschmacksart')
+    stammlösung = StringField('stammlösung')
+    antworten = FieldList(SelectField('probenreihen_id'))
 
-    def __init__(self, *args, **kwargs):
-        super(SubmitKonz_reihe, self).__init__(*args, **kwargs)
-        self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="konz_reihe").all()]
-        self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+class ProbeForm(FlaskForm):
+    taste = IntegerField('Taste Evaluation', validators=[DataRequired()])
+    
 
 class SubmitHed_beurteilung(FlaskForm):
-    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probe', choices=[])
-    einordnung = FieldList(SelectField('Einordnung', choices=[]))
-
-
+   
+    skalenwerte = FieldList(IntegerField('Skalenwert'))
+    csrf_token = HiddenField(validators=[DataRequired()])
+    
 
 class SubmitGeruchserkennung(FlaskForm):
     ohne_auswahl = StringField('Geruchserkennung ohne Auswahl')
     beschreibung = StringField('Beschreibung des Geruchs')
     mit_auswahl = StringField('Geruchserkennung mit Auswahl')
     csrf_token = HiddenField()
-
- 
         # Add choices for the dynamic fields based on the user's selections
 
 class SubmitDreieckstest(FlaskForm):
@@ -358,17 +356,32 @@ class SubmitDreieckstest(FlaskForm):
         # Add choices for the dynamic fields based on the user's selections
 
 class SubmitAuswahltest(FlaskForm):
-    taste_salzig = BooleanField("Salzig")
-    taste_süß = BooleanField("Süß")
-    taste_sauer = BooleanField("Sauer")
-    taste_bitter = BooleanField("Bitter")
-    taste_nicht_erkennen = BooleanField("Nicht zu erkennen")
+    probe_name = FieldList(StringField())
+    probe_nr = FieldList(StringField())
+    taste_salzig = FieldList(BooleanField("salzig"))
+    taste_süß = FieldList(BooleanField("süß"))
+    taste_sauer = FieldList(BooleanField("sauer"))
+    taste_bitter = FieldList(BooleanField("bitter"))
+    taste_nicht_erkennen = FieldList(BooleanField("nicht zu erkennen"))
+    csrf_token = HiddenField()
+
+    def __init__(self, proben=None, proben_nr=None, *args, **kwargs):
+        super(SubmitAuswahltest, self).__init__(*args, **kwargs)
+        if proben:
+            self.probe_name.process(None, data=proben)
+        if proben_nr:
+            self.probe_nr.process(None, data=proben_nr)
+
+        self.taste_salzig.process(None, data=[0,0,0])    
+        self.taste_süß.process(None, data=[0,0,0])
+        self.taste_sauer.process(None, data=[0,0,0])
+        self.taste_bitter.process(None, data=[0,0,0])
+        self.taste_nicht_erkennen.process(None, data=[0,0,0])
+        
+class SubmitRangordnungstest(FlaskForm):
+    antworten = FieldList(HiddenField('Antworten'))   
     csrf_token = HiddenField()
     
-
    
 
-class SubmitRangordnungstest(FlaskForm):
-    antworten = FieldList(IntegerField('Rang:'))
-    csrf_token = HiddenField()
-   
+    

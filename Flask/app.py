@@ -5,6 +5,7 @@ from forms import *
 from uuid import uuid4
 from datetime import datetime
 from jinja2 import Environment
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -858,96 +859,191 @@ def manage_aufgabenstellungen():
 
     return render_template('manage_aufgabenstellungen.html', tasks=tasks, prüfnamen=prüfnamen)
 #-----------------------------------#
-def get_form_instance(question_type):
-    if question_type == "paar_vergleich": 
-        return SubmitPaar_vergleich()
-    elif question_type == "auswahltest":
-        return SubmitAuswahltest()
-    elif question_type == "dreieckstest":
-        return SubmitDreieckstest()
-    elif question_type == "geruchserkennungtest":
-        return SubmitGeruchserkennung()
-    elif question_type == "hed_beurteilung":
-        return SubmitHed_beurteilung()
-    elif question_type == "konz_reihe":
-        return SubmitKonz_reihe()
-    elif question_type == "ebp":
-        return SubmitEbpForm()
-    elif question_type == "rangordnungstest":
-        return SubmitRangordnungstest()
-    elif question_type == "profilprüfung":
-        return SubmitProfilprüfung()
-    else:
-        return None
+def setup_df(form_data):
+    # Get the list of attributes from the form_data keys
+    attributes = list(form_data.keys())
+
+    # Filter out any non-attribute keys (e.g., 'csrf_token')
+    attributes = [attr for attr in attributes if not attr.startswith('csrf_')]
+    print("attributes: ", attributes)
+    print()
+
+    # The number of probes can be calculated as the number of entries for any attribute
+    num_probes = len(form_data.get(attributes[0]))
+
+    # Create a list to store individual row dictionaries
+    rows = []
+
+    # Iterate over each probe
+    for i in range(num_probes):
+        # Initialize an empty dictionary for this row
+        row = {}
+
+        # For each attribute, get the corresponding value from the form_data and add it to the dictionary
+        for attribute in attributes:
+            # Get the values for the current attribute at index i
+            values = form_data.getlist(attribute)
+            value = values[i]
+
+            # If the value is 'y', replace it with True, otherwise replace it with False
+            value = True if value == 'y' else False
+
+            # Add the attribute and its value to the dictionary
+            row[attribute] = value
+
+        # Append the row dictionary to the list
+        rows.append(row)
+
+    # Create the DataFrame by passing the list of dictionaries and specifying the index
+    df = pd.DataFrame(rows, index=range(num_probes))
+
+    return df
 
 def process_form_submission(question_type, form_data):
+    
+
+    #TODO: instanziate df without values if he is not existing
+    #TODO:  add the columus as they are not existing in df
+
+    
+    df = pd.DataFrame()   
     def paar_vergleich():
-        proben_id_1 = form_data.get("proben_id_1")
-        proben_id_2 = form_data.get("proben_id_2")
-        proben_id_3 = form_data.get("proben_id_3")
-        # Process the form submission for "Paarweiser Vergleich"
-        # Perform the necessary logic for this form type
-        # ...
+        print("paar_vergleich")
+        print("request.form_data",request.form )
+        print()
+        print("form_data",form_data)
+        #TODO: update df with values from form or request form data
+        #      over write existing values or add new values
 
     def auswahltest():
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Auswahltest"
-        # Perform the necessary logic for this form type
-        # ...
+        nonlocal df
+    # Call the setup_df function to create the DataFrame
+        return
+        df = setup_df(form_data)
+        print("request.form_data",request.form )
+        print()
+        for i in range(len(form_data['probe_name'])):
+            probe_nr_key = f'probe_nr-{i}'
+            probe_name_key = f'probe_name-{i}'
+            taste_salzig_key = f'taste_salzig-{i}'
+            taste_süß_key = f'taste_süß-{i}'
+            taste_sauer_key = f'taste_sauer-{i}'
+            taste_bitter_key = f'taste_bitter-{i}'
+            taste_nicht_erkennen_key = f'taste_nicht_erkennen-{i}'
+
+            # Retrieve the values from the request form data using the updated keys
+            probe_nr = request.form.get(probe_nr_key)
+            probe_name = request.form.get(probe_name_key)
+            taste_salzig = request.form.get(taste_salzig_key) == 'y'
+            taste_süß = request.form.get(taste_süß_key) == 'y'
+            taste_sauer = request.form.get(taste_sauer_key) == 'y'
+            taste_bitter = request.form.get(taste_bitter_key) == 'y'
+            taste_nicht_erkennen = request.form.get(taste_nicht_erkennen_key) == 'y'
+
+            # Update the corresponding row in the DataFrame with the new values
+            df.loc[i, 'probe_nr'] = probe_nr
+            df.loc[i, 'probe_name'] = probe_name
+            df.loc[i, 'taste_salzig'] = taste_salzig
+            df.loc[i, 'taste_süß'] = taste_süß
+            df.loc[i, 'taste_sauer'] = taste_sauer
+            df.loc[i, 'taste_bitter'] = taste_bitter
+            df.loc[i, 'taste_nicht_erkennen'] = taste_nicht_erkennen
+
+        print(df)
+
+
 
     def dreieckstest():
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Dreieckstest"
-        # Perform the necessary logic for this form type
-        # ...
+        print("dreieckstest")
+        print("request.form_data", request.form)
+        print()
+        print("form_data", form_data)
 
-    def geruchserkennung():
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Geruchserkennung"
-        # Perform the necessary logic for this form type
-        # ...
+        #df = setup_df(form_data)
+        return
+        for i in range(len(form_data['beschreibung_1'])):
+            abweichende_probe_key = f'abweichende_probe_-[{form_data["probenreihen_id"][i]}]'
+            beschreibung_key = f'beschreibung_-[{form_data["probenreihen_id"][i]}]'
 
-    def hed_beurteilung():
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Hed_beurteilung"
-        # Perform the necessary logic for this form type
-        # ...
+            # Retrieve the values from the request form data using the updated keys
+            abweichende_probe = request.form.get(abweichende_probe_key)
+            beschreibung = request.form.get(beschreibung_key)
+
+            # Add new columns to the DataFrame if they don't exist
+            if 'abweichende_probe' not in df.columns:
+                df['abweichende_probe'] = None
+            if 'beschreibung' not in df.columns:
+                df['beschreibung'] = None
+
+            # Update the corresponding rows in the DataFrame with the new values
+            df.loc[i, 'abweichende_probe'] = abweichende_probe
+            df.loc[i, 'beschreibung'] = beschreibung
+
+        print(df)
+
+    def geruchserkennungtest():
+        print("geruchserkennungtest")
+        print("request.form_data",request.form )
+        print()
+        print("form_data",form_data)
+        #TODO: update df with values from form or request form data
+        #       add the columus as they are not existing in df 
+        #       over write existing values
+        geruchserkennungen = []
+ 
 
     def konz_reihe():
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Konz_reihe"
-        # Perform the necessary logic for this form type
-        # ...
+        print("konz_reihe")
+        print("request.form_data",request.form )
+        print()
+        print("form_data",form_data)
+        #TODO: update df with values from form or request form data
+        #       add the columus as they are not existing in df 
+        #       over write existing values
+        probenreihen_id = form_data.get("probenreihen_id")
+        # Process the form submission for "Konzentrationsreihe"
+        print("Konzentrationsreihe: Probenreihe ID:", probenreihen_id)
+     
 
     def ebp():
-        aussehen_farbe = form_data.get("aussehen_farbe")
-        geruch = form_data.get("geruch")
-        geschmack = form_data.get("geschmack")
-        textur = form_data.get("textur")
-        konsistenz = form_data.get("konsistenz")
-        # Process the form submission for "Einfach beschreibende Prüfung"
-        # Perform the necessary logic for this form type
-        # ...
-
+        print("ebp")
+        print("request.form_data",request.form )
+        print()
+        print("form_data",form_data)
+        #TODO: update df with values from form or request form data
+        #       add the columus as they are not existing in df 
+        #       over write existing values
+        print("Einfach beschreibende Prüfung: form_data:", form_data)
+        
     def rangordnungstest():
-        antworten = form_data.get("antworten")
-        # Here you can access the additional data directly from the form_data
-        probenreihen_id = form_data.get("probenreihen_id")
-        # Perform the necessary logic for the "Rangordnungstest" form submission
-        # ...
+        print("rangordnungstest")
+        print("request.form_data",request.form )
+        print()
+        print("form_data",form_data)
+        #TODO: update df with values from form or request form data
+        #       add the columus as they are not existing in df 
+        #       over write existing values
+
+        antworten = form_data.get('antworten')
+    # Process the form submission for "Rangordnungstest"
+        print("Rangordnungstest: Antworten:", antworten)
+    
 
     def profilprüfung():
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Profilprüfung"
-        # Perform the necessary logic for this form type
-        # ...
-
+        print("profilprüfung")
+        print("request.form_data",request.form )
+        print()
+        print("form_data",form_data)
+        #TODO: update df with values from form or request form data
+        #       add the columus as they are not existing in df 
+        #       over write existing values
+        kriterien_werte = []
+    
     form_type_funcs = {
         "paar_vergleich": paar_vergleich,
         "auswahltest": auswahltest,
         "dreieckstest": dreieckstest,
-        "geruchserkennung": geruchserkennung,
-        "hed_beurteilung": hed_beurteilung,
+        "geruchserkennungtest": geruchserkennungtest,
         "konz_reihe": konz_reihe,
         "ebp": ebp,
         "rangordnungstest": rangordnungstest,
@@ -957,121 +1053,34 @@ def process_form_submission(question_type, form_data):
     if question_type in form_type_funcs:
         form_type_funcs[question_type]()
     else:
-        print(question_type)
+        print("Invalid question type")
 
-    if question_type == "paar_vergleich":
-        proben_id_1 = form_data.get("proben_id_1")
-        proben_id_2 = form_data.get("proben_id_2")
-        proben_id_3 = form_data.get("proben_id_3")
-        # Process the form submission for "Paarweiser Vergleich"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "auswahltest":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Auswahltest"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "dreieckstest":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Dreieckstest"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "geruchserkennung":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Geruchserkennung"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "hed_beurteilung":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Hed_beurteilung"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "konz_reihe":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Konz_reihe"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "ebp":
-        aussehen_farbe = form_data.get("aussehen_farbe")
-        geruch = form_data.get("geruch")
-        geschmack = form_data.get("geschmack")
-        textur = form_data.get("textur")
-        konsistenz = form_data.get("konsistenz")
+def get_form_instance(question_type, additional_data=None):
+    if question_type == 'hed_beurteilung':
+        return SubmitHed_beurteilung()
+    elif question_type == 'auswahltest':
         
-        # Process the form submission for "Einfach beschreibende Prüfung"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "rangordnungstest":
-        print("Rangordnungstest")
-        antworten = form_data.get("antworten")
-        # Here you can access the additional data directly from the form_data
-        probenreihen_id = form_data.get("probenreihen_id")
-        # Perform the necessary logic for the "Rangordnungstest" form submission
-        # ...
-    elif question_type == "profilprüfung":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Profilprüfung"
-        # Perform the necessary logic for this form type
-        # ...
+        proben=[probe.probenname for probe in additional_data['probenreihen_id']]
+        proben_nr=[probe.proben_nr for probe in additional_data['probenreihen_id']]
+        return SubmitAuswahltest(proben, proben_nr)
+    
+    elif question_type == 'dreieckstest':
+        return SubmitDreieckstest()
+    elif question_type == 'geruchserkennungtest':
+        return SubmitGeruchserkennung()
+    elif question_type == 'ebp':
+        return SubmitEbpForm()
+    elif question_type == 'rangordnungstest':
+        return SubmitRangordnungstest()
+    elif question_type == 'profilprüfung':
+        return SubmitProfilprüfung()
+    elif question_type == 'konz_reihe':
+        return SubmitKonz_reihe()
+    elif question_type == 'paar_vergleich':
+        if additional_data and 'probenreihen_id_1' in additional_data and 'probenreihen_id_2' in additional_data:
+            return SubmitPaar_vergleich(additional_data['probenreihen_id_1'], additional_data['probenreihen_id_2'])
     else:
-        print(question_type)
-    if question_type == "paar_vergleich":
-        proben_id_1 = form_data.get("proben_id_1")
-        proben_id_2 = form_data.get("proben_id_2")
-        proben_id_3 = form_data.get("proben_id_3")
-        # Process the form submission for "Paarweiser Vergleich"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "auswahltest":
-        selected_option = form_data.get("selected_option")
-        print(selected_option)
-        # Process the form submission for "Auswahltest"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "dreieckstest":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Dreieckstest"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "geruchserkennung":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Geruchserkennung"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "hed_beurteilung":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Hed_beurteilung"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "konz_reihe":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Konz_reihe"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "ebp":
-        aussehen_farbe = form_data.get("aussehen_farbe")
-        geruch = form_data.get("geruch")
-        geschmack = form_data.get("geschmack")
-        textur = form_data.get("textur")
-        konsistenz = form_data.get("konsistenz")
-        print("Einfach beschreibende Prüfung", aussehen_farbe, geruch, geschmack, textur, konsistenz)
-        # Process the form submission for "Einfach beschreibende Prüfung"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "rangordnungstest":
-        print("Rangordnungstest")
-        antworten = form_data.get("antworten")
-        # Process the form submission for "Rangordnungstest"
-        # Perform the necessary logic for this form type
-        # ...
-    elif question_type == "profilprüfung":
-        selected_option = form_data.get("selected_option")
-        # Process the form submission for "Profilprüfung"
-        # Perform the necessary logic for this form type
-        # ...
-    else:
-        print(question_type)
-
+        raise ValueError(f"Unknown question_type: {question_type}")
 def get_question_instance(question_type, question_id):
 
     session = db.session
@@ -1097,58 +1106,67 @@ def get_question_instance(question_type, question_id):
         return None
 def get_additional_data(question_type, question):
     additional_data = {}
+    
     if question_type == "auswahltest":
         probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
         additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]        
+        
     elif question_type == "dreieckstest":
         probenreihen_id_1 = Probenreihen.query.get(question.probenreihe_id_1)
         probenreihen_id_2 = Probenreihen.query.get(question.probenreihe_id_2)
-        
         proben_numbers_1 = [probe.proben_nr for probe in [Proben.query.get(probe) for probe in probenreihen_id_1.proben_ids]]
         proben_numbers_2 = [probe.proben_nr for probe in [Proben.query.get(probe) for probe in probenreihen_id_2.proben_ids]]
-
         additional_data["probenreihen_id_1"] = proben_numbers_1
         additional_data["probenreihen_id_2"] = proben_numbers_2
+
     elif question_type == "geruchserkennungtest":
-        
         probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        
-        
         additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids] 
-        
 
     elif question_type == "hed_beurteilung":
         probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        additional_data["probenreihen_id"] = probenreihen_id
+        additional_data["probenreihen_ids"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids] 
+
     elif question_type == "konz_reihe":
         probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        additional_data["probenreihen_id"] = probenreihen_id
-    elif question_type == "ebp":
+        additional_data["stammlösung"] = request.args.get('stammlösung', '1')
+        additional_data["probenreihen_id"] = [probe.proben_nr for probe in [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]]
 
+    elif question_type == "ebp":
         proben_id = Proben.query.get(question.proben_id)
         additional_data["proben_id"] = proben_id
 
-    elif question_type == "rangordnungstest":
-        
+    elif question_type == "rangordnungstest": 
         probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
         additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]
 
     elif question_type == "profilprüfung":
         proben_id = Proben.query.get(question.proben_id)
+        print(proben_id)	
         additional_data["proben_id"] = proben_id
         additional_data["kriterien"] = question.kriterien
-    return additional_data
 
+    elif question_type == "paar_vergleich":
+        
+        probenreihen_id_1 = Probenreihen.query.get(question.probenreihe_id_1)
+        probenreihen_id_2 = Probenreihen.query.get(question.probenreihe_id_2)
+        additional_data["probenreihen_id_1"] =   [Proben.query .get(probe) for probe in probenreihen_id_1.proben_ids]
+        additional_data["probenreihen_id_2"] =  [Proben.query.get(probe) for probe in probenreihen_id_2.proben_ids]
+
+    return additional_data
 def print_form_validation_errors(form):
     for field_name, field in form._fields.items():
         if field.errors:
-            error_messages = ', '.join(field.errors)
+            error_messages = ', '.join(str(error) for error in field.errors)
             print(f"Validation errors for field '{field_name}': {error_messages}")
         else:
             print(f"No validation errors for field '{field_name}'")
+    return ''  # Add this line to return an empty string
+ # Add this line to return an empty string
 
 @app.route('/training_page/', methods=['GET', 'POST'])
 def training_page():
+    
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     env = Environment()
@@ -1167,20 +1185,18 @@ def training_page():
 
     question_type = training.fragen_typen[question_index]
 
-    form = get_form_instance(question_type)
+    
     question = get_question_instance(question_type, training.fragen_ids[question_index])
     aufgabenstellung = db.session.get(Aufgabenstellungen, question.aufgabenstellung_id)
     additional_data = get_additional_data(question_type, question)
-
-    print("additional_data", additional_data)	,
-    print("question_index", question_index)
-    print("question_type", question_type)
-    print("form", form)
-    print("aufgabenstellung", aufgabenstellung)
-    
-    print("form.data", form.data)	
-    print(form.validate_on_submit())
-
+    form = get_form_instance(question_type,additional_data)
+    print("question",question)
+    print("question_type",question_type)
+    print("aufgabenstellung",aufgabenstellung)
+    print("additional_data",additional_data)
+    print("form",form)
+    print("form",form.data)
+    print("validate_on_submit",form.validate_on_submit())
     if request.method == 'POST':
         if form.validate_on_submit():
             process_form_submission(question_type, form.data)
@@ -1188,6 +1204,7 @@ def training_page():
             return redirect(url_for('training_page'))
         else:
             print_form_validation_errors(form)
+    
 
     return render_template('training_page.html', question=question, question_type=question_type, form=form,
                        aufgabenstellung=aufgabenstellung, question_index=question_index, enumerate=enumerate,

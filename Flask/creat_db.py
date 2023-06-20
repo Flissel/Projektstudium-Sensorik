@@ -59,7 +59,8 @@ CREATE TABLE proben (
     geruch TEXT,
     geschmack TEXT,
     textur TEXT,
-    konsistenz TEXT
+    konsistenz TEXT,
+    anmerkung TEXT
 );
 
 -- Create the probenreihen table

@@ -63,6 +63,7 @@
       <th>Geschmack</th>
       <th>Textur</th>
       <th>Konsistenz</th>
+      <th>Anmerkung</th>
       <th>Edit</th>
       <th>Delete</th>
     </tr>
@@ -77,6 +78,8 @@
         <td>{{ sample.geschmack }}</td>
         <td>{{ sample.textur }}</td>
         <td>{{ sample.konsistenz }}</td>
+        <td>{{ sample.anmerkung }}</td>
+        
         <td><a href="{{ url_for('edit_sample', sample_id=sample.id) }}">Edit</a></td>
         <td><button onclick="deleteSample('{{ sample.id }}')">Delete</button></td>
       </tr>
