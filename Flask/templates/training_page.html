@@ -61,11 +61,16 @@ Training Page
             <p>{{ aufgabenstellung.aufgabenstellung }}</p>
             <form method="POST" id="hed-beurteilung-form" action="{{ url_for('training_page') }}">
                 {% for probe in probenreihen_ids %}
-                <br></br>
+                
                 <label>{{ probe.probenname }}</label>
-                <input type="range" name="taste_evaluations-{{ loop.index0 }}-taste" min="1" max="10" step="1" list="taste_scale">
+                <div class="skala-labels">
+                    <span>mag ich überhaupt nicht</span>
+                    <span>weder dafür noch dagegen</span>
+                    <span>mag ich besonders gern</span>
+                </div>
+                <input type="range" name="taste_evaluations-{{ loop.index0 }}-taste" min="1" max="10" step="1" list="taste_scale" class="form-control">
                     <datalist id="taste_scale">
-                        <option value="1">mag ich überhaupt nicht</option>
+                        <option value="1"></option>
                         <option value="2"></option>
                         <option value="3"></option>
                         <option value="4"></option>
@@ -74,7 +79,7 @@ Training Page
                         <option value="7"></option>
                         <option value="8"></option>
                         <option value="9"></option>
-                        <option value="10">mag ich besonders gern</option>
+                        <option value="10"></option>
                     </datalist>
                 {% endfor %}
                 <br></br>
@@ -121,7 +126,7 @@ Training Page
                 <div>
                     {{ form.probe_3.label }}
                     <select name="{{ form.probe_3.name }}" class="form-control">
-                        <option value="">Wählen Sie eine Probe</option>
+                        
                         {% for probe in probenreihen_id_1 %}
                         <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
                         {% endfor %}
@@ -144,7 +149,7 @@ Training Page
                 <div>
                     {{ form.probe_4.label }}
                     <select name="{{ form.probe_4.name }}" class="form-control">
-                        <option value="">Wählen Sie eine Probe</option>
+                        
                         {% for probe in probenreihen_id_2 %}
                         <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
                         {% endfor %}
@@ -153,7 +158,7 @@ Training Page
                 <div>
                     {{ form.probe_5.label }}
                     <select name="{{ form.probe_5.name }}" class="form-control">
-                        <option value="">Wählen Sie eine Probe</option>
+                        
                         {% for probe in probenreihen_id_2 %}
                         <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
                         {% endfor %}
@@ -162,7 +167,7 @@ Training Page
                 <div>
                     {{ form.probe_6.label }}
                     <select name="{{ form.probe_6.name }}" class="form-control">
-                        <option value="">Wählen Sie eine Probe</option>
+                        
                         {% for probe in probenreihen_id_2 %}
                         <option value="{{ probe.proben_nr }}">{{ probe.proben_nr }}</option>
                         {% endfor %}

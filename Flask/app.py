@@ -102,13 +102,13 @@ def register():
         is_professor = 'professor' in request.form
         if is_professor and professor_password != 'your_expected_password':
            
-            return render_template('registery.html', error='Incorrect professor password')
+            return render_template('registery.html', error='Professor Passwort Falsch')
 
         # Check if the username is already taken
         existing_user = Benutzer.query.filter_by(benutzername=username).first()
         if existing_user:
            
-            return render_template('registery.html', error='Username already taken')
+            return render_template('registery.html', error='Berutzername ist leider schon vergeben.')
 
         # Set the role based on whether the user is registering as a professor or not
         role = is_professor
@@ -119,7 +119,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        flash(f"User '{username}' has been added to the database!", 'success')
+        flash(f"Benutzer '{username}' wurde in die Datenbank mit aufgenommen", 'success')
         return redirect(url_for('login'))
 
     return render_template('registery.html')
@@ -137,21 +137,17 @@ def student_waitingroom():
         return redirect(url_for('login'))
   
     user = Benutzer.query.filter_by(benutzername=session['username']).first()
-
-    if user.rolle == False and user.training_id != None and user.aktiv == True:
-      
-        return redirect(url_for('training_page')) 
-    while True:
-        user = Benutzer.query.filter_by(benutzername=session['username']).first()
-        if user.rolle == True:
-            return redirect(url_for('professor_dashboard'))
+    print(user.training_id)
+    if user.rolle == False:
+        if user.training_id and user.aktiv == True:
+            flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')   
+            return redirect(url_for('training_page'))
         else:
-            if user.training_id and user.aktiv == True:
-                flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')   
-                return redirect(url_for('training_page'))
-        
-        flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')
-        return render_template('student_waitingroom.html')
+            flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')
+            return render_template('student_waitingroom.html')
+    else:
+        return redirect(url_for('professor_dashboard'))
+
 
 @app.route('/Error')
 def error():
@@ -507,7 +503,8 @@ def professor_dashboard():
 @app.route('/modify_training/<int:training_id>', methods=['GET', 'POST'])
 def modify_training(training_id=None, value=None):
     sdf = Trainings.query.filter_by(id=training_id).first()
-
+    return render_template('modify_training.html', training_id=sdf.id,form=CreateTrainingForm())
+    
 @app.route('/select_training/<training>')
 def select_training(training):
     """
@@ -515,6 +512,7 @@ def select_training(training):
     It sets the 'training' attribute of all students to the selected training.
     After updating the database, it redirects to the training page for the selected training.
     """
+    print(training)
     students = Benutzer.query.filter_by(rolle=False,aktiv=True).all()
     for student in students: 
         print(student.name, student.aktiv , student.training_id , student.last_activity),
@@ -1231,8 +1229,7 @@ def training_progress():
         user_progress.append((user, progress))
 
     # show the training progress of each user
-    for user, progress in user_progress:
-        print(f"{user.username}: {progress}")
+    
 
     # give the required data to the template
     return render_template('training_progress.html', user_progress=user_progress)
@@ -1260,17 +1257,10 @@ def calculate_training_progress(user):
 def check_task_completion(user, fragen_id):
     task_type = Aufgabenstellungen.query.get(fragen_id).aufgabentyp
 
-    if task_type == 'paar_vergleich':
-        task = Paar_vergleich.query.filter_by(aufgabenstellung_id=fragen_id).first()
-        if task:
-            # Assuming user_responses is a relationship between User and Paar_vergleich models
-            user_response = task.user_responses.filter_by(user_id=user.id).first()
-            if user_response:
-                return True
+    return True
 
     # Add conditions for other task types as needed
 
-    return False
 #-----------------------------------#
 @app.route('/')
 def dashboard():
@@ -1288,7 +1278,7 @@ def view_samples():
     samples = Proben.query.all()
     sampleChain = Probenreihen.query.all()
     return render_template('view_samples.html', samples=samples , sampleChain=sampleChain)
-# Route for editing a sample
+
 @app.route('/edit_sample/<sample_id>', methods=['GET', 'POST'])
 def edit_sample(sample_id):
     sample = Proben.query.get(sample_id)
@@ -1300,7 +1290,7 @@ def edit_sample(sample_id):
         return redirect(url_for('view_samples'))
 
     return render_template('edit_sample.html', sample=sample)
-# Helper function to update a sample in the database
+
 def update_sample_in_database(sample_id, form_data):
     try:
         sample = Proben.query.get(sample_id)
@@ -1355,7 +1345,7 @@ def create_sample_chain():
     
     samples = Proben.query.all()
     return render_template('create_sample_chain.html', samples=samples)
-# Delete a sample
+
 @app.route('/delete_sample/<sample_id>', methods=['DELETE'])
 def delete_sample(sample_id):
     sample = Proben.query.get(sample_id)
@@ -1366,7 +1356,7 @@ def delete_sample(sample_id):
         return jsonify({'message': 'Sample deleted successfully'})
     else:
         return jsonify({'message': 'Sample not found'})
-# Delete a sample chain
+
 @app.route('/delete_sample_chain/<sample_chain_id>', methods=['DELETE'])
 def delete_sample_chain(sample_chain_id):
     sample_chain = Probenreihen.query.get(sample_chain_id)
