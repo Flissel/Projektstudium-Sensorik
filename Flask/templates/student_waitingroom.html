@@ -1,33 +1,28 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-header">{{ page_title }}</div>
-          <div class="card-body">
-            {% if training %}
-              <p>You have been assigned to the {{ training }} training.</p>
-              <p>
-                <form action="{{ url_for('training_page', training=training) }}">
-                  <button type="submit" class="btn btn-primary">Go to {{ training }}</button>
-                </form>
-              </p>              
-            {% else %}
-              <p>Please wait until a training is chosen by the professor.</p>
 
-              <script>
-                setInterval(function() {
-                  location.reload()
-                }, 5000);
-              </script>
-              
-            {% endif %}
-          </div>
-        </div>
-      </div>
+<div class="card-container">
+  <div class="card">
+    <div class="card-body">
+      {% if training %}
+        <p>Praktikum {{ training }} wurde zugewiesen.</p>
+        
+          <form action="{{ url_for('training_page', training=training) }}">
+            <button type="submit" class="btn btn-primary">Go to {{ training }}</button>
+          </form>
+                      
+      {% else %}
+        <p class="waiting-room-text">Hoppla, du bist im Warteraum gelandet. Bitte warten.</p>
+
+        <script>
+          setInterval(function() {
+            location.reload();
+          }, 5000);
+        </script>
+      {% endif %}
     </div>
   </div>
-{% endblock %}
+</div>
 
+{% endblock %}

@@ -1,82 +1,96 @@
 {% extends 'base.html' %}
-
 {% block content %}
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card mt-5 shadow-lg">
-          <div class="card-body">
-            <h1 class="card-title text-center">Welcome, Professor!</h1>
-            <h3 class="text-center">Wählen Sie das zu bearbeitende Praktikum:</h3>
-            <hr>
-            <form method="POST" action="{{ url_for('professor_dashboard') }}">
-              <input type="hidden" name="form_id" value="{{ form_id }}">
-              <div class="mb-3">
-                {% for training in form.trainings %}
-                  <div class="card mt-4">
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="card-title">{{ training.name }}</h3>
-                        <div>
-                          <button type="submit" class="btn btn-primary mr-2" name="action" value="select {{ loop.index - 1 }}">
-                            <i class="fas fa-check-circle mr-1"></i>Auswählen
-                          </button>
-                          <button type="submit" class="btn btn-danger" name="action" value="delete {{ loop.index - 1 }}">
-                            <i class="fas fa-trash-alt mr-1"></i>Löschen
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                {% endfor %}
-              </div>
-            </form>
-          </div>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-4">
+      <div class="card mt-5 shadow-lg custom-card">
+        <div class="card-body">
+          <h3 class="card-title">Proben anzeigen</h3>
+          <p>Hier können Sie Proben erstellen, bearbeiten oder löschen...</p>
+          <a href="{{ url_for('view_samples') }}" class="btn btn-success">Proben anzeigen</a>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="card mt-5 shadow-lg">
-          <div class="card-body">
-            <h3 class="card-title">Proben anzeigen</h3>
-            <p>Hier können Sie Proben erstellen, bearbeiten oder löschen...</p>
-            <a href="{{ url_for('view_samples') }}" class="btn btn-success">Proben anzeigen</a>
-          </div>
+      <div class="card mt-5 shadow-lg custom-card">
+        <div class="card-body">
+          <h3 class="card-title">Praktikum hinzufügen</h3>
+          <p>Hier können Sie individuelle Praktika erstellen und speichern.</p>
+          <a href="{{ url_for('create_training') }}" class="btn btn-success">
+            <i class="fas fa-plus mr-1"></i>Neues Praktikum erstellen
+          </a>
         </div>
-        <div class="card mt-5 shadow-lg">
-          <div class="card-body">
-            <h3 class="card-title">Praktikum hinzufügen</h3>
-            <p>Hier können Sie individuelle Praktika erstellen und speichern.</p>
-            <a href="{{ url_for('create_training') }}" class="btn btn-success">
-              <i class="fas fa-plus mr-1"></i>Neues Praktikum erstellen
-            </a>
-          </div>
-        </div>
-        <div class="card mt-5 shadow-lg">
-          <div class="card-body">
-            <h3 class="card-title">Aufgabenstellungen verwalten</h3>
-            <p>Hier können Sie Aufgabenstellungen und Prüfvarianten erstellen, löschen und ändern.</p>
-            <a href="{{ url_for('manage_aufgabenstellungen') }}" class="btn btn-success">
-              <i class="fas fa-cogs mr-1"></i>Aufgabenstellungen verwalten
-            </a>
-          </div>
-        </div>
-        <div class="card mt-5 shadow-lg">
-          <div class="card-body">
-            <h3 class="card-title">Log</h3>
-            <div class="log-section">
-              {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                  <ul>
-                    {% for message in messages %}
-                      <li>{{ message }}</li>
-                    {% endfor %}
-                  </ul>
-                {% endif %}
-              {% endwith %}
-            </div>
-          </div>
+      </div>
+      <div class="card mt-5 shadow-lg custom-card">
+        <div class="card-body">
+          <h3 class="card-title">Aufgabenstellungen verwalten</h3>
+          <p>Hier können Sie Aufgabenstellungen und Prüfvarianten erstellen, löschen und ändern.</p>
+          <a href="{{ url_for('manage_aufgabenstellungen') }}" class="btn btn-success">
+            <i class="fas fa-cogs mr-1"></i>Aufgabenstellungen verwalten
+          </a>
         </div>
       </div>
     </div>
+    <div class="col-md-4">
+      <div class="card mt-5 shadow-lg">
+        <div class="card-body">
+          <h1 class="card-title text-center">Hallo, Professor!</h1>
+          <h3 class="text-center">Wählen Sie das zu bearbeitende Praktikum:</h3>
+          <hr>
+          <form method="POST" action="{{ url_for('professor_dashboard') }}">
+            <input type="hidden" name="form_id" value="{{ form_id }}">
+            <div class="mb-3">
+              {% for training in form.trainings %}
+                <div class="card mt-4 custom-card">
+                  <div class="card-body">
+                    <p class="card-text">{{ training.name }}</p>
+                    <div class="d-flex justify-content-between">
+                      <button type="submit" class="btn btn-primary" name="action" value="select {{ loop.index - 1 }}">
+                        <i class="fas fa-check-circle mr-1"></i>Auswählen
+                      </button>
+                      <button type="submit" class="btn btn-danger" name="action" value="delete {{ loop.index - 1 }}">
+                        <i class="fas fa-trash-alt mr-1"></i>Löschen
+                      </button>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+                      <button type="submit" class="btn btn-warning" name="action" value="modify {{ loop.index - 1 }}">
+                        <i class="fas fa-pencil-alt mr-1"></i>Bearbeiten
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card mt-5 shadow-lg">
+        <div class="card-body">
+          <h3 class="card-title">Log</h3>
+          <div class="log-section">
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul>
+                  {% for message in messages %}
+                    <li>{{ message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+      <div class="card mt-5 shadow-lg custom-card">
+        <div class="card-body">
+          <h3 class="card-title">Fortschritt Praktikum</h3>
+          <p>Hier können sie den aktuellen Stand der überlieferten Antworten sehen.</p>
+          <a href="{{ url_for('training_progress') }}" class="btn btn-success">
+            <i class="fas fa-chart-line mr-1"></i>Praktikumsfortschritt anzeigen
+          </a>
+        </div>
+      </div>
+      
+    </div>
   </div>
+</div>
 {% endblock %}
