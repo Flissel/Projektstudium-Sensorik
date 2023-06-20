@@ -320,7 +320,7 @@ Training Page
             
             {% if question_type == 'geruchserkennungtest' %}
             <!-- Geruchserkennung form -->
-            <form method="POST" id="geruchserkennung-form" action="{{ url_for('training_page') }}">
+            <form method="POST" id="geruchserkennung-form" action="{{ url_for('training_page', question_index=question_index + 1) }}">
                 <h2>Geruchserkennung</h2>
                 <p>{{ aufgabenstellung.aufgabenstellung }}</p>
         
@@ -362,17 +362,37 @@ Training Page
                 <button type="submit">Submit</button>
             </form>
             {% endif %}
-        </div>
-    </div>
-</div>
-{% if question_type == 'konz_reihe' %}
+            {% if question_type == 'konz_reihe' %}
 <!-- Konz reihe form-->
 <form method="POST" id="hed-beurteilung-form" action="{{ url_for('training_page') }}">
-    
+    <h2>Konzentrationsreihe</h2>
+    <p> </p>
     <p>{{ aufgabenstellung.aufgabenstellung }}</p>
 
     <table>
-        <!-- Table for symbols and descriptions -->
+        <thead>
+            <tr>
+                <th>O</th>
+                <th>Sie haben keinen Geschmackseindruck, die Probe schmeckt wie O = Wasser.</th>
+            </tr>
+            <tr>
+                <td>?</td>
+                <td>Sie stellen eine Veränderung zu Probe O fest, können den Geschmack aber nicht definieren.</td>
+            </tr>
+            <tr>
+                <td>x</td>
+                <td>Sie haben den Geschmack erkannt (bitte Geschmacksart notieren).</td>
+            </tr>
+            <tr>
+                <td>xx</td>
+                <td>Der Geschmack ist im Vergleich zur vorhergehenden Probe stärker geworden.</td>
+            </tr>
+            <tr>
+                <td>xxx</td>
+                <td>Fügen Sie bitte bei jedem stärker werden der Konzentration ein Kreuz hinzu</td>
+            </tr>     
+            <!-- Add more rows for symbols and descriptions -->
+        </thead>
     </table>
 
     <p>Probenreihe:</p>
@@ -381,7 +401,10 @@ Training Page
             <td>{{ probenreihen_id }}</td>
         </tr>
     </table>
-    
+    <div>
+        <label for="erkannte_geschmacksart">Erkannte Geschmacksart:</label>
+        <input type="text" name="erkannte_geschmacksart" id="erkannte_geschmacksart" class="form-control">
+    </div>
     <div>
         <label for="stammlösung">Stammlösung 1% Zugabe ml/l:</label>
         <input type="number" name="stammlösung" id="stammlösung" class="form-control" step="0.01" required value="{{ stammlösung|default('') }}">
@@ -407,17 +430,18 @@ Training Page
                 <th>6</th>
                 <th>7</th>
                 <th>8</th>
-                <th>9</th>
+                
             </tr>
         </thead>
         <tbody>
             <tr>
+                
                 <td>Antwort bzw. Zahl der Kreuze</td>
-                {% for index in range(10) %}
+                {% for _ in range(9) %}
                     <td>
-                        <select name="probenreihen_id{{ index }}" required>
+                        <select name="probenreihen_id" >
                             <option value=""></option>
-                            <option value="O" {% if index == 0 %}selected{% endif %}>O</option>
+                            <option value="O" {% if loop.index == 1 %}selected{% endif %}>O</option>
                             <option value="?">?</option>
                             <option value="x">x</option>
                             <option value="xx">xx</option>
@@ -428,13 +452,16 @@ Training Page
             </tr>
             <tr>
                 <td>Stammlösung {{ stammlösung|default('') }}% Zugabe ml/l</td>
-                <td colspan="10">{{ stammlösung|default('') }}</td>
+                <td>0</td>
+                {% for num in range(5, 45, 5) %}
+                <td>{{ num }}</td>
+                {% endfor %}
             </tr>
             <tr>
                 <td>Konzentration %</td>
-                {% for num in range(5, 51,5) %}
-                    <td>{{ num/10000 }}</td>
-                {% endfor %}
+                {% for num in range(5, 50, 5) %}
+                <td id="konzentration{{ num }}">{{ stammlösung|default('0')|float * num / 1000|round(6) }}</td>
+            {% endfor %}
             </tr>
         </tbody>
     </table>
@@ -442,7 +469,11 @@ Training Page
     {{ form.csrf_token }}
     <button type="submit">Submit</button>
 </form>
-    {% endif %}
+{% endif %}
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}
 
@@ -455,7 +486,7 @@ Training Page
     stammlösungInput.addEventListener('input', function () {
         const stammlösungValue = parseFloat(this.value);
         konzentrationFields.forEach(function (field, index) {
-            field.textContent = (stammlösungValue * (index * 5) / 1000).toFixed(3);
+            field.textContent = (stammlösungValue * (index * 5) / 1000).toFixed(4);
         });
     });
 </script>
