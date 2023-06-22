@@ -70,9 +70,30 @@ body {
     justify-content: center;
     align-items: center;
   }
-  .btn-green {
+  .btn-add {
     background-color: rgb(28, 194, 28);
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
   }
+  .btn-add:hover {
+    background-color: #228b22;
+  }
+  .btn-remove {
+    background-color: #ff0000;
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-remove:hover {
+    background-color: #cc0000;
+  }
+  
   .dashboard li {
     margin: 0 10px;
   }
