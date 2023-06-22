@@ -501,9 +501,29 @@ def professor_dashboard():
 #-----------------------------------#
 
 @app.route('/modify_training/<int:training_id>', methods=['GET', 'POST'])
-def modify_training(training_id=None, value=None):
-    sdf = Trainings.query.filter_by(id=training_id).first()
-    return render_template('modify_training.html', training_id=sdf.id,form=CreateTrainingForm())
+
+def modify_training(training_id):
+    # Query the database for the training with the provided id
+    training = Trainings.query.get(training_id)
+
+    # If no such training exists, redirect to an appropriate page (e.g., a list of all trainings)
+    if training is None:
+        flash('No such training exists.', 'error')
+        return redirect(url_for('list_trainings'))
+
+    # Create a TrainingForm populated with the existing training data
+    form = CreateTrainingForm(obj=training)
+
+    # If the form is submitted and the data is valid, update the training and commit it to the database
+    if form.validate_on_submit():
+        form.populate_obj(training)
+        db.session.commit()
+        flash('Training successfully updated.', 'success')
+        return redirect(url_for('list_trainings'))
+
+    # Render the form with the current training data and the questions
+    return render_template('modify_training.html', form=form, training=training,training_id=training_id)
+
     
 @app.route('/select_training/<training>')
 def select_training(training):
