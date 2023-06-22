@@ -7,6 +7,27 @@ body {
   padding: 0;
 }
 
+input[type="range"]::-webkit-slider-runnable-track {
+  background-color: transparent;
+  border: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #1e90ff;
+  cursor: pointer;
+  margin-top: -5px;
+}
+
+.skala-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
 .container {
   display: flex;
   justify-content: center;
@@ -15,7 +36,7 @@ body {
   margin: 0 auto;
 }
 
-form {
+.form {
   background-color: #ffffff;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -26,28 +47,23 @@ form {
   max-width: 400px;
 }
 
+
 label {
   display: block;
   margin-bottom: 10px;
 }
 
-input[type="text"],
-input[type="password"],
-button[type="submit"] {
+input[type="username"],
+input[type="password"] {
   border: 1px solid #cccccc;
   border-radius: 4px;
   font-size: 16px;
   margin-bottom: 10px;
   padding: 10px;
-  width: 100%;
+  width: 40%;
 }
 
-button[type="submit"] {
-  background-color: #32cd32;
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-}
+
 
 button[type="submit"]:hover {
   background-color: #228b22;
@@ -111,7 +127,7 @@ button[type="submit"]:hover {
   font-size: 18px;
   padding: 12px 20px;
   text-decoration: none;
-  text-transform: uppercase;
+  
   transition: background-color 0.3s ease;
 }
 
@@ -119,8 +135,13 @@ button[type="submit"]:hover {
 .student-link:hover {
   background-color: #228b22;
 }
-
+.card {
+  max-width: 2000px; /* Increase the max-width as needed */
+  margin: 0 auto;
+  padding: 40px; /* Increase the padding as needed */
+}
 .card-header {
+  align-items: center;
   background-color: #eaecee;
   color: #000000;
   padding: 10px;
@@ -129,6 +150,8 @@ button[type="submit"]:hover {
 }
 
 .card-body {
+  align-items: center;
+  width: 100%;
   padding: 20px;
   background-color: #ffffff;
   color: #000000;
@@ -167,4 +190,123 @@ button[type="submit"]:hover {
 
 .edit-button:focus {
   outline: none;
+}
+
+.error-message {
+  background-color: #f3efef;
+  color: #470606ea;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.document-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
+}
+
+.form-column {
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+}
+
+.form-row {
+  margin-bottom: 10px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-input {
+  padding: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+}
+
+button[type="submit"] {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: #32cd32;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  width : 40%;
+}
+
+button[type="submit"]:hover {
+  background-color: #228b22;
+}
+
+.fitting-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.fitting-slot {
+  background-color: #eaecee;
+  border: 1px dashed #cccccc;
+  border-radius: 4px;
+  height: 100px;
+  width: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slot-number {
+  font-size: 12px;
+}
+
+.drag-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.drag-item {
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid #cccccc;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #eaecee;
+  font-weight: bold;
 }

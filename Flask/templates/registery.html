@@ -1,17 +1,43 @@
 {% extends 'base.html' %}
-
-{% block title %}
-Registration
-{% endblock %}
-
 {% block content %}
-  <h1>Registration Form</h1>
-  <form action="/register" method="post">
-    <label>Username:</label>
-    <input type="text" name="username" required><br><br>
-    <label>Password:</label>
-    <input type="password" name="password" required><br><br>
-    <button type="submit">Register</button>
-  </form>
-{% endblock %}
+  <div class="card-container">
+    <div class="card">
+      <h1 class="document-title">Registiere dich oder deine Gruppe</h1>
+      <br>
+      <form action="/register" method="post">
+        <div class="alert alert-danger" role="alert">
+          {% if error %}
+            {{ error }}
+          {% endif %}
+        </div>
+      
+        <div >
+          <label for="username" class="form-label">Benutzername</label>
+          <input type="username" class="form-control" id="username" name="username" required>
+        </div>
+        <div>
+          <label for="password" class="form-label">Passwort</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+          <input type="checkbox" id="professor" name="professor">
+          <label for="professor">Professor</label>
+        </div><br>
+        <div id="professorPasswordWrapper" style="display: none;">
+          <label>Professor Passwort:</label>
+          <input type="password" name="professor_password"><br><br>
+        </div>
+        <button type="submit" class="btn btn-primary btn-green">Registieren</button>
+      </form>
+    </div>
+  </div>
 
+  <script>
+    var professorCheckbox = document.getElementById('professor');
+    var professorPasswordWrapper = document.getElementById('professorPasswordWrapper');
+
+    professorCheckbox.addEventListener('change', function() {
+      professorPasswordWrapper.style.display = this.checked ? 'block' : 'none';
+    });
+  </script>
+{% endblock %}

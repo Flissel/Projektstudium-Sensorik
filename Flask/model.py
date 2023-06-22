@@ -14,7 +14,12 @@ class Aufgabenstellungen(db.Model):
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     aufgabenstellung = db.Column(db.Text, nullable=False)
     aufgabentyp = db.Column(db.Text, nullable=False)
-    prüfvarianten_id = db.Column(db.Integer, db.ForeignKey('prüfvarianten', ondelete='CASCADE'))
+    prüfvarianten_id = db.Column(db.Integer, db.ForeignKey('prüfvarianten.id'))
+
+class Prüfvarianten(db.Model):
+    __tablename__ = 'prüfvarianten'
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    prüfname = db.Column(db.Text, nullable=False)
 
 class Trainings(db.Model):
     __tablename__ = 'trainings'
@@ -37,6 +42,7 @@ class Proben(db.Model):
     geschmack = db.Column(db.Text)
     textur = db.Column(db.Text)
     konsistenz = db.Column(db.Text)
+    anmerkung = db.Column(db.Text)
 
 class Probenreihen(db.Model):
 
@@ -55,7 +61,7 @@ class Benutzer(db.Model):
     rolle = db.Column(db.Boolean, nullable=False)
     training_id = db.Column(db.Integer, db.ForeignKey('trainings.id'))
     aktiv = db.Column(db.Boolean, nullable=False)
-
+    last_activity = db.Column(db.TIMESTAMP)    
 """
 Fragetyp Tabellen (ebp, rangordnungstest, Auswahltest etc.)
 """
@@ -99,7 +105,7 @@ class Geruchserkennung(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, index=True,autoincrement=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
-    proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
+    probenreihe_id= db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     geruch_ohne_auswahl = db.Column(db.Text)
     geruch_mit_auswahl = db.Column(db.Text)
     bemerkung = db.Column(db.Text)

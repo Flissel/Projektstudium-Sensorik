@@ -1,26 +1,26 @@
+
+
+
+
 {% extends 'base.html' %}
 
-{% block title %}Choose your Role{% endblock %}
-
 {% block content %}
-  <div class="dashboard">
-    <h1>Choose your Role</h1>
-    <ul>
-      <a href="{{ url_for('login') }}" class="professor-link">Professor</a>
-      <span class="or">&nbsp;&nbsp;or&nbsp;&nbsp;</span>
-      <a href="{{ url_for('register') }}" class="student-link">Student</a>
-    </ul>
+  <div class="card-container">
+    <div class="card">
+      <div class="card-body">
+        <div class="dashboard">
+          <h1>Wähle zwischen</h1>
+          <ul>
+            <a href="{{ url_for('login') }}" class="professor-link">Professor</a>
+            <span class="or">oder</span>
+            <a href="{{ url_for('register') }}" class="student-link">Student</a>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 {% endblock %}
 
 {% block scripts %}
   <script src="{{ url_for('static', filename='script.js') }}"></script>
-{% endblock %}
-
-{% block styles %}
-  <style>
-    .or {
-      font-size: 24px;
-    }
-  </style>
 {% endblock %}

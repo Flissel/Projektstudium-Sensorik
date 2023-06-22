@@ -1,21 +1,3 @@
 {% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Progress and Results</title>
-</head>
-<body>
-    <h1>User Progress and Results</h1>
-    {% if 'results' in session %}
-        {% for training, data in session['results'].items() %}
-            <h2>{{ training }}</h2>
-            <p>Progress: {{ data['progress'] * 100 }}%</p>
-            <p>Score: {{ data['score'] }}%</p>
-            <hr>
-        {% endfor %}
-    {% else %}
-        <p>No results found.</p>
-    {% endif %}
-</body>
-</html>
+

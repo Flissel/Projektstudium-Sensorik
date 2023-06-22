@@ -1,92 +1,45 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
+
+{% block content %}	
 <head>
-  <meta charset="UTF-8">
-  <title>Create Sample Chain</title>
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    .selected {
-      background-color: #ddd;
-    }
-  </style>
-  <script>
-    var selectedProbenIds = [];
-
-    function toggleProbenId(probenId) {
-      var index = selectedProbenIds.indexOf(probenId);
-      if (index === -1) {
-        selectedProbenIds.push(probenId);
-      } else {
-        selectedProbenIds.splice(index, 1);
-      }
-    }
-
-    function addSelectedProbenIds() {
-      var selectedRows = document.querySelectorAll('.selected');
-      selectedRows.forEach(function(row) {
-        var probenId = row.cells[0].innerText;
-        toggleProbenId(probenId);
-      });
-    }
-  </script>
+    <h1 class="document-title">Probenreihen erstellen</h1>
 </head>
 <body>
-  <h1>Create Sample Chain</h1>
-  
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <ul class="flash-messages">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
-
-  <form method="POST" action="{{ url_for('create_sample_chain') }}">
-    <label for="name">Name:</label>
-    <input type="text" name="name" id="name" required>
-
-    <label for="proben_ids">Associated Proben IDs:</label>
-    <table>
-      <tr>
-        <th>ID</th>
-        <th>Proben Nr</th>
-        <th>Probenname</th>
-        <th>Farbe</th>
-        <th>Farbintensität</th>
-        <th>Geruch</th>
-        <th>Geschmack</th>
-        <th>Textur</th>
-        <th>Konsistenz</th>
-      </tr>
-      {% for sample in samples %}
-        <tr onclick="toggleProbenId('{{ sample.id }}'); this.classList.toggle('selected');">
-          <td>{{ sample.id }}</td>
-          <td>{{ sample.proben_nr }}</td>
-          <td>{{ sample.probenname }}</td>
-          <td>{{ sample.farbe }}</td>
-          <td>{{ sample.farbintensitaet }}</td>
-          <td>{{ sample.geruch }}</td>
-          <td>{{ sample.geschmack }}</td>
-          <td>{{ sample.textur }}</td>
-          <td>{{ sample.konsistenz }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-
-    <input type="hidden" name="proben_ids" value="{{ selectedProbenIds|join(',') }}">
-
-    <button type="button" onclick="addSelectedProbenIds()">Add Selected Samples</button>
-    <button type="submit">Create Sample Chain</button>
-  </form>
+    
+    <form method="POST" action="{{ url_for('create_sample_chain') }}">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="proben">Proben:</label>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Proben Nr</th>
+                <th>Probenname</th>
+                <th>Farbe</th>
+                <th>Farbintensität</th>
+                <th>Geruch</th>
+                <th>Geschmack</th>
+                <th>Textur</th>
+                <th>Konsistenz</th>
+                <th>Select</th>
+            </tr>
+            {% for proben in samples %}
+            <tr>
+                <td>{{ proben.id }}</td>
+                <td>{{ proben.proben_nr }}</td>
+                <td>{{ proben.probenname }}</td>
+                <td>{{ proben.farbe }}</td>
+                <td>{{ proben.farbintensität }}</td>
+                <td>{{ proben.geruch }}</td>
+                <td>{{ proben.geschmack }}</td>
+                <td>{{ proben.textur }}</td>
+                <td>{{ proben.konsistenz }}</td>
+                <td><input type="checkbox" name="proben_ids[]" value="{{ proben.id }}"></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <input type="submit" value="Create Sample Chain">
+    </form>
 </body>
-</html>
+{% endblock %}

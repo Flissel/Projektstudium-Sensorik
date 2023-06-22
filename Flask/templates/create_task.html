@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <h1 class="text-center mb-4">Create Task</h1>
+        <form method="POST" action="{{ url_for('create_task') }}">
+          <div class="form-group">
+            <label for="aufgabenstellung">Task:</label>
+            <textarea class="form-control" id="aufgabenstellung" name="aufgabenstellung" rows="8"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="aufgabentyp">Aufgabentyp:</label>
+            <select class="form-control" id="aufgabentyp" name="aufgabentyp">
+              {% for aufgabentyp in aufgabentypen %}
+                <option value="{{ aufgabentyp.aufgabentyp }}">{{ aufgabentyp.aufgabentyp }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="prüfvariante">Prüfvariante:</label>
+            <select class="form-control" id="prüfvariante" name="prüfvariante">
+              {% for prüfvariante in prüfvarianten %}
+                <option value="{{ prüfvariante.prüfname }}">{{ prüfvariante.prüfname }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Create Task</button>
+          <a href="{{ url_for('manage_aufgabenstellungen') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

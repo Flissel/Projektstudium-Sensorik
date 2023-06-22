@@ -3,8 +3,8 @@
 {% block content %}
 <div class="container my-5">
     <div class="card">
-        <div class="card-header text-white" style="background-color: #32cd32;">
-            <h2>Create Training</h2>
+        <div class="card-header">
+            <h2>Hier können Sie ein Training erstellen</h2>
         </div>
         <div class="card-body">
             <form method="POST" id="create-training-form" action="create_training">
@@ -18,10 +18,10 @@
                     {{form.question_types(class="form-control")}}
                 </div>
                 <div class="form-group d-flex justify-content-between align-items-center">                    
-                    <button type="submit" name="add_question" value="ebp">Frage Hinzufügen</button>
+                    <button type="submit" name="add_question" class="btn-add" value="ebp">Frage Hinzufügen</button>
                 </div>
-                <div class="ebp_forms">
-                    {% for question in form.ebp_questions %}
+                {% for question in form.ebp_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Einfach beschreibende Prüfung - {{ loop.index }}</h3>
@@ -29,13 +29,15 @@
                         {{question.aufgabenstellung_id(class="form-control")}}
                         {{question.proben_id.label(class="form-label")}} 
                         {{question.proben_id(class="form-control")}}
-                        <button type="submit" name="delete_ebp_question" value="{{loop.index0}}">Frage entfernen</button>
+                        <button type="submit" name="delete_ebp_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <div class="rangordnungstest_forms">
-                    {% for question in form.rangordnungstest_questions %}
+                <hr>
+                {% endfor %}
+            </div>
+            <div class="rangordnungstest_forms">
+                {% for question in form.rangordnungstest_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Rangordnungstest - {{ loop.index }}</h3>
@@ -43,13 +45,15 @@
                         {{question.aufgabenstellung_id(class="form-control")}}
                         {{question.probenreihe_id.label(class="form-label")}}
                         {{question.probenreihe_id(class="form-control")}}
-                        <button type="submit" name="delete_rangordnungstest_question" value="{{loop.index0}}">Frage entfernen</button>
+                        <button type="submit" name="delete_rangordnungstest_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <div class="auswahltest_forms">
-                    {% for question in form.auswahltest_questions %}
+                <hr>
+                {% endfor %}
+            </div>
+            <div class="auswahltest_forms">
+                {% for question in form.auswahltest_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Auswahltest - {{ loop.index }}</h3>
@@ -57,13 +61,15 @@
                         {{question.aufgabenstellung_id(class="form-control")}}
                         {{question.probenreihe_id.label(class="form-label")}} 
                         {{question.probenreihe_id(class="form-control")}}
-                        <button type="submit" name="delete_auswahltest_question" value="{{loop.index0}}">Frage entfernen</button>
+                        <button type="submit" name="delete_auswahltest_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <div class="dreieckstest_forms">
-                    {% for question in form.dreieckstest_questions %}
+                <hr>
+                {% endfor %}
+            </div>
+            <div class="dreieckstest_forms">
+                {% for question in form.dreieckstest_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Dreieckstest - {{ loop.index }}</h3>
@@ -77,27 +83,31 @@
                         {{question.probenreihe_id_2(class="form-control")}}
                         {{question.lösung_2.label(class="form-label")}} 
                         {{question.lösung_2(class="form-control")}}
-                        <button type="submit" name="delete_dreieckstest_question" value="{{loop.index0}}">Frage entfernen</button>
+                        <button type="submit" name="delete_dreieckstest_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <div class="geruchserkennung_forms">
-                    {% for question in form.geruchserkennung_questions %}
+                <hr>
+                {% endfor %}
+            </div>
+            <div class="geruchserkennung_forms">
+                {% for question in form.geruchserkennung_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Geruchserkennungstest - {{ loop.index }}</h3>
                         {{question.aufgabenstellung_id.label(class="form-label")}} 
                         {{question.aufgabenstellung_id(class="form-control")}}
-                        {{question.proben_id.label(class="form-label")}} 
-                        {{question.proben_id(class="form-control")}}
-                        <button type="submit" name="delete_geruchserkennungstest_question" value="{{loop.index0}}">Frage entfernen</button>
+                        {{question.probenreihe_id.label(class="form-label")}} 
+                        {{question.probenreihe_id(class="form-control")}}
+                        <button type="submit" name="delete_geruchserkennungstest_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <div class="hed_beurteilung_forms">
-                    {% for question in form.hed_beurteilung_questions %}
+                <hr>
+                {% endfor %}
+            </div>
+            <div class="hed_beurteilung_forms">
+                {% for question in form.hed_beurteilung_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Hedonische Beurteilung - {{ loop.index }}</h3>
@@ -105,13 +115,15 @@
                         {{question.aufgabenstellung_id(class="form-control")}}
                         {{question.probenreihe_id.label(class="form-label")}} 
                         {{question.probenreihe_id(class="form-control")}}
-                        <button type="submit" name="delete_hed_beurteilung_question" value="{{loop.index0}}">Frage entfernen</button>
+                        <button type="submit" name="delete_hed_beurteilung_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <div class="konz_reihe_forms">
-                    {% for question in form.konz_reihe_questions %}
+                <hr>
+                {% endfor %}
+            </div>
+            <div class="konz_reihe_forms">
+                {% for question in form.konz_reihe_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Konzentrationsreihe - {{ loop.index }}</h3>
@@ -119,13 +131,15 @@
                         {{question.aufgabenstellung_id(class="form-control")}}
                         {{question.probenreihe_id.label(class="form-label")}} 
                         {{question.probenreihe_id(class="form-control")}}
-                        <button type="submit" name="delete_konz_reihe_question" value="{{loop.index0}}">Frage entfernen</button>
+                        <button type="submit" name="delete_konz_reihe_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <div class="paar_vergleich_forms">
-                    {% for question in form.paar_vergleich_questions %}
+                <hr>
+                {% endfor %}
+            </div>
+            <div class="paar_vergleich_forms">
+                {% for question in form.paar_vergleich_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Paarweise Vergleichsprüfung - {{ loop.index }}</h3>
@@ -139,13 +153,15 @@
                         {{question.probenreihe_id_2(class="form-control")}}
                         {{question.lösung_2.label(class="form-label")}}
                         {{question.lösung_2(class="form-control")}}
-                        <button type="submit" name="delete_paar_vergleich_question" value="{{loop.index0}}">Frage entfernen</button>
+                        <button type="submit" name="delete_paar_vergleich_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <div class="profilprüfung_forms">
-                    {% for question in form.profilprüfung_questions %}
+                <hr>
+                {% endfor %}
+            </div>
+            <div class="profilprüfung_forms">
+                {% for question in form.profilprüfung_questions %}
+                <div class="question-frame">
                     {{ question.csrf_token }}
                     <div class="form-group">
                         <h3>Profilprüfung - {{ loop.index }}</h3>
@@ -164,15 +180,17 @@
                           <i class="fas fa-trash-alt mr-1"></i>Kriterium entfernen
                         </button>
                         <br>
-                        <button type="submit" name="delete_profilprüfung_question" value="{{loop.index0}}">Frage entfernen</button>
+                        <button type="submit" name="delete_profilprüfung_question" value="{{loop.index0}}" class="btn-remove">Frage entfernen</button>
                     </div>
-                    <hr>
-                    {% endfor %}
                 </div>
-                <button type="submit" class="btn btn-success" name="submit" value="Create Training">
-                  <i class="fas fa-plus mr-1"></i>Training erstellen
-            </form>
-        </div>
+                <hr>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-success" name="submit" value="Create Training">
+              <i class="fas fa-plus mr-1"></i>Training erstellen
+            </button>
+        </form>
     </div>
+</div>
 </div>
 {% endblock %}

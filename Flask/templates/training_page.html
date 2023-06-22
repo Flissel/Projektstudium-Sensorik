@@ -5,89 +5,56 @@ Training Page
 {% endblock %}
 
 {% block content %}
-  <div class="container my-5">
+<div class="container my-5">
     <div class="card">
         <div class="card-header">
-            {% if question_type == 'paar_vergleich' %}
-            <form method="POST" id="paar-vergleich-form" action="answer_question">
-                <h2>Paarweiser Vergleich</h2>
-                <p>{{ aufgabenstellung.aufgabenstellung }}</p>
-                <h3>Probenreihe 1:</h3>
-                <table>
-                {% for probe in probenreihen_id_1.proben_ids %}
-                  <tr>
-                {{Proben.query.get(probe).proben_nr}} {{ Proben.query.get(probe).probenname}}<br>
-                </tr>
-                {% endfor %}
-                </table>
-                <h3>Probenreihe 2:</h3>
-                <table>
-                {% for probe in probenreihen_id_2.proben_ids %}
-                  <tr>
-                {{Proben.query.get(probe).proben_nr}} {{ Proben.query.get(probe).probenname}}<br>
-                </tr>
-                {% endfor %}
-                </table>
-                <br><br>
-                <div>
-                {{ form.proben_id_1.label }} {{ form.proben_id_1(class="form-control") }}
-              </div>
-              <div>
-                {{ form.proben_id_2.label }} {{ form.proben_id_2(class="form-control") }}
-              </div>
-              <div>
-                {{ form.proben_id_3.label }} {{ form.proben_id_3(class="form-control") }}
-              </div>
-            </form>
-            {% endif %}
-            {% if question_type == 'ebp' %}
-            <form method="POST" id="ebp-form" action="answer_ebp">
-                <h2>Einfach beschreibende Prüfung</h2>
-                <p>{{ aufgabenstellung.aufgabenstellung }}</p>
-                <h3>Probe:</h3>
-                {{ proben_id.proben_nr }} {{ proben_id.probenname }}
-                <br><br>
-                <div>
-                {{ form.aussehen_farbe.label }} {{ form.aussehen_farbe(class="form-control") }}
-                {{ form.geruch.label }} {{ form.geruch(class="form-control") }}
-                {{ form.geschmack.label }} {{ form.geschmack(class="form-control") }}
-                {{ form.textur.label }} {{ form.textur(class="form-control") }}
-                {{ form.konsistenz.label }} {{ form.konsistenz(class="form-control") }}
-              {% endif %}
-              {% if question_type == 'rangordnungstest' %}
-              <form method="POST" id="rangordnungstest-form" action="answer_rangordnungstest">
-                  <h2>Rangordnungstest</h2>
-                  <p>{{ aufgabenstellung.aufgabenstellung }}</p>
-                  <h3>Probenreihe:</h3>
-                  <table>
-                  {% for probe in probenreihen_id.proben_ids %}
-                    <tr>
-                  {{Proben.query.get(probe).proben_nr}} {{ Proben.query.get(probe).probenname}}<br>
-                  </tr>
-                  {% endfor %}
-                  </table>
-                  <br><br>
-                  {% for probe_id, antwort_field in probenreihen_id.proben_ids|zip_lists(form.antworten) %}
-                    Rang:
-                    {{ Proben.query.get(probe_id).proben_nr }} {{ Proben.query.get(probe_id).probenname }}<br>
-                    {{ antwort_field(class="form-control") }}
-                {% endfor %}
-
-                {% endif %}
-
-        </div>
-        <div class="card-body">
-            <form method="post">
-                {% for option in question['options'] %}
-                <div class="form-group question_type">
-                    <input class="form-control" type="radio" name="question{{ question['id'] }}" value="{{ option }}" id="{{ option }}">
-                    <label for="{{ option }}">{{ option }}</label>
+            <form method="POST" action="{{url_for('training_page')}}">
+                {{ form.csrf_token }}
+                {% if question_type == 'ebp' %}
+                <h3><strong>Einfach beschreibende Prüfung</strong></h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">
+                <h5>Proben Nr. : {{form.proben_nr.label}}</h5><br>
+                {{form.aussehen_farbe.label}} {{form.aussehen_farbe(class="form-control")}}
+                {{form.geruch.label}} {{form.geruch(class="form-control")}}
+                {{form.geschmack.label}} {{form.geschmack(class="form-control")}}
+                {{form.textur.label}} {{form.textur(class="form-control")}}
+                {{form.konsistenz.label}} {{form.konsistenz(class="form-control")}}
                 </div>
+                {% elif question_type == 'rangordnungstest' %}
+                <h3>Rangordnungstest</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">              
+                <h5>Rangordnung:</h5>
+                {% for probe in form.proben %}
+                    Probe {{probe.label}}: {{probe(class="form-control")}}
                 {% endfor %}
-                <input type="hidden" name="current_question_index" value="{{ current_question_index }}">
-                <button type="submit" class="btn btn-primary btn-block choose-button">Submit</button>
+                </div>
+
+                {% elif question_type == 'auswahltest'%}
+                <h3>Auswahltest</h3>
+                Aufgabenstellung: {{form.aufgabenstellung.label}}
+                <table>
+                    <tr>
+                        <th>Proben</th>
+                        <th>Einordnung</th>
+                        <th>Bemerkungen</th>
+                    </tr>
+                    {% for probe in form.proben %}
+                    <tr>
+                        <td>{{probe.label}}</td>
+                        <td>{{form.einordnungen[loop.index0](class="form-control")}}</td>
+                        <td>{{form.bemerkungen[loop.index0](class="form-control")}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% endif %}
+                {% if question_index == question_max -1 %}
+                <button type="submit" name="submit" class="btn btn-primary" value="abgeben">Abgeben</button>
+                {% else %}
+                <button type="submit" name="submit" class="btn btn-danger" value="zurück">Zurück</button>
+                <button type="submit" name="submit" class="btn btn-primary" value="weiter">Weiter</button>
+                {% endif %}
             </form>
-        </div>
-    </div>
-  </div>
+
 {% endblock %}

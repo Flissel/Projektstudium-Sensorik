@@ -1,0 +1,214 @@
+body {
+    background-color: #f5f5f5;
+    color: #333333;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+  }
+  
+  main {
+    flex-grow: 1;
+  }
+  
+  footer {
+    text-align: center;
+    background-color: #f5f5f5;
+    padding: 20px;
+    margin-top: auto;
+  }
+  
+  .card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: flex;
+  }
+  
+  .card {
+    background-color: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    margin: 20px;
+   
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .card-text {
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin-bottom: 10px;
+    text-align:center ;
+  }
+  
+  .dashboard {
+    margin-top: 20px;
+  }
+  
+  .dashboard h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .dashboard ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn-add {
+    background-color: rgb(28, 194, 28);
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-add:hover {
+    background-color: #228b22;
+  }
+  .btn-remove {
+    background-color: #ff0000;
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-remove:hover {
+    background-color: #cc0000;
+  }
+  
+  .dashboard li {
+    margin: 0 10px;
+  }
+  
+  .professor-link,
+  .student-link {
+    background-color: #32cd32;
+    border-radius: 4px;
+    color: #ffffff;
+    display: block;
+    font-size: 18px;
+    padding: 12px 20px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .professor-link:hover,
+  .student-link:hover {
+    background-color: #228b22;
+  }
+  
+  .or {
+    font-size: 18px;
+    margin: 0 10px;
+  }
+  
+  .green-box {
+    background-color: #32cd32;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    padding: 0 20px;
+  }
+  
+  .green-box ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .green-box li {
+    display: inline-block;
+    margin-right: 20px;
+  }
+  
+  .green-box a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  .waiting-room-text {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .professor-dashboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .professor-dashboard h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .professor-dashboard .button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .professor-dashboard .button-container a {
+    background-color: #32cd32;
+    border-radius: 4px;
+    color: #ffffff;
+    display: block;
+    font-size: 18px;
+    padding: 12px 20px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+  }
+  
+  .professor-dashboard .button-container a:hover {
+    background-color: #228b22;
+  }
+  
+  .professor-dashboard .training-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .professor-dashboard .training-list li {
+    margin-bottom: 10px;
+  }
+  
+  .professor-dashboard .training-list li a {
+    color: #333333;
+    text-decoration: none;
+    font-size: 16px;
+  }
+  
+  .professor-dashboard .training-list li a:hover {
+    text-decoration: underline;
+  }
+
+  .form-group{
+    text-align: left;
+  }

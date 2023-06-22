@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>View Samples</title>
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="document-title">Vorhandene Proben und Probenreihen</h1>
+
   <style>
     table {
       width: 100%;
@@ -14,11 +14,44 @@
       border-bottom: 1px solid #ddd;
     }
   </style>
-</head>
-<body>
-  <h1>View Samples</h1>
-  
-  <h2>Samples</h2>
+
+  <script>
+    function deleteSample(sampleId) {
+      fetch("/delete_sample/" + sampleId, {
+        method: "DELETE"
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log("Sample deleted successfully.");
+          location.reload(); // Refresh the page
+        } else {
+          console.error("Failed to delete sample.");
+        }
+      })
+      .catch(error => {
+        console.error("An error occurred while deleting the sample:", error);
+      });
+    }
+    
+    function deleteSampleChain(sampleChainId) {
+      fetch("/delete_sample_chain/" + sampleChainId, {
+        method: "DELETE"
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log("Sample chain deleted successfully.");
+          location.reload(); // Refresh the page
+        } else {
+          console.error("Failed to delete sample chain.");
+        }
+      })
+      .catch(error => {
+        console.error("An error occurred while deleting the sample chain:", error);
+      });
+    }
+  </script>
+
+  <h2>Proben</h2>
   <table>
     <tr>
       <th>ID</th>
@@ -30,53 +63,44 @@
       <th>Geschmack</th>
       <th>Textur</th>
       <th>Konsistenz</th>
-      <th>bearbeiten</th>
+      <th>Anmerkung</th>
+      <th>Edit</th>
+      <th>Delete</th>
     </tr>
     {% for sample in samples %}
-    <tr>
-      <td>{{ sample.id }}</td>
-      <td>{{ sample.proben_nr }}</td>
-      <td>{{ sample.probenname }}</td>
-      <td>{{ sample.farbe }}</td>
-      <td>{{ sample.farbintensitaet  }}</td>
-      <td>{{ sample.geruch }}</td>
-      <td>{{ sample.geschmack }}</td>
-      <td>{{ sample.textur }}</td>
-      <td>{{ sample.konsistenz }}</td>
-      <td><a href="{{ url_for('edit_sample', sample_id=sample.id) }}">Edit</a></td>
-    </tr>
+      <tr>
+        <td>{{ sample.id }}</td>
+        <td>{{ sample.proben_nr }}</td>
+        <td>{{ sample.probenname }}</td>
+        <td>{{ sample.farbe }}</td>
+        <td>{{ sample.farbintensität }}</td>
+        <td>{{ sample.geruch }}</td>
+        <td>{{ sample.geschmack }}</td>
+        <td>{{ sample.textur }}</td>
+        <td>{{ sample.konsistenz }}</td>
+        <td>{{ sample.anmerkung }}</td>
+        
+        <td><a href="{{ url_for('edit_sample', sample_id=sample.id) }}">Edit</a></td>
+        <td><button onclick="deleteSample('{{ sample.id }}')">Delete</button></td>
+      </tr>
     {% endfor %}
   </table>
- <button onclick="openNewSampleWindow()">Hinzufügen</button>
+  <button onclick="window.location.href='{{ url_for('create_sample') }}'">Hinzufügen</button>
 
   <h2>Probenreihen</h2>
   <table>
     <tr>
-      <th>ID</th>
       <th>Name</th>
       <th>Proben IDs</th>
+      <th>Delete</th>
     </tr>
     {% for probenreihe in sampleChain %}
-    <tr>
-      <td>{{ probenreihe.id }}</td>
-      <td>{{ probenreihe.name }}</td>
-      <td>{{ probenreihe.proben_ids }}</td>
-    </tr>
+      <tr>  
+        <td>{{ probenreihe.name }}</td>
+        <td>{{ probenreihe.proben_ids }}</td>
+        <td><button onclick="deleteSampleChain('{{ probenreihe.id }}')">Delete</button></td>
+      </tr>
     {% endfor %}
   </table>
-  <button onclick="openNewSampleChainWindow()">Hinzufügen</button>
-
- 
-  <script>
-    function openNewSampleWindow() {
-      window.open("{{ url_for('create_sample') }}", "_blank", "width=400,height=500");
-    }
-  </script>  
-  
-   <script>
-    function openNewSampleChainWindow() {
-      window.open("{{ url_for('create_sample_chain') }}", "_blank", "width=400,height=500");
-    }
-  </script>  
-</body>
-</html>
+  <button onclick="window.location.href='{{ url_for('create_sample_chain') }}'">Hinzufügen</button>
+{% endblock %}
