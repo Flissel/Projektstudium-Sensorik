@@ -208,3 +208,61 @@ body {
   .professor-dashboard .training-list li a:hover {
     text-decoration: underline;
   }
+  .fitting-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .fitting-slot {
+    background-color: #eaecee;
+    border: 1px dashed #cccccc;
+    border-radius: 4px;
+    height: 100px;
+    width: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .slot-number {
+    font-size: 12px;
+  }
+  
+  .drag-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .drag-item {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  table,
+  th,
+  td {
+    border: 1px solid #cccccc;
+  }
+  
+  th,
+  td {
+    padding: 8px;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #eaecee;
+    font-weight: bold;
+  }

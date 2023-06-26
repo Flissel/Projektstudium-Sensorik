@@ -6,7 +6,7 @@ from uuid import uuid4
 from datetime import datetime
 from jinja2 import Environment
 import pandas as pd
-
+from flask_socketio import SocketIO, emit
 app = Flask(__name__)
 
 app.debug = True
@@ -14,6 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/pra
 app.config['SECRET_KEY'] = 'secret_key'
 
 db.init_app(app)
+socketio = SocketIO(app)
 
 INACTIVITY_THRESHOLD = 3600 # 1 hour in seconds
 
@@ -36,8 +37,9 @@ def check_inactive_user():
                 session.clear()
                 return redirect('/login')  # Redirect the user to the login page
             
-def zip_lists(a, b):
-    return zip(a, b)
+@app.template_filter('zip_lists')
+def zip_lists(*lists):
+    return zip(*lists)
 
 app.jinja_env.filters['zip_lists'] = zip_lists
 
@@ -877,34 +879,82 @@ def manage_aufgabenstellungen():
 
     return render_template('manage_aufgabenstellungen.html', tasks=tasks, prüfnamen=prüfnamen)
 #-----------------------------------#
+def calculate_size_df(form_data):
+    if isinstance(form_data, str):
+       df = pd.DataFrame(form_data, index=[0])          
+    if isinstance(form_data, list):
+        df = pd.DataFrame(form_data).T
+    if isinstance(form_data, dict):
+        df = pd.DataFrame([form_data])
+        
+    print(df)
+    return len(df)
+
+def extract_lists(data):
+    samples = data['samples']
+    extracted_data = []
+
+    for sample in samples:
+        probe_name = sample['probe_name']
+        probe_nr = sample['probe_nr']
+        taste_salzig = sample['taste_salzig']
+        taste_süß = sample['taste_süß']
+        taste_sauer = sample['taste_sauer']
+        taste_bitter = sample['taste_bitter']
+        taste_nicht_erkennen = sample['taste_nicht_erkennen']
+        
+        extracted_data.append({
+            'probe_name': probe_name,
+            'probe_nr': probe_nr,
+            'taste_salzig': taste_salzig,
+            'taste_süß': taste_süß,
+            'taste_sauer': taste_sauer,
+            'taste_bitter': taste_bitter,
+            'taste_nicht_erkennen': taste_nicht_erkennen
+        })
+        attributes = ['probe_name', 'probe_nr', 'taste_salzig', 'taste_süß', 'taste_sauer', 'taste_bitter', 'taste_nicht_erkennen']
+    print(extracted_data)
+    return extracted_data,attributes 
+    
+
 def setup_df(form_data):
     # Get the list of attributes from the form_data keys
+    
     attributes = list(form_data.keys())
-
-    # Filter out any non-attribute keys (e.g., 'csrf_token')
     attributes = [attr for attr in attributes if not attr.startswith('csrf_')]
-    print("attributes: ", attributes)
-    print()
+    
+    print("form_data: ",form_data)
 
-    # The number of probes can be calculated as the number of entries for any attribute
-    num_probes = len(form_data.get(attributes[0]))
+    print("attributes: ", attributes)
 
     # Create a list to store individual row dictionaries
     rows = []
-
+    
+    size_df=calculate_size_df(form_data)
     # Iterate over each probe
-    for i in range(num_probes):
+    for i in range(size_df):
         # Initialize an empty dictionary for this row
         row = {}
-
+       
         # For each attribute, get the corresponding value from the form_data and add it to the dictionary
         for attribute in attributes:
+            print("attribute:",attribute,type(attribute))
+            
             # Get the values for the current attribute at index i
-            values = form_data.getlist(attribute)
-            value = values[i]
+            if isinstance(form_data.get(attribute), str):
+                values = form_data.get(attribute)
+                print("str:",values)
+            if isinstance(form_data.get(attribute), list):
+                values = form_data.get(attribute)
+                print("list:",values)    
+            if isinstance(form_data.get(attribute), dict):
+                values = form_data.get(attribute) 
+                print("dict:",values)   
 
-            # If the value is 'y', replace it with True, otherwise replace it with False
-            value = True if value == 'y' else False
+         
+            value = values
+            
+
 
             # Add the attribute and its value to the dictionary
             row[attribute] = value
@@ -913,18 +963,35 @@ def setup_df(form_data):
         rows.append(row)
 
     # Create the DataFrame by passing the list of dictionaries and specifying the index
-    df = pd.DataFrame(rows, index=range(num_probes))
-
+    df = pd.DataFrame(rows, index=range(size_df))
+    
+    # Remove duplicate rows from the DataFrame
+    #df = df.drop_duplicates()
+    
+    print("df",df)
     return df
 
 def process_form_submission(question_type, form_data):
     
-
+    print("question_type",form_data)
     #TODO: instanziate df without values if he is not existing
     #TODO:  add the columus as they are not existing in df
+    if(question_type == "auswahltest"):
+        form_data,attributes = extract_lists(form_data)
+        df = pd.DataFrame(form_data)
+        print(df)
+    elif question_type == "dreieckstest":
+        df = pd.DataFrame([form_data])
+    elif question_type == "geruchserkennungtest":
+        pass
+    elif question_type == "konz_reihe":
+        pass
+    elif question_type == "paar_vergleich":
+        pass
 
-    
-    df = pd.DataFrame()   
+    else:
+        df = setup_df(form_data)   
+
     def paar_vergleich():
         print("paar_vergleich")
         print("request.form_data",request.form )
@@ -972,33 +1039,8 @@ def process_form_submission(question_type, form_data):
 
 
     def dreieckstest():
-        print("dreieckstest")
-        print("request.form_data", request.form)
-        print()
-        print("form_data", form_data)
-
-        #df = setup_df(form_data)
-        return
-        for i in range(len(form_data['beschreibung_1'])):
-            abweichende_probe_key = f'abweichende_probe_-[{form_data["probenreihen_id"][i]}]'
-            beschreibung_key = f'beschreibung_-[{form_data["probenreihen_id"][i]}]'
-
-            # Retrieve the values from the request form data using the updated keys
-            abweichende_probe = request.form.get(abweichende_probe_key)
-            beschreibung = request.form.get(beschreibung_key)
-
-            # Add new columns to the DataFrame if they don't exist
-            if 'abweichende_probe' not in df.columns:
-                df['abweichende_probe'] = None
-            if 'beschreibung' not in df.columns:
-                df['beschreibung'] = None
-
-            # Update the corresponding rows in the DataFrame with the new values
-            df.loc[i, 'abweichende_probe'] = abweichende_probe
-            df.loc[i, 'beschreibung'] = beschreibung
-
-        print(df)
-
+        df_dreieckstest = pd.DataFrame([form_data])
+        print(df_dreieckstest)
     def geruchserkennungtest():
         print("geruchserkennungtest")
         print("request.form_data",request.form )
@@ -1035,13 +1077,6 @@ def process_form_submission(question_type, form_data):
         
     def rangordnungstest():
         print("rangordnungstest")
-        print("request.form_data",request.form )
-        print()
-        print("form_data",form_data)
-        #TODO: update df with values from form or request form data
-        #       add the columus as they are not existing in df 
-        #       over write existing values
-
         antworten = form_data.get('antworten')
     # Process the form submission for "Rangordnungstest"
         print("Rangordnungstest: Antworten:", antworten)
@@ -1077,13 +1112,18 @@ def get_form_instance(question_type, additional_data=None):
     if question_type == 'hed_beurteilung':
         return SubmitHed_beurteilung()
     elif question_type == 'auswahltest':
-        
-        proben=[probe.probenname for probe in additional_data['probenreihen_id']]
-        proben_nr=[probe.proben_nr for probe in additional_data['probenreihen_id']]
-        return SubmitAuswahltest(proben, proben_nr)
+
+        form=SubmitAuswahltest()
+        if len(additional_data['probenreihen_id']) > len(form.samples):
+            for i in range(len(additional_data['probenreihen_id'])):
+                form.samples.append_entry()
+                form.samples[i].probe_nr = additional_data['probenreihen_id'][i].proben_nr
+                form.samples[i].probe_name = additional_data['probenreihen_id'][i].probenname
+        return form
     
     elif question_type == 'dreieckstest':
-        return SubmitDreieckstest()
+        
+        return SubmitDreieckstest(additional_data['probenreihen_id_1'], additional_data['probenreihen_id_2'])
     elif question_type == 'geruchserkennungtest':
         return SubmitGeruchserkennung()
     elif question_type == 'ebp':
@@ -1127,7 +1167,7 @@ def get_additional_data(question_type, question):
     
     if question_type == "auswahltest":
         probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]        
+        additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]       
         
     elif question_type == "dreieckstest":
         probenreihen_id_1 = Probenreihen.query.get(question.probenreihe_id_1)
@@ -1194,11 +1234,11 @@ def training_page():
     question_max = len(training.fragen_typen)
     question_index = session.get('question_index', 0)
 
-    if(question_index >= question_max):
+    if(question_index > question_max):
         question_index = 0
 
     if question_index == question_max:
-        # Training is already completed, redirect to a new page or perform a specific action
+        question_index = 0
         return redirect(url_for('complete_training'))
 
     question_type = training.fragen_typen[question_index]
@@ -1208,13 +1248,7 @@ def training_page():
     aufgabenstellung = db.session.get(Aufgabenstellungen, question.aufgabenstellung_id)
     additional_data = get_additional_data(question_type, question)
     form = get_form_instance(question_type,additional_data)
-    print("question",question)
-    print("question_type",question_type)
-    print("aufgabenstellung",aufgabenstellung)
-    print("additional_data",additional_data)
-    print("form",form)
-    print("form",form.data)
-    print("validate_on_submit",form.validate_on_submit())
+   
     if request.method == 'POST':
         if form.validate_on_submit():
             process_form_submission(question_type, form.data)
@@ -1232,27 +1266,32 @@ def training_page():
 @app.route('/complete_training/', methods=['GET', 'POST'])
 def complete_training():
     if 'username' not in session:
-       #TODO: display all answers for all questions
-        return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
+        return render_template('login.html')
+    
+    
     return render_template('complete_training.html')
 
 #-----------------------------------#
 @app.route('/professor_dashboard/training_progress')
 def training_progress():
-    # get all logged in users
     users = Benutzer.query.all()
 
-    # calculate the progress of each user absolving a training
     user_progress = []
     for user in users:
         progress = calculate_training_progress(user)
         user_progress.append((user, progress))
 
-    # show the training progress of each user
-    
+    socketio.emit('update_progress', {'user_progress': user_progress})
 
-    # give the required data to the template
     return render_template('training_progress.html', user_progress=user_progress)
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
 
 def calculate_training_progress(user):
     completed_tasks = 0
@@ -1276,7 +1315,9 @@ def calculate_training_progress(user):
 
 def check_task_completion(user, fragen_id):
     task_type = Aufgabenstellungen.query.get(fragen_id).aufgabentyp
-
+     
+    0
+     
     return True
 
     # Add conditions for other task types as needed

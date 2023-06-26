@@ -1,3 +1,26 @@
 {% extends 'base.html' %}
 
+{% block head %}
+    
+    <title>Praktikumsfortschritt</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const socket = io.connect('http://localhost:5000');
 
+            socket.on('connect', function() {
+                console.log('Connected to server');
+            });
+
+            socket.on('disconnect', function() {
+                console.log('Disconnected from server');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h2>Praktikums Fortschritt</h2>
+    
+    <!-- Progress display will go here -->
+{% endblock %}
