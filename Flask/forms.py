@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from flask import request, session
+from flask_wtf.form import _Auto
 from wtforms import StringField, IntegerField, SubmitField, SelectField, FieldList, FormField, HiddenField,BooleanField
 from wtforms.validators import DataRequired, NumberRange
 from model import Trainings, Aufgabenstellungen, Probenreihen, Proben, Benutzer,Paar_vergleich, Probenreihen
@@ -290,11 +291,13 @@ class ViewEbp(FlaskForm):
 
 #######################################################
 class SubmitEbpForm(FlaskForm):
+    proben_nr = HiddenField('proben_nr')
+    probenname = HiddenField('probenname')
     aussehen_farbe = StringField('Farbe')
     geruch = StringField('Geruch')
     geschmack = StringField('Geschmack')
     textur = StringField('Textur')
-    konsistenz = StringField('Konsistenz')
+    konsistenz = StringField('Konsistenz') 
     csrf_token = HiddenField()
 
 
@@ -339,49 +342,55 @@ class SubmitHed_beurteilung(FlaskForm):
     skalenwerte = FieldList(IntegerField('Skalenwert'))
     csrf_token = HiddenField(validators=[DataRequired()])
     
-
+#TODO:
 class SubmitGeruchserkennung(FlaskForm):
     ohne_auswahl = StringField('Geruchserkennung ohne Auswahl')
     beschreibung = StringField('Beschreibung des Geruchs')
     mit_auswahl = StringField('Geruchserkennung mit Auswahl')
     csrf_token = HiddenField()
-        # Add choices for the dynamic fields based on the user's selections
 
 class SubmitDreieckstest(FlaskForm):
-    beschreibung_1 = StringField('Beschreibung des Unterschieds (1)')
-    beschreibung_2 = StringField('Beschreibung des Unterschieds (2)')
-    antwort_1 = StringField('Ihre Antwort (Probe 1)')
-    antwort_2 = StringField('Ihre Antwort (Probe 2)')
+    beschreibung_1 = StringField('Beschreibung des Unterschieds')
+    abweichende_probe_1 = SelectField( choices=[], validators=[DataRequired()], coerce=int)
+    beschreibung_2 = StringField('Beschreibung des Unterschieds')
+    abweichende_probe_2 = SelectField( choices=[], validators=[DataRequired()], coerce=int)
     csrf_token = HiddenField()
+
+    def __init__(self,  probe_1,probe_2,*agrs, **kwargs):
+        super(SubmitDreieckstest, self).__init__(**kwargs)
+        self.abweichende_probe_1.choices = probe_1
+        self.abweichende_probe_2.choices = probe_2
+
         # Add choices for the dynamic fields based on the user's selections
 
+class SampleForm(FlaskForm):
+    probe_name = HiddenField()
+    probe_nr = HiddenField()
+    taste_salzig = BooleanField()
+    taste_süß = BooleanField()
+    taste_sauer = BooleanField()
+    taste_bitter = BooleanField()
+    taste_nicht_erkennen = BooleanField()
+    
+    def __init__(self,  *args, **kwargs):
+        super(SampleForm, self).__init__(*args, **kwargs)
+        
+
 class SubmitAuswahltest(FlaskForm):
-    probe_name = FieldList(StringField())
-    probe_nr = FieldList(StringField())
-    taste_salzig = FieldList(BooleanField("salzig"))
-    taste_süß = FieldList(BooleanField("süß"))
-    taste_sauer = FieldList(BooleanField("sauer"))
-    taste_bitter = FieldList(BooleanField("bitter"))
-    taste_nicht_erkennen = FieldList(BooleanField("nicht zu erkennen"))
+    samples = FieldList(FormField(SampleForm))
     csrf_token = HiddenField()
 
-    def __init__(self, proben=None, proben_nr=None, *args, **kwargs):
-        super(SubmitAuswahltest, self).__init__(*args, **kwargs)
-        if proben:
-            self.probe_name.process(None, data=proben)
-        if proben_nr:
-            self.probe_nr.process(None, data=proben_nr)
-
-        self.taste_salzig.process(None, data=[0,0,0])    
-        self.taste_süß.process(None, data=[0,0,0])
-        self.taste_sauer.process(None, data=[0,0,0])
-        self.taste_bitter.process(None, data=[0,0,0])
-        self.taste_nicht_erkennen.process(None, data=[0,0,0])
+        
         
 class SubmitRangordnungstest(FlaskForm):
+    
     antworten = FieldList(HiddenField('Antworten'))   
     csrf_token = HiddenField()
     
    
-
+#self.taste_salzig.process(None, data=[0,0,0])    
+#        self.taste_süß.process(None, data=[0,0,0])
+#        self.taste_sauer.process(None, data=[0,0,0])
+#        self.taste_bitter.process(None, data=[0,0,0])
+#        self.taste_nicht_erkennen.process(None, data=[0,0,0])
     
