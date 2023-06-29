@@ -5,11 +5,11 @@
       <h1 class="document-title">Registiere dich oder deine Gruppe</h1>
       <br>
       <form action="/register" method="post">
-        <div class="alert alert-danger" role="alert">
-          {% if error %}
-            {{ error }}
-          {% endif %}
-        </div>
+        {% if error %}
+          <div class="alert alert-danger" role="alert">
+              {{ error }}
+          </div>
+        {% endif %}
       
         <div >
           <label for="username" class="form-label">Benutzername</label>

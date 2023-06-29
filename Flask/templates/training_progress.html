@@ -1,3 +1,45 @@
 {% extends 'base.html' %}
 
+{% block title %}
+Complete Training
+{% endblock %}
+
+{% block content %}
+<body>
+    <h1>Submitted tests of the active Training</h1>
+    <br><br>
+    {% if training_data %}
+        {% for student_data in training_data %}
+            {% if student_data %}
+                <h2>{{ usernames[loop.index0] }}</h2>
+                {% for field, value in student_data.items() %}
+                    <h3>Test: {{ field }}</h3>
+                    {% if value %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Details:</th>
+                                    <th>Daten:</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subfield, subvalue in value.items() %}
+                                    <tr>
+                                        <td>{{ subfield }}</td>
+                                        <td>{{ subvalue }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No subfields available.</p>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>No form data available.</p>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</body>
+{% endblock %}
 

@@ -106,9 +106,7 @@ class Geruchserkennung(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True,autoincrement=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id= db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    geruch_ohne_auswahl = db.Column(db.Text)
     geruch_mit_auswahl = db.Column(db.Text)
-    bemerkung = db.Column(db.Text)
     
 class Paar_vergleich(db.Model):
     __tablename__ = 'paar_vergleich'
@@ -116,8 +114,6 @@ class Paar_vergleich(db.Model):
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    lösung_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    lösung_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))
     bemerkung = db.Column(db.Text)
 
 class Ebp(db.Model):
@@ -148,5 +144,3 @@ class Dreieckstest(db.Model):
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    lösung_1 = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    lösung_2 = db.Column(db.Integer, db.ForeignKey('proben.id'))

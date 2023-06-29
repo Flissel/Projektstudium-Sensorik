@@ -88,14 +88,10 @@ CREATE TABLE dreieckstest (
     aufgabenstellung_id INTEGER,
     probenreihe_id_1 INTEGER NOT NULL,
     probenreihe_id_2 INTEGER NOT NULL,
-    lösung_1 INTEGER NOT NULL,
-    lösung_2 INTEGER NOT NULL,
     proben_auswahl INTEGER[],
     beschreibung TEXT,
     FOREIGN KEY (probenreihe_id_1) REFERENCES probenreihen (id) ON DELETE CASCADE,
     FOREIGN KEY (probenreihe_id_2) REFERENCES probenreihen (id) ON DELETE CASCADE,
-    FOREIGN KEY (lösung_1) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (lösung_2) REFERENCES proben (id) ON DELETE CASCADE,
     FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
@@ -146,9 +142,7 @@ CREATE TABLE geruchserkennung (
     id SERIAL PRIMARY KEY,
     aufgabenstellung_id INTEGER,
     probenreihe_id INTEGER NOT NULL,
-    geruch_ohne_auswahl TEXT,
-    geruch_mit_auswahl TEXT,
-    bemerkung TEXT,
+    geruch_mit_auswahl INTEGER,
     FOREIGN KEY (probenreihe_id) REFERENCES probenreihen (id) ON DELETE CASCADE,
     FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
@@ -159,15 +153,11 @@ CREATE TABLE paar_vergleich (
     aufgabenstellung_id INTEGER,
     probenreihe_id_1 INTEGER NOT NULL,
     probenreihe_id_2 INTEGER NOT NULL,
-    lösung_1 INTEGER NOT NULL,
-    lösung_2 INTEGER NOT NULL,
     proben_auswahl_id_1 INTEGER,
     proben_auswahl_id_2 INTEGER,
     bemerkung TEXT,
     FOREIGN KEY (probenreihe_id_1) REFERENCES probenreihen (id) ON DELETE CASCADE,
     FOREIGN KEY (probenreihe_id_2) REFERENCES probenreihen (id) ON DELETE CASCADE,
-    FOREIGN KEY (lösung_1) REFERENCES proben (id) ON DELETE CASCADE,
-    FOREIGN KEY (lösung_2) REFERENCES proben (id) ON DELETE CASCADE,
     FOREIGN KEY (aufgabenstellung_id) REFERENCES aufgabenstellungen (id) ON DELETE CASCADE
 );
 
@@ -261,8 +251,8 @@ INSERT INTO public.aufgabenstellungen(
     (4, 'Ihnen liegen 2 Probensätze mit jeweils zwei Prüfproben vor. Beantworten Sie bitte für jedes Probenpaar die Prüffrage und tragen Sie die zutreffende Antwort in der Spalte “Antwort” entsprechend ein.', 'paar_vergleich',3),
     (5, 'Ihnen liegen 2 Probensätze vor.  Beantworten Sie bitte für das Probenpaar die Prüffrage und tragen Sie die zutreffende Antwort in der Spalte “Antwort” entsprechend ein.', 'paar_vergleich',4),
     (6, 'Versuchen Sie den zu prüfenden Geruch zu erkennen und tragen Sie das Ergebnis unter "Geruchserkennung ohne Auswahlliste" ein. Beschreiben Sie den Geruch', 'geruchserkennung',5),
-    (7, 'Sie erhalten eine Liste mit Vorschlägen möglicher Aromen. Prüfen Sie nun die Aromen erneut und tragen Sie Ihr Ergebnisse in der Spalte "Geruchserkennung mit Auswahlliste" ein. ', 'geruchserkennung',5),
-    (8, 'Versuchen Sie bei den 6 Reaktionsgefäßen den Geruch zu erkennen und tragen Sie das Ergebnis unter "Geruchserkennung ohne Auswahlliste" ein. Bescreiben Sie den Geruch', 'geruchserkennung',6),
+    (7, 'Sie erhalten eine Liste mit Vorschlägen möglicher Aromen. Prüfen Sie nun die Aromen erneut und tragen Sie Ihr Ergebnisse in der Spalte "Geruchserkennung mit Auswahlliste" ein. ', 'geruchserkennung',6),
+    (8, 'Versuchen Sie bei den 6 Reaktionsgefäßen den Geruch zu erkennen und tragen Sie das Ergebnis unter "Geruchserkennung ohne Auswahlliste" ein. Bescreiben Sie den Geruch', 'geruchserkennung',5),
     (9, 'Beschriften Sie Verkostungsbecher mit den untenstehenden Probennummern. Sehen Sie zusätzlichen Becher für das Referenzwasser vor. Sie erhalten 10 verschiedene wässrige Lösungen, die Saccharose (süß), Natriumchlorid (salzig), Citronensäure (sauer) und Coffein (bitter) in geringer Konzentration enthalten. Stellen Sie die Becher entsprechend der Probennummern von links nach rechts auf. Die vorgelegten Proben sind durch “Schmecken” von links nach rechts zu prüfen und in der entsprechenden Spalte durch ein Kreuz (X) zu kennzeichnen. Rückkosten ist nicht erlaubt ', 'auswahltest',7),
     (10, 'Beschriften Sie Verkostungsbecher mit den untenstehenden Probennummern. Sie erhalten 5 verschiedene wässrige Lösungen mit den Salzen, und eine mit Zreferenzwasser.', 'auswahltest',8),
     (11, 'Ihnen liegen zwei Probensätze mit jeweils drei codierten Proben vor. In jedem Probensatz sind zwei Proben identisch und eine Probe abweichend. Verkosten Sie die Proben bitte in der vorgegebenen Reihenfolge (Prüfproben von links nach rechts) und tragen Sie jeweils die abweichende Probe ein.Rückkosten ist erlaubt. Wenn Sie den Unterschied nicht sicher erkennen, müssen Sie raten.', 'dreieckstest',9),

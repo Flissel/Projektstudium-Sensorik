@@ -1,7 +1,3 @@
-
-
-
-
 {% extends 'base.html' %}
 
 {% block content %}
@@ -9,12 +5,9 @@
     <div class="card">
       <div class="card-body">
         <div class="dashboard">
-          <h1>Wähle zwischen</h1>
-          <ul>
-            <a href="{{ url_for('login') }}" class="professor-link">Professor</a>
-            <span class="or">oder</span>
-            <a href="{{ url_for('register') }}" class="student-link">Student</a>
-          </ul>
+            <a href="{{ url_for('login') }}" class="professor-link">Login</a>
+            <br>
+            <a href="{{ url_for('register') }}" class="student-link">Register</a>
         </div>
       </div>
     </div>

@@ -212,3 +212,22 @@ body {
   .form-group{
     text-align: left;
   }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  table, th, td {
+    border: 1px solid #cccccc;
+  }
+  
+  th, td {
+    padding: 8px;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #eaecee;
+    font-weight: bold;
+  }

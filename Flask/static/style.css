@@ -303,6 +303,7 @@ table, th, td {
 
 th, td {
   padding: 8px;
+  margin-left: 10px;
   text-align: left;
 }
 

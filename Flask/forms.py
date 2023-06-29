@@ -20,16 +20,12 @@ class CreatePaar_vergleich(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id_1 = SelectField('1. Probenreihe', choices=[])
     probenreihe_id_2 = SelectField('2. Probenreihe', choices=[])
-    lösung_1 = SelectField('1. Lösungsprobe', choices=[])
-    lösung_2 = SelectField('2. Lösungsprobe', choices=[])
     
     def __init__(self, *args, **kwargs):
         super(CreatePaar_vergleich, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="paar_vergleich").all()]
         self.probenreihe_id_1.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
         self.probenreihe_id_2.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
-        self.lösung_1.choices = [(p.id, p.probenname) for p in Proben.query.all()]
-        self.lösung_2.choices = [(p.id, p.probenname) for p in Proben.query.all()]
 
 class CreateKonz_reihe(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
@@ -51,21 +47,19 @@ class CreateHed_beurteilung(FlaskForm):
 
 class CreateGeruchserkennung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probe', choices=[])    # Eventuell dem Professor die Möglichkeit geben die Auswahl für jede Frage selbst zu definieren.
-    # Momentan ist Auswahlliste in "geruchsauswahl" Tabelle gespeichert
-    # Eventuell Möglichkeit einräumen diese Liste zu verändern
+    probenreihe_id = SelectField('Probe', choices=[])
+    geruchsauswahl = SelectField('Geruchsauswahl (Irrelevant bei Test ohne Auswahlliste)', choices=[])
 
     def __init__(self, *args, **kwargs):
         super(CreateGeruchserkennung, self).__init__(*args, **kwargs)
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="geruchserkennung").all()]
         self.probenreihe_id.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
+        self.geruchsauswahl.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
 
 class CreateDreieckstest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
     probenreihe_id_1 = SelectField('Probenreihe 1', choices=[])
     probenreihe_id_2 = SelectField('Probenreihe 2', choices=[])
-    lösung_1 = SelectField('Lösungsprobe 1', choices=[])
-    lösung_2 = SelectField('Lösungsprobe 2', choices=[])
 
 
     def __init__(self, *args, **kwargs):
@@ -73,8 +67,6 @@ class CreateDreieckstest(FlaskForm):
         self.aufgabenstellung_id.choices = [(a.id, a.aufgabenstellung) for a in Aufgabenstellungen.query.filter_by(aufgabentyp="dreieckstest").all()]
         self.probenreihe_id_1.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
         self.probenreihe_id_2.choices = [(p.id, p.name) for p in Probenreihen.query.all()]
-        self.lösung_1.choices = [(p.id, p.probenname) for p in Proben.query.all()]
-        self.lösung_2.choices = [(p.id, p.probenname) for p in Proben.query.all()]
 
 class CreateAuswahltest(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
@@ -150,61 +142,69 @@ class TrainingsViewForm(FlaskForm):
 ###################################
 
 class ViewProfilprüfung(FlaskForm):
-    proben_id = SelectField('Proben ID', choices=[])
-    kriterien = SelectField('Kriterium', choices=[])
-    skalenwerte = FieldList(IntegerField('Skalenwert'))
+    aufgabenstellung = StringField('')
+    probe = StringField('')
+    kriterien = FieldList(StringField(''))
+    skalenwerte = FieldList(SelectField('', choices=[('0', '0 (zu schwach)'),('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5'), ('6', '6'), ('7', '7'), ('8', '8'), ('9','9'), ('10', '10 (zu stark)')]))
 
 class ViewPaar_vergleich(FlaskForm):
-    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id_1 = SelectField('1. Probenreihe', choices=[])
-    probenreihe_id_2 = SelectField('2. Probenreihe', choices=[])
-    lösung_1 = SelectField('1. Lösungsprobe', choices=[])
-    lösung_2 = SelectField('2. Lösungsprobe', choices=[])
-
-    proben_id_1 = SelectField('Der geschmack welcher Probe ist stärker ausgeprägt ?', choices=[])
-    proben_id_2 = SelectField('Der geschmack welcher Probe ist stärker ausgeprägt ?', choices=[])
-    proben_id_3 = SelectField('Der Geschmack welcher Probe entspricht eher Ihren Erwartungen an das Produkt?', choices=[])
+    aufgabenstellung = StringField('')
+    proben_1 = FieldList(StringField(''))
+    proben_2 = FieldList(StringField(''))
+    ausgeprägte_probe_1 = SelectField('Der Geschmack welcher Probe ist stärker ausgeprägt ?', choices=[])
+    ausgeprägte_probe_2 = SelectField('Der Geschmack welcher Probe ist stärker ausgeprägt ?', choices=[])
+    bemerkung_1 = StringField('Bemerkung: ')
+    bemerkung_2 = StringField('Bemerkung: ')
+    erwartung_probe = SelectField('Der Geschmack welcher Probe entspricht eher Ihren Erwartungen an das Produkt ?', choices=[])
 
 
 class ViewKonz_reihe(FlaskForm):
-    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probenreihe', choices=[])
-    antworten = FieldList(StringField('Antwort'))
+    aufgabenstellung = StringField('')
+    proben = FieldList(StringField(''))
+    konzentration = FieldList(SelectField('Konzentration: ', choices=[("0", "0"), ("?", "?"), ("X", "X"), ("XX", "XX"), ("XXX", "XXX")]))
+    bemerkungen = FieldList(StringField('Anmerkung: '))
 
 class ViewHed_beurteilung(FlaskForm):
-    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probe', choices=[])
-    einordnung = FieldList(SelectField('Einordnung', choices=[]))
+    aufgabenstellung = StringField('')
+    proben = FieldList(StringField(''))
+    einordnungen = FieldList(SelectField('Einordnung: ', choices=[
+                                                                ("mag ich besonders gern", "Mag ich besonders gern"),
+                                                                ("mag ich sehr gern", "Mag ich sehr gern"),
+                                                                ("mag ich gern", "Mag ich gern"),
+                                                                ("mag ich etwas", "Mag ich etwas"),
+                                                                ("weder dafür noch dagegen", "Weder dafür noch dagegen"),
+                                                                ("etwas dagegen", "Etwas dagegen"),
+                                                                ("mag ich wenig", "Mag ich wenig"),
+                                                                ("mag ich sehr wenig", "Mag ich sehr wenig"),
+                                                                ("mag ich überhaupt nicht", "Mag ich überhaupt nicht"),
+                                                            ]))
+    bemerkungen = FieldList(StringField('Anmerkung: '))
 
 class ViewGeruchserkennung(FlaskForm):
-    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    proben_id = SelectField('Probe', choices=[])
-    ohne_auswahl = StringField('Geruchserkennung ohne Auswahl')
-    mit_auswahl = SelectField('Geruchserkennung mit Auswahl', choices=[])
-    # Eventuell dem Professor die Möglichkeit geben die Auswahl für jede Frage selbst zu definieren.
-    # Momentan ist Auswahlliste in "geruchsauswahl" Tabelle gespeichert
-    # Eventuell Möglichkeit einräumen diese Liste zu verändern
+    aufgabenstellung = StringField('')
+    proben = FieldList(StringField(''))
+    ohne_auswahl = FieldList(StringField('Geruchserkennung ohne Auswahl'))
+    mit_auswahl = FieldList(SelectField('Geruchserkennung mit Auswahl', choices=[]))
 
 class ViewDreieckstest(FlaskForm):
-    aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id_1 = SelectField('Probenreihe 1', choices=[])
-    probenreihe_id_2 = SelectField('Probenreihe 2', choices=[])
-    lösung_1 = SelectField('Lösungsprobe 1', choices=[])
-    lösung_2 = SelectField('Lösungsprobe 2', choices=[])
+    aufgabenstellung = StringField('')
+    proben_1 = FieldList(StringField(''))
+    proben_2 = FieldList(StringField(''))
     abweichende_probe_1 = SelectField('Welches ist die abweichende Probe ?', choices=[])
     abweichende_probe_2 = SelectField('Welches ist die abweichende Probe ?', choices=[])
-    beschreibung_1 = StringField('Beschreibung des unterschieds')
-    beschreibung_2 = StringField('Beschreibung des unterschieds')
+    beschreibung_1 = StringField('Beschreibung des unterschieds: ')
+    beschreibung_2 = StringField('Beschreibung des unterschieds: ')
 
 class ViewAuswahltest(FlaskForm):
-    aufgabenstellung = StringField('Aufgabenstellung')
+    aufgabenstellung = StringField('')
     proben = FieldList(StringField(''))
     einordnungen = FieldList(SelectField('Einordnung', choices=[]))
     bemerkungen = FieldList(StringField('Bemerkung'))
 
 class ViewRangordnungstest(FlaskForm):
     aufgabenstellung = StringField('')
-    proben = FieldList(SelectField('', choices=[]))
+    proben = FieldList(StringField(''))
+    ränge = FieldList(SelectField('', choices=[]))
 
 class ViewEbp(FlaskForm):
     aufgabenstellung = StringField('')
