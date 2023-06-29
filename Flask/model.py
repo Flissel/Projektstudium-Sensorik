@@ -72,7 +72,6 @@ class Konz_reihe(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True,autoincrement=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    antworten = db.Column(ARRAY(db.Text))
 
 class Profilprüfung(db.Model):
     __tablename__ = "profilprüfung"
@@ -81,7 +80,6 @@ class Profilprüfung(db.Model):
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
     kriterien = db.Column(ARRAY(db.Text))
-    bewertungen = db.Column(ARRAY(db.Integer))
 
 class Hed_beurteilung(db.Model):
     __tablename__ = "hed_beurteilung"
@@ -89,8 +87,6 @@ class Hed_beurteilung(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True,autoincrement=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    beurteilung = db.Column(ARRAY(db.Text))
-    anmerkung = db.Column(ARRAY(db.Text))
 
 class Auswahltest(db.Model):
     __tablename__ = "auswahltest"
@@ -98,7 +94,6 @@ class Auswahltest(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True,autoincrement=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id= db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    bemerkungen = db.Column(ARRAY(db.Text))
 
 class Geruchserkennung(db.Model):
     __tablename__ = "geruchserkennung"
@@ -114,29 +109,18 @@ class Paar_vergleich(db.Model):
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id_1 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
     probenreihe_id_2 = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    bemerkung = db.Column(db.Text)
 
 class Ebp(db.Model):
     __tablename__ = 'ebp'
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     proben_id = db.Column(db.Integer, db.ForeignKey('proben.id'))
-    aussehen_farbe = db.Column(db.Text)
-    geruch = db.Column(db.Text)
-    geschmack = db.Column(db.Text)
-    textur = db.Column(db.Text)
-    konsistenz = db.Column(db.Text)
 
 class Rangordnungstest(db.Model):
     __tablename__ = 'rangordnungstest'
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     aufgabenstellung_id = db.Column(db.Integer, db.ForeignKey('aufgabenstellungen.id'))
     probenreihe_id = db.Column(db.Integer, db.ForeignKey('probenreihen.id'))
-    rang_1_proben_id = db.Column(db.Integer)
-    rang_2_proben_id = db.Column(db.Integer)
-    rang_3_proben_id = db.Column(db.Integer)
-    rang_4_proben_id = db.Column(db.Integer)
-    rang_5_proben_id = db.Column(db.Integer)
 
 class Dreieckstest(db.Model):
     __tablename__ = 'dreieckstest'

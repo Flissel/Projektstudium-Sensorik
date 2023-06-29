@@ -1,5 +1,5 @@
 
-from flask import Flask, jsonify, render_template, request, session, redirect, url_for ,flash, request
+from flask import Flask, jsonify, render_template, request, session, redirect, url_for ,flash, request, send_file
 from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Probenreihen, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen,Prüfvarianten
 from forms import *
 from uuid import uuid4
@@ -7,6 +7,8 @@ from datetime import datetime
 from jinja2 import Environment
 import pandas as pd
 import json
+import pdfkit
+import os
 
 app = Flask(__name__)
 
@@ -18,6 +20,10 @@ app.config['SECRET_KEY'] = 'secret_key'
 db.init_app(app)
 
 INACTIVITY_THRESHOLD = 3600 # 1 hour in seconds
+
+path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+setted_professor_password = 'hswt_sensorik'
+
 
 
 def zip_lists(a, b):
@@ -84,6 +90,209 @@ def get_form_data_from_json(filename):
             data = None
 
         return data
+
+def fill_ebp_form(form, question):
+    aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id).aufgabenstellung
+    form.aufgabenstellung.label = aufgabe
+    form.aufgabenstellung.data = aufgabe
+
+    probe = Proben.query.get(question.proben_id)
+    form.proben_nr.label = probe.proben_nr
+    form.proben_nr.data = probe.proben_nr
+    return form
+
+def fill_rangordnungstest_form(form, question):
+    
+    aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+    form.aufgabenstellung.label = aufgabe.aufgabenstellung
+    form.aufgabenstellung.data = aufgabe.aufgabenstellung
+
+    proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
+
+    for i, probe in enumerate(proben):
+        probe = Proben.query.get(probe)
+        if len(form.ränge) < len(proben):
+            form.ränge.append_entry()
+        if len(form.proben) < len(proben):
+            form.proben.append_entry()
+        form.proben[i].label = probe.proben_nr
+        form.proben[i].data = probe.proben_nr
+        form.ränge[i].choices = [(i, i) for i in range(1, len(proben) + 1)]
+
+    return form
+
+def fill_auswahltest_form(form, question):
+
+    aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+    form.aufgabenstellung.label = aufgabe.aufgabenstellung
+    form.aufgabenstellung.data = aufgabe.aufgabenstellung
+    
+    proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
+    for i, probe in enumerate(proben):
+        probe = Proben.query.get(probe)
+        if len(form.einordnungen) < len(proben):
+            form.einordnungen.append_entry()
+        if len(form.proben) < len(proben):
+            form.proben.append_entry()
+        if len(form.bemerkungen) < len(proben):
+            form.bemerkungen.append_entry()
+        form.proben[i].label = probe.proben_nr
+        form.proben[i].data = probe.proben_nr
+        if aufgabe.prüfvarianten_id == 7:
+            form.einordnungen[i].choices = [("nicht zu erkennen", "nicht zu erkennen"), ("süß", "süß"), ("salzig", "salzig"), ("sauer", "sauer"), ("bitter", "bitter"), ("umami", "umami")]
+        if aufgabe.prüfvarianten_id == 8:
+            form.einordnungen[i].choices = [("neutral", "neutral"), ("KCL", "KCL"), ("NaCl", "NaCl"), ("NH4Cl", "NH4Cl"), ("CaCl2", "CaCl2"), ("Na2CO3", "Na2CO3")]
+    return form
+
+def fill_dreieckstest_form(form, question):
+        
+        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+        form.aufgabenstellung.label = aufgabe.aufgabenstellung
+        form.aufgabenstellung.data = aufgabe.aufgabenstellung
+
+        proben_1 = Probenreihen.query.get(question.probenreihe_id_1).proben_ids
+        proben_2 = Probenreihen.query.get(question.probenreihe_id_2).proben_ids
+
+        for i, probe in enumerate(proben_1):
+            probe = Proben.query.get(probe)
+            if len(form.proben_1) < len(proben_1):
+                form.proben_1.append_entry()
+            form.proben_1[i].label = probe.proben_nr
+            form.proben_1[i].data = probe.proben_nr
+
+        for i, probe in enumerate(proben_2):
+            probe = Proben.query.get(probe)
+            if len(form.proben_2) < len(proben_2):
+                form.proben_2.append_entry()
+            form.proben_2[i].label = probe.proben_nr
+            form.proben_2[i].data = probe.proben_nr
+        form.abweichende_probe_1.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_1]
+        form.abweichende_probe_2.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_2]
+        return form
+
+def fill_geruchserkennung_form(form, question):
+
+    aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+    form.aufgabenstellung.label = aufgabe.aufgabenstellung
+    form.aufgabenstellung.data = aufgabe.aufgabenstellung
+    proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
+    proben_auswahl = Probenreihen.query.get(question.geruch_mit_auswahl).proben_ids
+
+    for i, probe in enumerate(proben):
+        probe = Proben.query.get(probe)
+        if len(form.proben) < len(proben):
+            form.proben.append_entry()
+        if aufgabe.prüfvarianten_id == 6:
+            if len(form.mit_auswahl) < len(proben):
+                form.mit_auswahl.append_entry()
+            form.mit_auswahl[i].choices = [(probe, str(Proben.query.get(probe).probenname)) for probe in proben_auswahl]
+        if aufgabe.prüfvarianten_id == 5:
+            if len(form.ohne_auswahl) < len(proben):
+                form.ohne_auswahl.append_entry()
+        form.proben[i].label = probe.proben_nr
+        form.proben[i].data = probe.proben_nr
+    return form
+
+def fill_hed_beurteilung_form(form, question):
+        
+        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+        form.aufgabenstellung.label = aufgabe.aufgabenstellung
+        form.aufgabenstellung.data = aufgabe.aufgabenstellung
+        proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
+        for i, probe in enumerate(proben):
+            probe = Proben.query.get(probe)
+            if len(form.proben) < len(proben):
+                form.proben.append_entry()
+            if len(form.einordnungen) < len(proben):
+                form.einordnungen.append_entry()
+                form.bemerkungen.append_entry()
+            form.proben[i].label = probe.proben_nr
+            form.proben[i].data = probe.proben_nr
+        return form
+
+def fill_konz_reihe_form(form, question):
+
+    aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+    form.aufgabenstellung.label = aufgabe.aufgabenstellung
+    form.aufgabenstellung.data = aufgabe.aufgabenstellung
+    proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
+    for i, probe in enumerate(proben):
+        probe = Proben.query.get(probe)
+        if len(form.proben) < len(proben):
+            form.proben.append_entry()
+        if len(form.konzentration) < len(proben):
+            form.konzentration.append_entry()
+            form.bemerkungen.append_entry()
+        form.proben[i].label = probe.proben_nr
+        form.proben[i].data = probe.proben_nr
+    return form
+
+def fill_paar_vergleich_form(form, question):
+
+    aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+    form.aufgabenstellung.label = aufgabe.aufgabenstellung
+    form.aufgabenstellung.data = aufgabe.aufgabenstellung
+    proben_1 = Probenreihen.query.get(question.probenreihe_id_1).proben_ids
+    proben_2 = Probenreihen.query.get(question.probenreihe_id_2).proben_ids
+
+    for i, probe in enumerate(proben_1):
+        probe = Proben.query.get(probe)
+        if len(form.proben_1) < len(proben_1):
+            form.proben_1.append_entry()
+        form.proben_1[i].label = probe.proben_nr
+        form.proben_1[i].data = probe.proben_nr
+    for i, probe in enumerate(proben_2):
+        probe = Proben.query.get(probe)
+        if len(form.proben_2) < len(proben_2):
+            form.proben_2.append_entry()
+        form.proben_2[i].label = probe.proben_nr
+        form.proben_2[i].data = probe.proben_nr
+    form.ausgeprägte_probe_1.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_1]
+    form.ausgeprägte_probe_2.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_2]
+    form.erwartung_probe.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_1 + proben_2]
+    
+    return form
+
+def fill_profilprüfung_form(form, question):
+
+    aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+    form.aufgabenstellung.label = aufgabe.aufgabenstellung
+    form.aufgabenstellung.data = aufgabe.aufgabenstellung
+    probe = Proben.query.get(question.proben_id)
+    form.probe.label = probe.proben_nr
+    form.probe.data = probe.proben_nr
+
+    for i, kriterium in enumerate(question.kriterien):
+        if len(form.kriterien) < len(question.kriterien):
+            form.kriterien.append_entry()
+        if len(form.skalenwerte) < len(question.kriterien):
+            form.skalenwerte.append_entry()
+        form.kriterien[i].label = kriterium
+        form.kriterien[i].data = kriterium
+    return form
+
+def save_to_json(form, filename, question_type, question_index):
+    data = {}
+
+    try:
+        with open(filename, 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        pass
+
+    form_data = {}
+    for field_name, field_value in form.data.items():
+        if field_name != "csrf_token":
+            if isinstance(field_value, list):
+                form_data[field_name] = [item for item in field_value]
+            else:
+                form_data[field_name] = field_value
+
+    data[str(question_type) + '-' + str(question_index)] = form_data
+
+    with open(filename, 'w') as file:
+        json.dump(data, file)
+
 
 app.jinja_env.filters['zip_lists'] = zip_lists
 
@@ -165,7 +374,7 @@ def register():
 
         # Check if the user wants to register as a professor and if the professor password is correct
         is_professor = 'professor' in request.form
-        if is_professor and professor_password != 'your_expected_password':
+        if is_professor and professor_password != setted_professor_password:
            
             return render_template('registery.html', error='Professor Passwort Falsch')
 
@@ -173,7 +382,7 @@ def register():
         existing_user = Benutzer.query.filter_by(benutzername=username).first()
         if existing_user:
            
-            return render_template('registery.html', error='Berutzername ist leider schon vergeben.')
+            return render_template('registery.html', error='Benutzername ist leider schon vergeben.')
 
         # Set the role based on whether the user is registering as a professor or not
         role = is_professor
@@ -188,6 +397,22 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('registery.html')
+
+@app.route('/manage_users', methods=['GET', 'POST'])
+def manage_users():
+    if 'username' not in session or session['role'] == False:
+        return redirect(url_for('login'))
+    users = Benutzer.query.all()
+    return render_template('manage_users.html', users=users)
+
+@app.route('/delete_user/<int:id>', methods=['POST'])
+def delete_user(id):
+    if 'username' not in session or session['role'] == False:
+        return redirect(url_for('login'))
+    user = Benutzer.query.get(id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect(url_for('manage_users'))
 
 @app.route('/student_waitingroom')
 def student_waitingroom():
@@ -208,7 +433,7 @@ def student_waitingroom():
             flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')   
             return redirect(url_for('training_page'))
         else:
-            flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')
+            #flash('User ' + user.benutzername + ' wartet auf Praktikum.', 'warning')
             return render_template('student_waitingroom.html')
     else:
         return redirect(url_for('professor_dashboard'))
@@ -219,276 +444,6 @@ def error():
     This function handles the error page.
     """
     return render_template('Error.html')
-
-
-    form = CreateTrainingForm()
-    question_types_map = {
-        "ebp": form.ebp_questions,
-        "rangordnungstest": form.rangordnungstest_questions,
-        "auswahltest": form.auswahltest_questions,
-        "dreieckstest": form.dreieckstest_questions,
-        "geruchserkennung": form.geruchserkennung_questions,
-        "hed_beurteilung": form.hed_beurteilung_questions,
-        "konz_reihe": form.konz_reihe_questions,
-        "paar_vergleich": form.paar_vergleich_questions,
-        "profilprüfung": form.profilprüfung_questions
-    }
-    training = Trainings.query.filter_by(id=training_id).first()
-    training_questions = training.fragen_ids
-    training_question_types = training.fragen_typen
-    form.name.data = training.name
-    
-    if form.validate_on_submit():
-        
-        if 'add_question' in request.form:
-            question_type = form.question_types.data
-            if question_type in question_types_map:
-                question_types_map[question_type].append_entry()
-                return render_template('modify_training.html', form=form, training_id=training_id)
-
-        for question_type in question_types_map.keys():
-            if 'delete_{}_question'.format(question_type) in request.form:
-                index_to_remove = int(request.form['delete_{}_question'.format(question_type)])
-                question_types_map[question_type].entries.pop(index_to_remove)
-                return render_template('modify_training.html', form=form, training_id=training_id)
-        
-        if 'criteria' in request.form:
-            actions = request.form['criteria'].split(' ',2)
-            operation = actions[0]
-            index = int(actions[1])
-            
-            if operation == 'add':
-                form.profilprüfung_questions[index].kriterien.append_entry()    
-            elif operation == 'remove':
-                form.profilprüfung_questions[index].kriterien.entries.pop()
-            return render_template('modify_training.html', form=form, training_id=training_id)
-                
-        if 'submit' in request.form:
-            
-            fragen_ids = []
-            fragen_typen = []
-
-            for question_form in form.ebp_questions:
-                proben_id = question_form.proben_id.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-                test = Ebp(proben_id=proben_id, aufgabenstellung_id=aufgabenstellung_id)
-                
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id)
-                fragen_typen.append("ebp")
-
-            for question_form in form.rangordnungstest_questions:
-                probenreihe_id = question_form.probenreihe_id.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-
-                test = Rangordnungstest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id)
-                fragen_typen.append("rangordnungstest")
-                
-            for question_form in form.auswahltest_questions:
-                probenreihe_id = question_form.probenreihe_id.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-
-                test = Auswahltest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id)
-                fragen_typen.append("auswahltest")
-
-            for question_form in form.dreieckstest_questions:
-                probenreihe_id_1 = question_form.probenreihe_id_1.data
-                probenreihe_id_2 = question_form.probenreihe_id_2.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-                lösung_1 = question_form.lösung_1.data
-                lösung_2 = question_form.lösung_2.data
-
-                test = Dreieckstest(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id_1=probenreihe_id_1, probenreihe_id_2=probenreihe_id_2, lösung_1=lösung_1, lösung_2=lösung_2)
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id)
-                fragen_typen.append("dreieckstest") 
-                
-            for question_form in form.geruchserkennung_questions:
-                proben_id = question_form.proben_id.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-
-                test = Geruchserkennung(aufgabenstellung_id=aufgabenstellung_id, proben_id=proben_id)
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id) 
-                fragen_typen.append("geruchserkennungtest")
-            
-            for question_form in form.hed_beurteilung_questions:
-                probenreihe_id = question_form.probenreihe_id.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-
-                test = Hed_beurteilung(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id)
-                fragen_typen.append("hed_beurteilung")
-                
-            for question_form in form.konz_reihe_questions:
-                probenreihe_id = question_form.probenreihe_id.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-
-                test = Konz_reihe(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id=probenreihe_id)
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id)
-                fragen_typen.append("konz_reihe")
-                
-            for question_form in form.paar_vergleich_questions:
-                probenreihe_id_1 = question_form.probenreihe_id_1.data
-                probenreihe_id_2 = question_form.probenreihe_id_2.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-                lösung_1 = question_form.lösung_1.data
-                lösung_2 = question_form.lösung_2.data
-
-                test = Paar_vergleich(aufgabenstellung_id=aufgabenstellung_id, probenreihe_id_1=probenreihe_id_1, probenreihe_id_2=probenreihe_id_2, lösung_1=lösung_1, lösung_2=lösung_2)
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id)
-                fragen_typen.append("paar_vergleich")
-            
-            for question_form in form.profilprüfung_questions:
-                proben_id = question_form.proben_id.data
-                aufgabenstellung_id = question_form.aufgabenstellung_id.data
-                kriterien = question_form.kriterien.data
-
-                test = Profilprüfung(aufgabenstellung_id=aufgabenstellung_id, proben_id=proben_id, kriterien=kriterien)
-                db.session.add(test)
-                db.session.commit()
-
-                fragen_ids.append(test.id)
-                fragen_typen.append("profilprüfung")
-            
-            training = Trainings(
-                name=request.form["name"],
-                fragen_ids = fragen_ids,
-                fragen_typen = fragen_typen
-            )
-            db.session.add(training)
-            db.session.commit()
-
-            #TODO: delete training with training_id and all the questions dependend on it
-            training_to_delete = Trainings.query.filter_by(id=training_id).first()
-            for i in range(len(training_to_delete.fragen_ids)):
-                if training_to_delete.fragen_typen[i] == "ebp":
-                    Ebp.query.filter_by(id=training_to_delete.fragen_ids[i]).delete()
-                if training_to_delete.fragen_typen[i] == "rangordnungstest":
-                    Rangordnungstest.query.filter_by(id=training_to_delete.fragen_ids[i]).delete()
-                if training_to_delete.fragen_typen[i] == "dreieckstest":
-                    Dreieckstest.query.filter_by(id=training_to_delete.fragen_ids[i]).delete()
-                if training_to_delete.fragen_typen[i] == "geruchserkennungtest":
-                    Geruchserkennung.query.filter_by(id=training_to_delete.fragen_ids[i]).delete()
-                if training_to_delete.fragen_typen[i] == "hed_beurteilung":
-                    Hed_beurteilung.query.filter_by(id=training_to_delete.fragen_ids[i]).delete()
-                if training_to_delete.fragen_typen[i] == "konz_reihe":
-                    Konz_reihe.query.filter_by(id=training_to_delete.fragen_ids[i]).delete()
-                if training_to_delete.fragen_typen[i] == "paar_vergleich":
-                    Paar_vergleich.query.filter_by(id=training_to_delete.fragen_ids[i]).delete()
-                if training_to_delete.fragen_typen[i] == "profilprüfung":
-                    Profilprüfung.query.filter_by(id=training_to_delete.fragen_ids[i]).delete()
-                
-            db.session.delete(training_to_delete)
-            db.session.commit()
-
-            flash("Training erfolgreich erstellt", "success")
-            return redirect(url_for('professor_dashboard'))
-    index = 0       
-    for question in training_question_types:
-        if question == "ebp":
-            form.ebp_questions.append_entry()
-            form.ebp_questions[-1].proben_id.data = Ebp.query.filter_by(id=training_questions[index]).first().proben_id
-            form.ebp_questions[-1].proben_id.default = Ebp.query.filter_by(id=training_questions[index]).first().proben_id
-            form.ebp_questions[-1].aufgabenstellung_id.data = Ebp.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.ebp_questions[-1].aufgabenstellung_id.default = Ebp.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.ebp_questions[-1].form.process()
-        if question == "rangordnungstest":
-            form.rangordnungstest_questions.append_entry()
-            form.rangordnungstest_questions[-1].probenreihe_id.data = Rangordnungstest.query.filter_by(id=training_questions[index]).first().probenreihe_id
-            form.rangordnungstest_questions[-1].probenreihe_id.default = Rangordnungstest.query.filter_by(id=training_questions[index]).first().probenreihe_id
-            form.rangordnungstest_questions[-1].aufgabenstellung_id.data = Rangordnungstest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.rangordnungstest_questions[-1].aufgabenstellung_id.default = Rangordnungstest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.rangordnungstest_questions[-1].form.process()
-        if question == "auswahltest":
-            form.auswahltest_questions.append_entry()
-            form.auswahltest_questions[-1].probenreihe_id.data = Auswahltest.query.filter_by(id=training_questions[index]).first().probenreihe_id
-            form.auswahltest_questions[-1].probenreihe_id.default = Auswahltest.query.filter_by(id=training_questions[index]).first().probenreihe_id
-            form.auswahltest_questions[-1].aufgabenstellung_id.data = Auswahltest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.auswahltest_questions[-1].aufgabenstellung_id.default = Auswahltest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.auswahltest_questions[-1].form.process()
-        if question == "dreieckstest":
-            form.dreieckstest_questions.append_entry()
-            form.dreieckstest_questions[-1].probenreihe_id_1.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().probenreihe_id_1
-            form.dreieckstest_questions[-1].probenreihe_id_1.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().probenreihe_id_1
-            form.dreieckstest_questions[-1].probenreihe_id_2.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().probenreihe_id_2
-            form.dreieckstest_questions[-1].probenreihe_id_2.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().probenreihe_id_2
-            form.dreieckstest_questions[-1].aufgabenstellung_id.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.dreieckstest_questions[-1].aufgabenstellung_id.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.dreieckstest_questions[-1].lösung_1.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().lösung_1
-            form.dreieckstest_questions[-1].lösung_1.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().lösung_1
-            form.dreieckstest_questions[-1].lösung_2.data = Dreieckstest.query.filter_by(id=training_questions[index]).first().lösung_2
-            form.dreieckstest_questions[-1].lösung_2.default = Dreieckstest.query.filter_by(id=training_questions[index]).first().lösung_2
-            form.dreieckstest_questions[-1].form.process()
-        if question == "geruchserkennung":
-            form.geruchserkennung_questions.append_entry()
-            form.geruchserkennung_questions[-1].proben_id.data = Geruchserkennung.query.filter_by(id=training_questions[index]).first().proben_id
-            form.geruchserkennung_questions[-1].proben_id.default = Geruchserkennung.query.filter_by(id=training_questions[index]).first().proben_id
-            form.geruchserkennung_questions[-1].aufgabenstellung_id.data = Geruchserkennung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.geruchserkennung_questions[-1].aufgabenstellung_id.default = Geruchserkennung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.geruchserkennung_questions[-1].form.process()
-        if question == "hed_beurteilung":
-            form.hed_beurteilung_questions.append_entry()
-            form.hed_beurteilung_questions[-1].probenreihe_id.data = Hed_beurteilung.query.filter_by(id=training_questions[index]).first().probenreihe_id
-            form.hed_beurteilung_questions[-1].probenreihe_id.default = Hed_beurteilung.query.filter_by(id=training_questions[index]).first().probenreihe_id
-            form.hed_beurteilung_questions[-1].aufgabenstellung_id.data = Hed_beurteilung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.hed_beurteilung_questions[-1].aufgabenstellung_id.default = Hed_beurteilung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.hed_beurteilung_questions[-1].form.process()
-        if question == "konz_reihe":
-            form.konz_reihe_questions.append_entry()
-            form.konz_reihe_questions[-1].probenreihe_id.data = Konz_reihe.query.filter_by(id=training_questions[index]).first().probenreihe_id
-            form.konz_reihe_questions[-1].probenreihe_id.default = Konz_reihe.query.filter_by(id=training_questions[index]).first().probenreihe_id
-            form.konz_reihe_questions[-1].aufgabenstellung_id.data = Konz_reihe.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.konz_reihe_questions[-1].aufgabenstellung_id.default = Konz_reihe.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.konz_reihe_questions[-1].form.process()
-        if question == "paar_vergleich":
-            form.paar_vergleich_questions.append_entry()
-            form.paar_vergleich_questions[-1].probenreihe_id_1.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().probenreihe_id_1
-            form.paar_vergleich_questions[-1].probenreihe_id_1.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().probenreihe_id_1
-            form.paar_vergleich_questions[-1].probenreihe_id_2.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().probenreihe_id_2
-            form.paar_vergleich_questions[-1].probenreihe_id_2.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().probenreihe_id_2
-            form.paar_vergleich_questions[-1].aufgabenstellung_id.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.paar_vergleich_questions[-1].aufgabenstellung_id.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.paar_vergleich_questions[-1].lösung_1.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().lösung_1
-            form.paar_vergleich_questions[-1].lösung_1.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().lösung_1
-            form.paar_vergleich_questions[-1].lösung_2.data = Paar_vergleich.query.filter_by(id=training_questions[index]).first().lösung_2
-            form.paar_vergleich_questions[-1].lösung_2.default = Paar_vergleich.query.filter_by(id=training_questions[index]).first().lösung_2
-            form.paar_vergleich_questions[-1].form.process()
-        if question == "profilprüfung":
-            form.profilprüfung_questions.append_entry()
-            form.profilprüfung_questions[-1].proben_id.data = Profilprüfung.query.filter_by(id=training_questions[index]).first().proben_id
-            form.profilprüfung_questions[-1].proben_id.default = Profilprüfung.query.filter_by(id=training_questions[index]).first().proben_id
-            form.profilprüfung_questions[-1].aufgabenstellung_id.data = Profilprüfung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.profilprüfung_questions[-1].aufgabenstellung_id.default = Profilprüfung.query.filter_by(id=training_questions[index]).first().aufgabenstellung_id
-            form.profilprüfung_questions[-1].kriterien.data = Profilprüfung.query.filter_by(id=training_questions[index]).first().kriterien
-            form.profilprüfung_questions[-1].kriterien.default = Profilprüfung.query.filter_by(id=training_questions[index]).first().kriterien
-            form.profilprüfung_questions[-1].form.process()
-        index += 1
-    
-    return render_template('modify_training.html', form=form, training_id=training_id)
 
 @app.route('/professor_dashboard', methods=['GET', 'POST'])
 def professor_dashboard():
@@ -521,7 +476,6 @@ def professor_dashboard():
             form_id = request.form.get('form_id')
             action = request.form.get('action')
 
-        # Debug print statements
             index = int(action.split(' ')[1])
         if 'select' in request.form['action']:
             students = Benutzer.query.filter_by(rolle=False).all()
@@ -569,25 +523,82 @@ def professor_dashboard():
 @app.route('/modify_training/<int:training_id>', methods=['GET', 'POST'])
 def modify_training(training_id):
     # Query the database for the training with the provided id
-    training = Trainings.query.get(training_id)
+    if 'username' not in session:
+        return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
+    if Benutzer.query.filter_by(benutzername=session['username']).first().rolle == False:
+        return redirect(url_for('student_waitingroom'))
+    
+    question_types_models_map = {
+        "ebp": Ebp,
+        "rangordnungstest": Rangordnungstest,
+        "auswahltest": Auswahltest,
+        "dreieckstest": Dreieckstest,
+        "geruchserkennungstest": Geruchserkennung,
+        "hed_beurteilung": Hed_beurteilung,
+        "konz_reihe": Konz_reihe,
+        "paar_vergleich": Paar_vergleich,
+        "profilprüfung": Profilprüfung,
+        }
 
-    # If no such training exists, redirect to an appropriate page (e.g., a list of all trainings)
-    if training is None:
-        flash('No such training exists.', 'error')
-        return redirect(url_for('list_trainings'))
+    question_types_forms_map = {
+        "ebp": ViewEbp(),
+        "rangordnungstest": ViewRangordnungstest(),
+        "auswahltest": ViewAuswahltest(),
+        "dreieckstest": ViewDreieckstest(),
+        "geruchserkennungstest": ViewGeruchserkennung(),
+        "hed_beurteilung": ViewHed_beurteilung(),
+        "konz_reihe": ViewKonz_reihe(),
+        "paar_vergleich": ViewPaar_vergleich(),
+        "profilprüfung": ViewProfilprüfung(),
+        }
 
-    # Create a TrainingForm populated with the existing training data
-    form = CreateTrainingForm(obj=training)
+    form_filling_map = {
+        "ebp": fill_ebp_form,
+        "rangordnungstest": fill_rangordnungstest_form,
+        "auswahltest": fill_auswahltest_form,
+        "dreieckstest": fill_dreieckstest_form,
+        "geruchserkennungstest": fill_geruchserkennung_form,
+        "hed_beurteilung": fill_hed_beurteilung_form,
+        "konz_reihe": fill_konz_reihe_form,
+        "paar_vergleich": fill_paar_vergleich_form,
+        "profilprüfung": fill_profilprüfung_form,
+        }
+    
+    session['question_index'] = session.get('question_index', 0)
 
-    # If the form is submitted and the data is valid, update the training and commit it to the database
-    if form.validate_on_submit():
-        form.populate_obj(training)
-        db.session.commit()
-        flash('Training successfully updated.', 'success')
-        return redirect(url_for('list_trainings'))
+    training = Trainings.query.filter_by(id=training_id).first()
+    
+    question_max = len(training.fragen_typen)
 
-    # Render the form with the current training data and the questions
-    return render_template('modify_training.html', form=form, training=training,training_id=training_id)
+    question_type = training.fragen_typen[session['question_index']]
+
+    question = question_types_models_map[question_type].query.get(training.fragen_ids[session['question_index']])
+
+    aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
+
+    prüfvariante = aufgabe.prüfvarianten_id
+
+    form = question_types_forms_map[question_type]
+    
+    form = form_filling_map[question_type](form, question)
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+
+            if 'submit' in request.form:
+                if request.form['submit'] == "abgeben":
+                    session['question_index'] = 0
+                    return redirect(url_for('professor_dashboard'))
+                if request.form['submit'] == 'weiter':
+                    session['question_index'] = session['question_index'] + 1
+                elif request.form['submit'] == 'zurück':
+                    session['question_index'] = session['question_index'] - 1
+            return redirect(url_for('modify_training', training_id=training_id))
+        else:
+            print_form_validation_errors(form)
+    
+    return render_template('training_view_page.html', question=question, question_type=question_type, form=form,
+                       question_index=session['question_index'], prüfvariante=prüfvariante, question_max=question_max, training_id=training_id)
  
 @app.route('/select_training/<training>')
 def select_training(training):
@@ -942,251 +953,49 @@ def manage_aufgabenstellungen():
 @app.route('/training_page/', methods=['GET', 'POST'])
 def training_page():
 
-    def fill_ebp_form(form, question):
-        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id).aufgabenstellung
-        form.aufgabenstellung.label = aufgabe
-        form.aufgabenstellung.data = aufgabe
-
-        probe = Proben.query.get(question.proben_id)
-        form.proben_nr.label = probe.proben_nr
-        form.proben_nr.data = probe.proben_nr
-        return form
-    
-    def fill_rangordnungstest_form(form, question):
-        
-        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-        form.aufgabenstellung.label = aufgabe.aufgabenstellung
-        form.aufgabenstellung.data = aufgabe.aufgabenstellung
-
-        proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
-
-        for i, probe in enumerate(proben):
-            probe = Proben.query.get(probe)
-            if len(form.ränge) < len(proben):
-                form.ränge.append_entry()
-            if len(form.proben) < len(proben):
-                form.proben.append_entry()
-            form.proben[i].label = probe.proben_nr
-            form.proben[i].data = probe.proben_nr
-            form.ränge[i].choices = [(i, i) for i in range(1, len(proben) + 1)]
-
-        return form
-    
-    def fill_auswahltest_form(form, question):
-
-        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-        form.aufgabenstellung.label = aufgabe.aufgabenstellung
-        form.aufgabenstellung.data = aufgabe.aufgabenstellung
-        
-        proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
-        for i, probe in enumerate(proben):
-            probe = Proben.query.get(probe)
-            if len(form.einordnungen) < len(proben):
-                form.einordnungen.append_entry()
-            if len(form.proben) < len(proben):
-                form.proben.append_entry()
-            if len(form.bemerkungen) < len(proben):
-                form.bemerkungen.append_entry()
-            form.proben[i].label = probe.proben_nr
-            form.proben[i].data = probe.proben_nr
-            if aufgabe.prüfvarianten_id == 7:
-                form.einordnungen[i].choices = [("nicht zu erkennen", "nicht zu erkennen"), ("süß", "süß"), ("salzig", "salzig"), ("sauer", "sauer"), ("bitter", "bitter"), ("umami", "umami")]
-            if aufgabe.prüfvarianten_id == 8:
-                form.einordnungen[i].choices = [("neutral", "neutral"), ("KCL", "KCL"), ("NaCl", "NaCl"), ("NH4Cl", "NH4Cl"), ("CaCl2", "CaCl2"), ("Na2CO3", "Na2CO3")]
-        return form
-    
-    def fill_dreieckstest_form(form, question):
-            
-            aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            form.aufgabenstellung.label = aufgabe.aufgabenstellung
-            form.aufgabenstellung.data = aufgabe.aufgabenstellung
-
-            proben_1 = Probenreihen.query.get(question.probenreihe_id_1).proben_ids
-            proben_2 = Probenreihen.query.get(question.probenreihe_id_2).proben_ids
-
-            for i, probe in enumerate(proben_1):
-                probe = Proben.query.get(probe)
-                if len(form.proben_1) < len(proben_1):
-                    form.proben_1.append_entry()
-                form.proben_1[i].label = probe.proben_nr
-                form.proben_1[i].data = probe.proben_nr
-
-            for i, probe in enumerate(proben_2):
-                probe = Proben.query.get(probe)
-                if len(form.proben_2) < len(proben_2):
-                    form.proben_2.append_entry()
-                form.proben_2[i].label = probe.proben_nr
-                form.proben_2[i].data = probe.proben_nr
-            form.abweichende_probe_1.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_1]
-            form.abweichende_probe_2.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_2]
-            return form
-    
-    def fill_geruchserkennung_form(form, question):
-
-        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-        form.aufgabenstellung.label = aufgabe.aufgabenstellung
-        form.aufgabenstellung.data = aufgabe.aufgabenstellung
-        proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
-        proben_auswahl = Probenreihen.query.get(question.geruch_mit_auswahl).proben_ids
-
-        for i, probe in enumerate(proben):
-            probe = Proben.query.get(probe)
-            if len(form.proben) < len(proben):
-                form.proben.append_entry()
-            if aufgabe.prüfvarianten_id == 6:
-                if len(form.mit_auswahl) < len(proben):
-                    form.mit_auswahl.append_entry()
-                form.mit_auswahl[i].choices = [(probe, str(Proben.query.get(probe).probenname)) for probe in proben_auswahl]
-            if aufgabe.prüfvarianten_id == 5:
-                if len(form.ohne_auswahl) < len(proben):
-                    form.ohne_auswahl.append_entry()
-            form.proben[i].label = probe.proben_nr
-            form.proben[i].data = probe.proben_nr
-        return form
-    
-    def fill_hed_beurteilung_form(form, question):
-            
-            aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-            form.aufgabenstellung.label = aufgabe.aufgabenstellung
-            form.aufgabenstellung.data = aufgabe.aufgabenstellung
-            proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
-            for i, probe in enumerate(proben):
-                probe = Proben.query.get(probe)
-                if len(form.proben) < len(proben):
-                    form.proben.append_entry()
-                if len(form.einordnungen) < len(proben):
-                    form.einordnungen.append_entry()
-                    form.bemerkungen.append_entry()
-                form.proben[i].label = probe.proben_nr
-                form.proben[i].data = probe.proben_nr
-            return form
-    
-    def fill_konz_reihe_form(form, question):
-
-        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-        form.aufgabenstellung.label = aufgabe.aufgabenstellung
-        form.aufgabenstellung.data = aufgabe.aufgabenstellung
-        proben = Probenreihen.query.get(question.probenreihe_id).proben_ids
-        for i, probe in enumerate(proben):
-            probe = Proben.query.get(probe)
-            if len(form.proben) < len(proben):
-                form.proben.append_entry()
-            if len(form.konzentration) < len(proben):
-                form.konzentration.append_entry()
-                form.bemerkungen.append_entry()
-            form.proben[i].label = probe.proben_nr
-            form.proben[i].data = probe.proben_nr
-        return form
-    
-    def fill_paar_vergleich_form(form, question):
-
-        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-        form.aufgabenstellung.label = aufgabe.aufgabenstellung
-        form.aufgabenstellung.data = aufgabe.aufgabenstellung
-        proben_1 = Probenreihen.query.get(question.probenreihe_id_1).proben_ids
-        proben_2 = Probenreihen.query.get(question.probenreihe_id_2).proben_ids
-
-        for i, probe in enumerate(proben_1):
-            probe = Proben.query.get(probe)
-            if len(form.proben_1) < len(proben_1):
-                form.proben_1.append_entry()
-            form.proben_1[i].label = probe.proben_nr
-            form.proben_1[i].data = probe.proben_nr
-        for i, probe in enumerate(proben_2):
-            probe = Proben.query.get(probe)
-            if len(form.proben_2) < len(proben_2):
-                form.proben_2.append_entry()
-            form.proben_2[i].label = probe.proben_nr
-            form.proben_2[i].data = probe.proben_nr
-        form.ausgeprägte_probe_1.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_1]
-        form.ausgeprägte_probe_2.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_2]
-        form.erwartung_probe.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_1 + proben_2]
-        
-        return form
-    
-    def fill_profilprüfung_form(form, question):
-
-        aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
-        form.aufgabenstellung.label = aufgabe.aufgabenstellung
-        form.aufgabenstellung.data = aufgabe.aufgabenstellung
-        probe = Proben.query.get(question.proben_id)
-        form.probe.label = probe.proben_nr
-        form.probe.data = probe.proben_nr
-
-        for i, kriterium in enumerate(question.kriterien):
-            if len(form.kriterien) < len(question.kriterien):
-                form.kriterien.append_entry()
-            if len(form.skalenwerte) < len(question.kriterien):
-                form.skalenwerte.append_entry()
-            form.kriterien[i].label = kriterium
-            form.kriterien[i].data = kriterium
-        return form
-    
-    def save_to_json(form, filename, question_type):
-        data = {}
-
-        try:
-            with open(filename, 'r') as file:
-                data = json.load(file)
-        except FileNotFoundError:
-            pass
-
-        form_data = {}
-        for field_name, field_value in form.data.items():
-            if field_name != "csrf_token":
-                if isinstance(field_value, list):
-                    form_data[field_name] = [item for item in field_value]
-                else:
-                    form_data[field_name] = field_value
-
-        data[str(question_type) + '-' + str(session['question_index'])] = form_data
-
-        with open(filename, 'w') as file:
-            json.dump(data, file)
-    
-    question_types_models_map = {
-    "ebp": Ebp,
-    "rangordnungstest": Rangordnungstest,
-    "auswahltest": Auswahltest,
-    "dreieckstest": Dreieckstest,
-    "geruchserkennungstest": Geruchserkennung,
-    "hed_beurteilung": Hed_beurteilung,
-    "konz_reihe": Konz_reihe,
-    "paar_vergleich": Paar_vergleich,
-    "profilprüfung": Profilprüfung,
-    }
-
-    question_types_forms_map = {
-    "ebp": ViewEbp(),
-    "rangordnungstest": ViewRangordnungstest(),
-    "auswahltest": ViewAuswahltest(),
-    "dreieckstest": ViewDreieckstest(),
-    "geruchserkennungstest": ViewGeruchserkennung(),
-    "hed_beurteilung": ViewHed_beurteilung(),
-    "konz_reihe": ViewKonz_reihe(),
-    "paar_vergleich": ViewPaar_vergleich(),
-    "profilprüfung": ViewProfilprüfung(),
-    }
-
-    form_filling_map = {
-    "ebp": fill_ebp_form,
-    "rangordnungstest": fill_rangordnungstest_form,
-    "auswahltest": fill_auswahltest_form,
-    "dreieckstest": fill_dreieckstest_form,
-    "geruchserkennungstest": fill_geruchserkennung_form,
-    "hed_beurteilung": fill_hed_beurteilung_form,
-    "konz_reihe": fill_konz_reihe_form,
-    "paar_vergleich": fill_paar_vergleich_form,
-    "profilprüfung": fill_profilprüfung_form,
-    }
-
-
-    
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     user = Benutzer.query.filter_by(benutzername=session['username']).first()
     if not user.training_id:
         return redirect(url_for('student_waitingroom'))
+    
+    question_types_models_map = {
+        "ebp": Ebp,
+        "rangordnungstest": Rangordnungstest,
+        "auswahltest": Auswahltest,
+        "dreieckstest": Dreieckstest,
+        "geruchserkennungstest": Geruchserkennung,
+        "hed_beurteilung": Hed_beurteilung,
+        "konz_reihe": Konz_reihe,
+        "paar_vergleich": Paar_vergleich,
+        "profilprüfung": Profilprüfung,
+        }
+
+    question_types_forms_map = {
+        "ebp": ViewEbp(),
+        "rangordnungstest": ViewRangordnungstest(),
+        "auswahltest": ViewAuswahltest(),
+        "dreieckstest": ViewDreieckstest(),
+        "geruchserkennungstest": ViewGeruchserkennung(),
+        "hed_beurteilung": ViewHed_beurteilung(),
+        "konz_reihe": ViewKonz_reihe(),
+        "paar_vergleich": ViewPaar_vergleich(),
+        "profilprüfung": ViewProfilprüfung(),
+        }
+
+    form_filling_map = {
+        "ebp": fill_ebp_form,
+        "rangordnungstest": fill_rangordnungstest_form,
+        "auswahltest": fill_auswahltest_form,
+        "dreieckstest": fill_dreieckstest_form,
+        "geruchserkennungstest": fill_geruchserkennung_form,
+        "hed_beurteilung": fill_hed_beurteilung_form,
+        "konz_reihe": fill_konz_reihe_form,
+        "paar_vergleich": fill_paar_vergleich_form,
+        "profilprüfung": fill_profilprüfung_form,
+        }
+
+
     env = Environment()
     env.globals['enumerate'] = enumerate
 
@@ -1194,9 +1003,10 @@ def training_page():
     question_max = len(training.fragen_typen)
     
     session['question_index'] = session.get('question_index', 0)
-
+    print('\n\n\n')
     print("session['question_index']",session['question_index'])
-    print("question_max",question_max)
+    print('\n\n\n')
+
     if session['question_index'] >= question_max:
         session['question_index'] = 0
         return redirect(url_for('complete_training'))
@@ -1231,16 +1041,17 @@ def training_page():
             if 'submit' in request.form:
                 path_to_json = './saved_submits/' + session['username'] + '-' + str(training.id) + '.json'
                 if request.form['submit'] == "abgeben":
-                    save_to_json(form, path_to_json, question_type)
+                    save_to_json(form, path_to_json, question_type, question_index=session['question_index'])
                     session['question_index'] = session['question_index'] + 1
                     return redirect(url_for('complete_training'))
                 if request.form['submit'] == 'weiter':
-                    save_to_json(form, path_to_json, question_type)
+                    save_to_json(form, path_to_json, question_type, question_index=session['question_index'])
                     session['question_index'] = session['question_index'] + 1
                 elif request.form['submit'] == 'zurück':
-                    save_to_json(form, path_to_json, question_type)
+                    save_to_json(form, path_to_json, question_type, question_index=session['question_index'])
                     session['question_index'] = session['question_index'] - 1
             return redirect(url_for('training_page'))
+            
         else:
             print_form_validation_errors(form)
     
@@ -1256,7 +1067,8 @@ def complete_training():
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     session['question_index'] = 0
     training_id = Benutzer.query.filter_by(benutzername=session['username']).first().training_id
-    data = get_form_data_from_json(session['username'] + '-' + str(training_id) + '.json')
+    path_to_json = './saved_submits/' + session['username'] + '-' + str(training_id) + '.json'
+    data = get_form_data_from_json(path_to_json)
     if not data:
         return redirect(url_for('training_page'))
     return render_template('complete_training.html', data=data)
@@ -1277,6 +1089,33 @@ def training_progress():
         training_data.append(get_form_data_from_json(path_to_json + student + '-' + str(training_id) + '.json'))
 
     return render_template('training_progress.html', usernames=student_names, training_data=training_data)
+
+@app.route('/professor_dashboard/training_progress/save_submits', methods=['POST'])
+def save_submits():
+    if 'username' not in session:
+        return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
+    
+    training_id = Benutzer.query.filter_by(rolle=False).first().training_id
+
+    student_names = [student.benutzername for student in Benutzer.query.filter_by(rolle=False).all()]
+
+    training_data = []
+    path_to_json = './saved_submits/'
+    for student in student_names:
+        training_data.append(get_form_data_from_json(path_to_json + student + '-' + str(training_id) + '.json'))
+
+    path_to_pdf = './saved_pdfs/'
+    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+    options = {
+        'no-stop-slow-scripts': True,
+    }
+    html = render_template('training_progress_content.html', usernames=student_names, training_data=training_data)
+    if not os.path.exists(path_to_pdf):
+        os.makedirs(path_to_pdf)
+    if os.path.isfile(path_to_pdf + 'training_progress-' + str(training_id) + '.pdf'):
+        os.remove(path_to_pdf + 'training_progress-' + str(training_id) + '.pdf')
+    pdfkit.from_string(html, path_to_pdf + 'training_progress-' + str(training_id) + '.pdf', configuration=config, options=options)
+    return send_file("..\\saved_pdfs\\" + 'training_progress-' + str(training_id) + '.pdf', as_attachment=True)
 
 @app.route('/')
 def dashboard():

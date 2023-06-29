@@ -1,17 +1,8 @@
-{% extends 'base.html' %}
-
-{% block title %}
-Complete Training
-{% endblock %}
-
-{% block content %}
+<head>
+    <meta charset="UTF-8">
+ </head>
+ 
 <body>
-    <h1>Submitted tests of the active Training</h1>
-    <br>
-    <form action="{{ url_for('save_submits') }}" method="post">
-        <input type="submit" value="speichern" class="btn btn-success">
-    </form>
-    <br>
     {% if training_data %}
         {% for student_data in training_data %}
             {% if student_data %}
@@ -45,5 +36,3 @@ Complete Training
         {% endfor %}
     {% endif %}
 </body>
-{% endblock %}
-

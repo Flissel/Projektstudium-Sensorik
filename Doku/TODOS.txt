@@ -1,26 +1,3 @@
-@Trainingpage 
-TODO: Restlichen Aufgabentypen anzeigen lassen 
-        - Form (Jan) (Vorerst erledigt. Test steht aus.)
-        - HMTL (Jan)
-        - Ausgabe Speichern // wie? (SPÄTER)
-        - Weiter / Zurück  (nächste Frage , Hervorige)
-        - Abgabe Bestätigen  (Shoutbox)
-
-TODO: Edit Button für Trainings(done) 
-      ----noch nich auf den dashboard sichtbar--- 
-
-@Training_progress 
-        - zeige Fortschritt an 
-
-@Professor dashboard
-        - vielleicht Inhalt eines Praktikums mit anzeigen lassen (vorschau)
-        
-@trainings_page
-        - aufgaben werden noch nicht immer angezeigt
-        - Dreieckstest 
-
-        TRaining_id zurücksetzen
-
 ENDE PROJEKT 
 TODO: Migration 
 TODO: Doku fertigstellen (Anforderungen, Gesamtplan, DB_Struktur)
@@ -28,6 +5,4 @@ TODO: Requirments schreiben
 TODO: Server  (Victoria)
 
 
-
-
-
+professor_password = hswt_sensorik

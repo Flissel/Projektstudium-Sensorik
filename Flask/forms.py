@@ -38,7 +38,7 @@ class CreateKonz_reihe(FlaskForm):
 
 class CreateHed_beurteilung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probe', choices=[])
+    probenreihe_id = SelectField('Probenreihe', choices=[])
 
     def __init__(self, *args, **kwargs):
         super(CreateHed_beurteilung, self).__init__(*args, **kwargs)
@@ -47,7 +47,7 @@ class CreateHed_beurteilung(FlaskForm):
 
 class CreateGeruchserkennung(FlaskForm):
     aufgabenstellung_id = SelectField('Aufgabenstellung', choices=[])
-    probenreihe_id = SelectField('Probe', choices=[])
+    probenreihe_id = SelectField('Probenreihe', choices=[])
     geruchsauswahl = SelectField('Geruchsauswahl (Irrelevant bei Test ohne Auswahlliste)', choices=[])
 
     def __init__(self, *args, **kwargs):
@@ -183,7 +183,7 @@ class ViewHed_beurteilung(FlaskForm):
 class ViewGeruchserkennung(FlaskForm):
     aufgabenstellung = StringField('')
     proben = FieldList(StringField(''))
-    ohne_auswahl = FieldList(StringField('Geruchserkennung ohne Auswahl'))
+    ohne_auswahl = FieldList(StringField('Geruchserkennung ohne Auswahl', validators=[DataRequired()]))
     mit_auswahl = FieldList(SelectField('Geruchserkennung mit Auswahl', choices=[]))
 
 class ViewDreieckstest(FlaskForm):
