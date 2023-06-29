@@ -497,6 +497,7 @@ def professor_dashboard():
             for i in range(len(training.fragen_ids)):
                 #print(question_types_map[training.fragen_typen[i]].query.filter_by(id=training.fragen_ids[i]).first())
                 db.session.delete(question_types_map[training.fragen_typen[i]].query.filter_by(id=training.fragen_ids[i]).first())
+                db.session.commit()
                 
             db.session.delete(training)
             db.session.commit()
@@ -780,85 +781,7 @@ def create_training():
             db.session.commit()
 
             return redirect(url_for('professor_dashboard'))
-    """       
-    if request.method == "POST" and request.form.get('action'):
-        action = request.form.get('action').split(" ", 2)
-        print(action[2])
-        if action[1] == "ebp":
-            ebp1 = form.ebp_questions[0:int(action[2])]
-            ebp2 = form.ebp_questions[int(action[2])+1:len(form.ebp_questions)]
-            form.ebp_questions = []
-            for item in ebp1:
-                form.ebp_questions.append(item)
-            for item in ebp2:
-                form.ebp_questions.append(item)
-        if action[1] == "rang":
-            rang1 = form.rangordnungstest_questions[0:int(action[2])]
-            rang2 = form.rangordnungstest_questions[int(action[2])+1:len(form.rangordnungstest_questions)]
-            form.rangordnungstest_questions = []
-            for item in rang1:
-                form.rangordnungstest_questions.append(item)
-            for item in rang2:
-                form.rangordnungstest_questions.append(item)
-        if action[1] == "auswahltest":
-            rang1 = form.auswahltest_questions[0:int(action[2])]
-            rang2 = form.auswahltest_questions[int(action[2])+1:len(form.auswahltest_questions)]
-            form.auswahltest_questions = []
-            for item in rang1:
-                form.auswahltest_questions.append(item)
-            for item in rang2:
-                form.auswahltest_questions.append(item)
-        if action[1] == "dreieckstest":
-            rang1 = form.dreieckstest_questions[0:int(action[2])]
-            rang2 = form.dreieckstest_questions[int(action[2])+1:len(form.dreieckstest_questions)]
-            form.dreieckstest_questions = []
-            for item in rang1:
-                form.dreieckstest_questions.append(item)
-            for item in rang2:
-                form.dreieckstest_questions.append(item)
-        if action[1] == "geruchserkennung":
-            rang1 = form.geruchserkennung_questions[0:int(action[2])]
-            rang2 = form.geruchserkennung_questions[int(action[2])+1:len(form.geruchserkennung_questions)]
-            form.geruchserkennung_questions = []
-            for item in rang1:
-                form.geruchserkennung_questions.append(item)
-            for item in rang2:
-                form.geruchserkennung_questions.append(item)
-        if action[1] == "hed_beurteilung":
-            rang1 = form.hed_beurteilung_questions[0:int(action[2])]
-            rang2 = form.hed_beurteilung_questions[int(action[2])+1:len(form.hed_beurteilung_questions)]
-            form.hed_beurteilung_questions = []
-            for item in rang1:
-                form.hed_beurteilung_questions.append(item)
-            for item in rang2:
-                form.hed_beurteilung_questions.append(item)
-        if action[1] == "konz_reihe":
-            rang1 = form.konz_reihe_questions[0:int(action[2])]
-            rang2 = form.konz_reihe_questions[int(action[2])+1:len(form.konz_reihe_questions)]
-            form.konz_reihe_questions = []
-            for item in rang1:
-                form.konz_reihe_questions.append(item)
-            for item in rang2:
-                form.konz_reihe_questions.append(item)
-        if action[1] == "paar_vergleich":
-            rang1 = form.paar_vergleich_questions[0:int(action[2])]
-            rang2 = form.paar_vergleich_questions[int(action[2])+1:len(form.paar_vergelich_questions)]
-            form.paar_vergleich_questions = []
-            for item in rang1:
-                form.paar_vergleich_questions.append(item)
-            for item in rang2:
-                form.paar_vergelich_questions.append(item)
-        if action[1] == "profilprüfung":
-            rang1 = form.profilprüfung_questions[0:int(action[2])]
-            rang2 = form.profilprüfung_questions[int(action[2])+1:len(form.profilprüfung_questions)]
-            form.profilprüfung_questions = []
-            for item in rang1:
-                form.profilprüfung_questions.append(item)
-            for item in rang2:
-                form.profilprüfung_questions.append(item)
-
-        form.question_types[0].data["submit"] = False
-    """
+    
     if request.method == "POST" and request.form.get('kriteria'):
         action = request.form.get('kriteria').split(' ',2)
         if action[0] == 'add':
