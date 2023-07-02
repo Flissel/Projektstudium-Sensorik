@@ -1,11 +1,9 @@
-
 from flask import Flask, jsonify, render_template, request, session, redirect, url_for ,flash, request, send_file
 from model import db, Trainings, Ebp, Rangordnungstest, Benutzer, Proben, Probenreihen, Dreieckstest, Auswahltest, Paar_vergleich, Konz_reihe, Hed_beurteilung, Profilprüfung, Geruchserkennung, Aufgabenstellungen,Prüfvarianten
 from forms import *
 from uuid import uuid4
 from datetime import datetime
 from jinja2 import Environment
-import pandas as pd
 import json
 import pdfkit
 import os
