@@ -6,7 +6,7 @@ Complete Training
 
 {% block content %}
 <body>
-    <h1>Submitted tests of the active Training</h1>
+    <h1>Abgegebene Antworten des aktuellen Trainings: {{training_name}}</h1>
     <br>
     <form action="{{ url_for('save_submits') }}" method="post">
         <input type="submit" value="speichern" class="btn btn-success">
@@ -40,7 +40,7 @@ Complete Training
                     {% endif %}
                 {% endfor %}
             {% else %}
-                <p>No submits from: {{usernames[loop.index0]}}</p>
+                <p>Student ohne Antworten: {{usernames[loop.index0]}}</p>
             {% endif %}
         {% endfor %}
     {% endif %}

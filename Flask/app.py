@@ -1011,7 +1011,7 @@ def training_progress():
     for student in student_names:
         training_data.append(get_form_data_from_json(path_to_json + student + '-' + str(training_id) + '.json'))
 
-    return render_template('training_progress.html', usernames=student_names, training_data=training_data)
+    return render_template('training_progress.html', usernames=student_names, training_data=training_data, training_name=Trainings.query.get(training_id).name)
 
 @app.route('/professor_dashboard/training_progress/save_submits', methods=['POST'])
 def save_submits():
@@ -1032,7 +1032,7 @@ def save_submits():
     options = {
         'no-stop-slow-scripts': True,
     }
-    html = render_template('training_progress_content.html', usernames=student_names, training_data=training_data)
+    html = render_template('training_progress_content.html', usernames=student_names, training_data=training_data, training_name=Trainings.query.get(training_id).name)
     if not os.path.exists(path_to_pdf):
         os.makedirs(path_to_pdf)
     if os.path.isfile(path_to_pdf + 'training_progress-' + str(training_id) + '.pdf'):

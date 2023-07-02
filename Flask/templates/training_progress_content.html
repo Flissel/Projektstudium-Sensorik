@@ -3,6 +3,8 @@
  </head>
  
 <body>
+    <h1>Abgegebene Antworten des aktuellen Trainings: {{training_name}}</h1>
+    <br>
     {% if training_data %}
         {% for student_data in training_data %}
             {% if student_data %}
@@ -31,7 +33,7 @@
                     {% endif %}
                 {% endfor %}
             {% else %}
-                <p>No submits from: {{usernames[loop.index0]}}</p>
+                <p>Student ohne Antworten: {{usernames[loop.index0]}}</p>
             {% endif %}
         {% endfor %}
     {% endif %}
