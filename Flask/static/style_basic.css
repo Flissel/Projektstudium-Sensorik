@@ -78,6 +78,28 @@ body {
     border-radius: 4px;
     cursor: pointer;
   }
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .form-label {
+    width: 120px;
+    text-align: right;
+    margin-right: 10px;
+  }
+
+  .form-input {
+    width: 200px;
+  }
   .btn-add:hover {
     background-color: #228b22;
   }
@@ -208,56 +230,21 @@ body {
   .professor-dashboard .training-list li a:hover {
     text-decoration: underline;
   }
-  .fitting-area {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+
+  .form-group{
+    text-align: left;
   }
-  
-  .fitting-slot {
-    background-color: #eaecee;
-    border: 1px dashed #cccccc;
-    border-radius: 4px;
-    height: 100px;
-    width: 150px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .slot-number {
-    font-size: 12px;
-  }
-  
-  .drag-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-  
-  .drag-item {
-    background-color: #ffffff;
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    padding: 10px;
-    cursor: pointer;
-  }
-  
+
   table {
     border-collapse: collapse;
     width: 100%;
   }
   
-  table,
-  th,
-  td {
+  table, th, td {
     border: 1px solid #cccccc;
   }
   
-  th,
-  td {
+  th, td {
     padding: 8px;
     text-align: left;
   }

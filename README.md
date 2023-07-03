@@ -1,59 +1,109 @@
 # Projektstudium-Sensorik
  
-Definieren Sie die Anforderungen an die Software:
 
-Was soll die Software tun?
-- Siehe Anforderungen: <REF> TODO @DOKU
-Welche Funktionen muss sie haben?
-- Siehe UmL Diagramm:  <REF> TODO @DOKU ENTWICKLER 
+This project is a Flask web application for managing training programs and conducting sensory tests in the field of food and beverages.
 
-1. Definieren Sie die Art der Daten, die die Software sammeln und analysieren soll.
+## Table of Contents
 
-wie werden die Daten aufgenommen und gespeichert?
--  in einer Flask Session 
--  Textfelder
--  Matching 
--  Multiple Choice 
--  Bitte ergänzen falls jemanden was auffällt.
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Database Models](#database-models)
+- [Contributing](#contributing)
+- [License](#license)
 
--> Speichern in einer CSV oder Excel Tabelle (Docx) ||| bei jeder Antwort updaten? 
--> Optional in Dataframe (Pandas) ||| was passiert bei vorzeitigen Ende einer Session? 
+## Introduction
 
-2. Bestimmen Sie die Methoden zur Analyse der Daten:
-Wie sollen die Daten verarbeitet und ausgewertet werden?
-   Vielleicht extra Script für Auswertung activierung bei  press Button der letzten Abgabe. 
--  File einlesen 
--  Auswertung mit Matplotlib, Numpy , Pandas --> Möglichkeit Graphen und ähnliches zuerstellen  
--
+The project aims to provide a user-friendly interface for creating and managing various types of sensory tests, such as profile evaluations, ranking tests, selection tests, and more. It allows administrators to define training programs and customize the test parameters based on specific requirements.
 
-3. Erstellen Sie ein Design für die Software
+## Features
 
-Wie soll die Benutzeroberfläche aussehen?
-- Webapplikation 
+- Create and manage training programs
+- Define different types of sensory tests, including:
+  - Einfach beschreibende Prüfung (EBP)
+  - Rangordnungstest
+  - Auswahltest
+  - Dreieckstest
+  - Geruchserkennung
+  - Hedonische Beurteilung
+  - Konzentrationsreihe
+  - Paarweise Vergleichstest
+  - Profilprüfung
+- Customize test parameters for each test type
+- Assign tests to users and track their progress
+- Collect and analyze test results
+- User authentication and role-based access control
 
-    -> Zusammenstellung des Quizes (eventuell schon vorgegeben? oder Direkt Auswahl für jeden oder nur für User xxx )  
-    -> Erste Aufgabe -> OnKlick Abgabe (Update) -> nächste Aufgabe -> ... Ende Screen evtl mit Auswertung? 
-    
-welche Funktionen sollen verfügbar sein?
-- Zusammenstellen von Aufgabentypen eines Themabereichs 
-    -> Atomisieren der Aufgaben und Unterteilung in Themengebiete 
-    -> SQL würde sich anbieten wegen Primär Fremdschlüssel  Relationen , CSV Format kann für Multiple Choice und ähnliches benutzt werden. 
-    -> Pro Aufgabentyp eine Klasse bauen die sie erstellt <-> Daten müssen in einer bestimmten Form vorlegen
-    -> Api von Python für Googleforms -> kein strunz was da Rauskommt 
+## Installation
 
-4. Implementieren Sie die Software
-Flask Session -> Html Page -> Database(As needed) -> Script zur Erstellung von Aufgabentypen -> Script zur Auswertung 
+1. Clone the repository:
+git clone https://github.com/yourusername/project.git
 
-siehe Flask Ablauf Diagramm 
+2. Change into the project directory:
+cd project
 
-siehe Html Beispile 
-siehe Database Design 
-Scripts immer mit DOC STRING UND COMMENT (Chat Bot kann da gut helfen)
+3. Create a virtual environment:
+python3 -m venv venv
 
-5. Testen Sie die Software: -> Student aus Praktikum 
+4. Activate the virtual environment:
+- For Windows:
+venv\Scripts\activate
 
-TODO BUG: < Ref Bug fix >
-- Line, Filename und Kurzbeschreibung
+- For Unix or Linux:
+source venv/bin/activate
 
+5. Install the dependencies:
+pip install -r requirements.txt
 
-6. Optimieren Sie die Software: Verbessern Sie die Leistung der Software und beheben Sie alle Fehler oder Probleme, die während des Testens aufgetreten sind.
+6. Set up the database:
+- Modify the database configuration in `config.py` according to your environment.
+- Run the following commands to create and populate the database:
+
+python manage.py db init
+python manage.py db migrate
+python manage.py db upgrade
+
+7. Start the application:
+
+python manage.py runserver
+
+8. Open your web browser and visit `http://localhost:5000` to access the application.
+
+## Usage
+1. Register a new user account or log in with an existing account.
+
+2. As an administrator, create training programs and define test parameters for each test type.
+
+3. Assign tests to users and track their progress.
+
+4. Users can access their assigned tests, complete them, and submit the results.
+
+5. Administrators can view and analyze the test results.
+
+## Database Models
+
+The application uses SQLAlchemy and includes the following database models:
+
+- Aufgabenstellungen
+- Prüfvarianten
+- Trainings
+- Proben
+- Probenreihen
+- Benutzer
+- Konz_reihe
+- Profilprüfung
+- Hed_beurteilung
+- Auswahltest
+- Geruchserkennung
+- Paar_vergleich
+- Ebp
+- Rangordnungstest
+- Dreieckstest
+
+For detailed information about each model, refer to the source code in the `models.py` file.
+
+## Contributing
+
+Contributions are welcome! If you have any suggestions or improvements for the project, feel free to submit a pull request.
+
