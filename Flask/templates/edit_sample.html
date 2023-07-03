@@ -1,16 +1,12 @@
 {% extends 'base.html' %}
-<!DOCTYPE html>
-<html>
+
+
+{% block content %} 
 <head>
-  <meta charset="UTF-8">
   <h1 class="document-title">Proben editieren</h1>
-  <style>
-    /* Add your custom styling here */
-  </style>
+
 </head>
 <body>
-  <h1>Edit Sample</h1>
-  
   <form method="POST" action="{{ url_for('edit_sample', sample_id=sample.id) }}">
     <table>
       <tr>
@@ -38,10 +34,10 @@
         <td><input type="text" name="anmerkung" value="{{ sample.anmerkung }}"></td>
       </tr>
     </table>
-    <button type="submit">Save</button>
+    <button type="submit" class="btn-add">Speichern</button>
   </form>
   
   
 
 </body>
-</html>
+{% endblock %}

@@ -1,8 +1,0 @@
-ENDE PROJEKT 
-TODO: Migration 
-TODO: Doku fertigstellen (Anforderungen, Gesamtplan, DB_Struktur)
-TODO: Requirments schreiben     
-TODO: Server  (Victoria)
-
-
-professor_password = hswt_sensorik

@@ -78,6 +78,28 @@ body {
     border-radius: 4px;
     cursor: pointer;
   }
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .form-label {
+    width: 120px;
+    text-align: right;
+    margin-right: 10px;
+  }
+
+  .form-input {
+    width: 200px;
+  }
   .btn-add:hover {
     background-color: #228b22;
   }

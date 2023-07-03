@@ -12,7 +12,7 @@
         <label for="proben">Proben:</label>
         <table>
             <tr>
-                <th>ID</th>
+                
                 <th>Proben Nr</th>
                 <th>Probenname</th>
                 <th>Farbe</th>
@@ -21,11 +21,11 @@
                 <th>Geschmack</th>
                 <th>Textur</th>
                 <th>Konsistenz</th>
-                <th>Select</th>
+                <th>Auswahl Probenreihe</th>
             </tr>
             {% for proben in samples %}
             <tr>
-                <td>{{ proben.id }}</td>
+              
                 <td>{{ proben.proben_nr }}</td>
                 <td>{{ proben.probenname }}</td>
                 <td>{{ proben.farbe }}</td>
@@ -39,7 +39,7 @@
             {% endfor %}
         </table>
         <br>
-        <input type="submit" value="Create Sample Chain">
+        <input type="submit" class="btn-add" value="Hinzufügen">
     </form>
 </body>
 {% endblock %}

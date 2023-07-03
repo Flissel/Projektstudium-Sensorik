@@ -9,7 +9,7 @@ Complete Training
     <h1>Abgegebene Antworten des aktuellen Trainings: {{training_name}}</h1>
     <br>
     <form action="{{ url_for('save_submits') }}" method="post">
-        <input type="submit" value="speichern" class="btn btn-success">
+        <input type="submit" value="Als PDF speichern" class="btn btn-success">
     </form>
     <br>
     {% if training_data %}

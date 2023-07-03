@@ -25,9 +25,28 @@ setted_professor_password = 'hswt_sensorik'
 
 
 def zip_lists(a, b):
-    return zip(a, b)
+    """
+    Zip two lists together element-wise.
 
+    Args:
+        a (list): The first list.
+        b (list): The second list.
+
+    Returns:
+        zip: A zip object containing pairs of elements from `a` and `b`.
+    """
+    return zip(a, b)
+app.jinja_env.filters['zip_lists'] = zip_lists
 def print_form_validation_errors(form):
+    """
+    Print validation errors for each field in the form.
+
+    Parameters:
+        form (object): The form object.
+
+    Returns:
+        str: An empty string.
+    """
     for field_name, field in form._fields.items():
         if field.errors:
             error_messages = ', '.join(str(error) for error in field.errors)
@@ -61,6 +80,19 @@ def create_sample_in_database(form_data):
     db.session.commit()
 
 def update_sample_in_database(sample_id, form_data):
+    """
+    Update a sample in the database.
+
+    Parameters:
+        sample_id (int): The ID of the sample to update.
+        form_data (dict): A dictionary containing the updated sample data.
+
+    Raises:
+        ValueError: If the sample with the given ID is not found in the database.
+
+    Returns:
+        None
+    """
     try:
         sample = Proben.query.get(sample_id)
         if sample is None:
@@ -74,13 +106,22 @@ def update_sample_in_database(sample_id, form_data):
         sample.geschmack = form_data.get('geschmack')
         sample.textur = form_data.get('textur')
         sample.konsistenz = form_data.get('konsistenz')
-
+        sample.anmerkung =  form_data.get('anmerkung')
         db.session.commit()
     except Exception as e:
         print(f"Error updating sample: {e}")
         db.session.rollback()
 
 def get_form_data_from_json(filename):
+        """
+        Reads data from a JSON file and returns the content as a Python dictionary.
+
+        Parameters:
+            filename (str): The name of the JSON file to be read.
+
+        Returns:
+            dict or None: The content of the JSON file as a dictionary. If the file is not found, None is returned.
+        """
         try:
             with open(filename, 'r') as file:
                 data = json.load(file)
@@ -90,6 +131,16 @@ def get_form_data_from_json(filename):
         return data
 
 def fill_ebp_form(form, question):
+    """
+    Fill the EBP form with the provided values.
+
+    Args:
+        form: The EBP form to be filled.
+        question: The question object containing the necessary information.
+
+    Returns:
+        The filled EBP form.
+    """
     aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id).aufgabenstellung
     form.aufgabenstellung.label = aufgabe
     form.aufgabenstellung.data = aufgabe
@@ -100,6 +151,16 @@ def fill_ebp_form(form, question):
     return form
 
 def fill_rangordnungstest_form(form, question):
+    """
+    Fill the Rangordnungstest form with data from the given question.
+
+    Parameters:
+        form (Form): The form to be filled.
+        question (Question): The question object containing the data.
+
+    Returns:
+        Form: The filled form.
+    """
     
     aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
     form.aufgabenstellung.label = aufgabe.aufgabenstellung
@@ -120,7 +181,16 @@ def fill_rangordnungstest_form(form, question):
     return form
 
 def fill_auswahltest_form(form, question):
+    """
+    Fills the Auswahltest form with data from the given form and question.
 
+    Args:
+        form (Form): The form to fill.
+        question (Question): The question data.
+
+    Returns:
+        Form: The filled form.
+    """
     aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
     form.aufgabenstellung.label = aufgabe.aufgabenstellung
     form.aufgabenstellung.data = aufgabe.aufgabenstellung
@@ -143,6 +213,18 @@ def fill_auswahltest_form(form, question):
     return form
 
 def fill_dreieckstest_form(form, question):
+        """
+        Fills the 'dreieckstest' form with data from the given 'form' and 'question' objects.
+
+        :param form: The form to be filled with data.
+        :type form: <type of 'form'>
+
+        :param question: The question object containing the data to fill the form.
+        :type question: <type of 'question'>
+
+        :return: The filled 'dreieckstest' form.
+        :rtype: <type of 'form'>
+        """
         
         aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
         form.aufgabenstellung.label = aufgabe.aufgabenstellung
@@ -168,8 +250,17 @@ def fill_dreieckstest_form(form, question):
         form.abweichende_probe_2.choices = [(Proben.query.get(probe).proben_nr, str(Proben.query.get(probe).proben_nr)) for probe in proben_2]
         return form
 
-def fill_geruchserkennung_form(form, question):
-
+def fill_geruchserkennung_form(form, question):    
+    """
+    Fills the Geruchserkennung form with data from the given question.
+    
+    Parameters:
+        form (Form): The form to be filled.
+        question (Question): The question containing the data to fill the form.
+        
+    Returns:
+        Form: The filled Geruchserkennung form.
+    """
     aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
     form.aufgabenstellung.label = aufgabe.aufgabenstellung
     form.aufgabenstellung.data = aufgabe.aufgabenstellung
@@ -192,6 +283,16 @@ def fill_geruchserkennung_form(form, question):
     return form
 
 def fill_hed_beurteilung_form(form, question):
+        """
+        Fill the hed beurteilung form with data.
+
+        :param form: The form to fill.
+        :type form: Form
+        :param question: The question to get data from.
+        :type question: Question
+        :return: The filled form.
+        :rtype: Form
+        """
         
         aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
         form.aufgabenstellung.label = aufgabe.aufgabenstellung
@@ -209,6 +310,16 @@ def fill_hed_beurteilung_form(form, question):
         return form
 
 def fill_konz_reihe_form(form, question):
+    """
+    Fills the Konz_reihe_form with data from the given form and question.
+
+    :param form: The form to be filled.
+    :type form: Form object
+    :param question: The question object.
+    :type question: Question object
+    :return: The filled form.
+    :rtype: Form object
+    """
 
     aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
     form.aufgabenstellung.label = aufgabe.aufgabenstellung
@@ -226,7 +337,17 @@ def fill_konz_reihe_form(form, question):
     return form
 
 def fill_paar_vergleich_form(form, question):
+    
+    """
+    Fills the PAAR Vergleich Form with data from the database.
 
+    Parameters:
+    - form: The PAAR Vergleich Form object to be filled.
+    - question: The question object containing the required data.
+
+    Returns:
+    - form: The filled PAAR Vergleich Form object.
+    """
     aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
     form.aufgabenstellung.label = aufgabe.aufgabenstellung
     form.aufgabenstellung.data = aufgabe.aufgabenstellung
@@ -252,7 +373,15 @@ def fill_paar_vergleich_form(form, question):
     return form
 
 def fill_profilprüfung_form(form, question):
-
+    """
+    Fills the profilprüfung form with the given form and question.
+    
+	:type form: Form object
+	:param question: The question to be used for filling the form.
+	:type question: Question object
+	:return: The filled form.
+	:rtype: Form object
+    """
     aufgabe = Aufgabenstellungen.query.get(question.aufgabenstellung_id)
     form.aufgabenstellung.label = aufgabe.aufgabenstellung
     form.aufgabenstellung.data = aufgabe.aufgabenstellung
@@ -270,6 +399,18 @@ def fill_profilprüfung_form(form, question):
     return form
 
 def save_to_json(form, filename, question_type, question_index):
+    """
+    Save the form data to a JSON file.
+
+    Args:
+        form (Form): The form object containing the data to be saved.
+        filename (str): The name of the JSON file to save the data to.
+        question_type (str): The type of the question.
+        question_index (int): The index of the question.
+
+    Returns:
+        None
+    """
     data = {}
 
     try:
@@ -291,11 +432,26 @@ def save_to_json(form, filename, question_type, question_index):
     with open(filename, 'w') as file:
         json.dump(data, file)
 
-
-app.jinja_env.filters['zip_lists'] = zip_lists
-
 @app.before_request
 def check_inactive_user():
+    """
+    Checks if the user is inactive and logs them out if necessary.
+
+    This function is executed before each request is processed by the application.
+    It checks if the user is logged in by checking if the 'username' key is present in the session.
+    If the user is logged in, it retrieves the corresponding user object from the database.
+    The last activity of the user is then obtained from the user object.
+    If the last activity is not None, the duration of inactivity is calculated.
+    If the duration of inactivity exceeds the specified threshold, the user is logged out.
+    Logging out involves setting the 'aktiv' attribute of the user to False, clearing the 'training_id' attribute, and committing the changes to the database.
+    Finally, the user session is cleared and the user is redirected to the login page.
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
     
     if 'username' in session:
         user = Benutzer.query.filter_by(benutzername=session['username']).first()
@@ -335,6 +491,7 @@ def login():
             else:
                 user.last_activity = datetime.now()
                 user.aktiv = True
+                user.training_id = None
                 #user.training_id = None
                 db.session.commit()
                 flash('User ' + user.benutzername + ' wurde als Student angemeldet', 'success')
@@ -346,6 +503,9 @@ def login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
+    """
+    Logs out the user by updating their status to inactive, clearing the session, and redirecting to the login page.
+    """
     
     if 'username' in session:
         # Update user's status to inactive
@@ -398,6 +558,17 @@ def register():
 
 @app.route('/manage_users', methods=['GET', 'POST'])
 def manage_users():
+    """
+    A function that manages users by checking if the user is logged in and has the proper role. 
+    If the user is not logged in or does not have the proper role, it redirects to the login page. 
+    It retrieves all users from the database and renders the 'manage_users.html' template with the users.
+    
+    Parameters:
+        None
+        
+    Returns:
+        The rendered 'manage_users.html' template with the users.
+    """
     if 'username' not in session or session['role'] == False:
         return redirect(url_for('login'))
     users = Benutzer.query.all()
@@ -405,6 +576,18 @@ def manage_users():
 
 @app.route('/delete_user/<int:id>', methods=['POST'])
 def delete_user(id):
+    """
+    Deletes a user from the database.
+
+    Parameters:
+        id (int): The ID of the user to be deleted.
+    
+    Returns:
+        None
+
+    Raises:
+        None
+    """
     if 'username' not in session or session['role'] == False:
         return redirect(url_for('login'))
     user = Benutzer.query.get(id)
@@ -521,6 +704,18 @@ def professor_dashboard():
 
 @app.route('/modify_training/<int:training_id>', methods=['GET', 'POST'])
 def modify_training(training_id):
+    """
+    Modify a training by its ID.    
+
+    Args:
+        training_id (int): The ID of the training to modify.    
+
+    Returns:
+        The modified training view page.    
+
+    Raises:
+        None.
+    """
     # Query the database for the training with the provided id
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
@@ -606,10 +801,7 @@ def select_training(training):
     It sets the 'training' attribute of all students to the selected training.
     After updating the database, it redirects to the training page for the selected training.
     """
-    #print(training)
     students = Benutzer.query.filter_by(rolle=False,aktiv=True).all()
-    #for student in students: 
-        #print(student.name, student.aktiv , student.training_id , student.last_activity),
 
     for student in students:
         student.training = training
@@ -791,6 +983,15 @@ def create_training():
 
 @app.route('/delete_task/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
+    """
+    Delete a task with the specified task_id.
+    
+    Parameters:
+    - task_id (int): The ID of the task to be deleted.
+    
+    Returns:
+    - Redirect: A redirect to the 'manage_aufgabenstellungen' view.
+    """
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     
@@ -808,6 +1009,15 @@ def delete_task(task_id):
 
 @app.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
 def edit_task(task_id):
+    """
+    Edit a task with the specified task_id.
+
+    Parameters:
+        task_id (int): The ID of the task to be edited.
+
+    Returns:
+        flask.Response: The response object that will be returned to the client.
+    """
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     
@@ -827,12 +1037,21 @@ def edit_task(task_id):
         
         # Redirect to the task list page after updating the task
         flash("Task updated successfully.", "success")
-        return redirect(url_for('task_list'))
+        return redirect(url_for('manage_aufgabenstellungen'))
     
     return render_template('edit_task.html', task=task)
 
 @app.route('/create_task/', methods=['GET', 'POST'])
 def create_task():
+    """
+    Creates a new task if the user is logged in. 
+    
+    This function handles both GET and POST requests to the '/create_task/' route. If the user is not logged in, it renders the 'login.html' template with an error message. Otherwise, it retrieves the distinct 'aufgabentypen' from the database and all 'prüfvarianten' to be used in the corresponding dropdown menus in the 'create_task.html' template.
+    
+    If the request method is POST, it retrieves the 'aufgabenstellung', 'aufgabentyp', and 'prüfvariante' from the form data. It then performs the necessary operations to create a new task using these values. This includes creating a new 'prüfvar' object and adding it to the database, retrieving the newly added 'prüfvar' object, and creating a new 'task' object with the provided 'aufgabenstellung', 'aufgabentyp', and 'prüfvarianten_id'. Both the 'prüfvar' and 'task' objects are added to the database. Finally, a success flash message is displayed and the user is redirected to the 'manage_aufgabenstellungen' route.
+    
+    If the request method is GET, it renders the 'create_task.html' template with the 'aufgabentypen' and 'prüfvarianten' retrieved from the database.
+    """
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
 
@@ -862,6 +1081,12 @@ def create_task():
 
 @app.route('/professor_dashboard/manage_aufgabenstellungen/', methods=['GET', 'POST'])
 def manage_aufgabenstellungen():
+    """
+    Renders the page for managing tasks and exam variants.
+
+    Returns:
+        The rendered template for the manage_aufgabenstellungen.html page.
+    """
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
 
@@ -870,10 +1095,52 @@ def manage_aufgabenstellungen():
     prüfnamen = [prüf.prüfname for prüf in prüfvarianten_list]
 
     return render_template('manage_aufgabenstellungen.html', tasks=tasks, prüfnamen=prüfnamen)
-
+ 
 @app.route('/training_page/', methods=['GET', 'POST'])
 def training_page():
-
+    """
+	Renders the training page for the user.
+	
+	Retrieves the username from the session and checks if the user is logged in.
+	If the user is not logged in, it renders the login page with an error message.
+	If the user is logged in, it retrieves the user object from the database and checks if the user has a training ID.
+	If the user does not have a training ID, it redirects the user to the student waiting room.
+	
+	Creates two dictionaries: `question_types_models_map` and `question_types_forms_map`.
+	These dictionaries map question types to their corresponding models and forms.
+	
+	Creates another dictionary `form_filling_map` that maps question types to functions that fill the forms.
+	
+	Creates an environment object `env` and adds `enumerate` to the global variables.
+	
+	Retrieves the training object from the database based on the user's training ID.
+	Checks the maximum number of questions for the training.
+	
+	Retrieves the question index from the session and sets it to 0 if it doesn't exist.
+	
+	If the question index is greater than or equal to the maximum number of questions, it resets the question index to 0 and redirects the user to the complete training page.
+	
+	Retrieves the question type for the current question index.
+	Retrieves the question object from the database based on the question ID for the current question index.
+	Retrieves the task object from the database based on the task ID for the current question.
+	
+	Retrieves the variant ID for the task.
+	
+	Creates a form object based on the question type.
+	Fills the form object with data based on the question object.
+	
+	If the request method is POST and the form is valid, it processes the form submission.
+	
+	Checks the value of the submit button in the request form.
+	If the value is "abgeben", it saves the form data to a JSON file and redirects the user to the complete training page.
+	If the value is "weiter", it saves the form data to a JSON file and increments the question index.
+	If the value is "zurück", it saves the form data to a JSON file and decrements the question index.
+	
+	If the request method is not POST or the form is not valid, it prints the form validation errors.
+	
+	Renders the training page template with the question, question type, form, question index, question max, and prüfvariante.
+	"""
+	
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     user = Benutzer.query.filter_by(benutzername=session['username']).first()
@@ -983,7 +1250,11 @@ def training_page():
 
 @app.route('/complete_training/', methods=['GET', 'POST'])
 def complete_training():
+    """
+    Renders the complete training page if the user is logged in and there is training data available.
 
+    :return: The rendered complete training page.
+    """
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     session['question_index'] = 0
@@ -996,11 +1267,20 @@ def complete_training():
 
 @app.route('/professor_dashboard/training_progress')
 def training_progress():
+    """
+	Route for displaying the training progress on the professor dashboard.
 
+	Returns:
+		- If the user is not logged in, renders the login page with an error message.
+		- If the user is logged in, renders the training progress page with the following data:
+			- List of student usernames
+			- List of training data for each student
+			- Name of the training
+	"""
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     
-    training_id = Benutzer.query.filter_by(rolle=False).first().training_id
+    training_id = Benutzer.query.filter_by(rolle=False, aktiv=True).first().training_id
 
     student_names = [student.benutzername for student in Benutzer.query.filter_by(rolle=False).all()]
 
@@ -1008,11 +1288,20 @@ def training_progress():
     path_to_json = './saved_submits/'
     for student in student_names:
         training_data.append(get_form_data_from_json(path_to_json + student + '-' + str(training_id) + '.json'))
-
+    training= Trainings.query.get(training_id)
+    if training is None:
+        flash("Noch keine Antowortenvorhanden.", "error")
+        return redirect(url_for('training_page'))
     return render_template('training_progress.html', usernames=student_names, training_data=training_data, training_name=Trainings.query.get(training_id).name)
 
 @app.route('/professor_dashboard/training_progress/save_submits', methods=['POST'])
 def save_submits():
+    """
+    Saves the submitted training progress for each student and generates a PDF report.
+
+    Returns:
+        The PDF file containing the training progress report.
+    """
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
     
@@ -1051,6 +1340,15 @@ def dashboard():
 
 @app.route('/view_samples/')
 def view_samples():
+    """
+    A function that retrieves sample data and renders the 'view_samples.html' template.
+    
+    Parameters:
+        None
+    
+    Returns:
+        The rendered 'view_samples.html' template with the retrieved sample data.
+    """
     # Logic to retrieve sample data
     samples = Proben.query.all()
     sampleChain = Probenreihen.query.all()
@@ -1058,6 +1356,15 @@ def view_samples():
 
 @app.route('/edit_sample/<sample_id>', methods=['GET', 'POST'])
 def edit_sample(sample_id):
+    """
+    Edit a sample by its ID.
+
+    Args:
+        sample_id (str): The ID of the sample to be edited.
+
+    Returns:
+        None
+    """
     sample = Proben.query.get(sample_id)
 
     if request.method == 'POST':
@@ -1070,6 +1377,15 @@ def edit_sample(sample_id):
 
 @app.route('/create_sample', methods=['GET', 'POST'])
 def create_sample():
+    """
+    Create a sample based on form data and store it in the database.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     if request.method == 'POST':
         form_data = request.form
         # Logic to create a new sample based on form data
@@ -1080,6 +1396,21 @@ def create_sample():
 
 @app.route('/create_sample_chain', methods=['GET', 'POST'])
 def create_sample_chain():
+    """
+    Create a sample chain.
+    
+    This function is responsible for handling the '/create_sample_chain' route. It supports both GET and POST requests. If a POST request is made, the function retrieves the 'name' and 'proben_ids[]' values from the request form. It processes the selected proben IDs, creates a new Probenreihen instance with the given name and proben IDs, and adds it to the database. It then redirects the user to the 'view_samples' page and displays a flash message indicating that the sample chain was created successfully.
+    
+    If a GET request is made, the function retrieves all Proben instances from the database and renders the 'create_sample_chain.html' template, passing the Proben instances as the 'samples' parameter.
+    
+    Returns:
+        If a POST request is made, the function redirects to the 'view_samples' page.
+        If a GET request is made, the function renders the 'create_sample_chain.html' template.
+    
+    Parameters:
+        None.
+    
+    """
     if request.method == 'POST':
         name = request.form['name']
         selected_proben_ids = request.form.getlist('proben_ids[]')  # Use getlist to retrieve all selected IDs
@@ -1107,6 +1438,19 @@ def create_sample_chain():
 
 @app.route('/delete_sample/<sample_id>', methods=['DELETE'])
 def delete_sample(sample_id):
+    """
+    Delete a sample from the database.
+
+    Parameters:
+        sample_id (int): The ID of the sample to be deleted.
+
+    Returns:
+        dict: A JSON response indicating the success or failure of the deletion.
+            - If the sample is found and deleted successfully:
+                {'message': 'Sample deleted successfully'}
+            - If the sample is not found:
+                {'message': 'Sample not found'}
+    """
     sample = Proben.query.get(sample_id)
     if sample:
         # TODO: Delete the sample from the database
@@ -1118,6 +1462,15 @@ def delete_sample(sample_id):
 
 @app.route('/delete_sample_chain/<sample_chain_id>', methods=['DELETE'])
 def delete_sample_chain(sample_chain_id):
+    """
+    Delete a sample chain by its ID.
+
+    Parameters:
+        sample_chain_id (str): The ID of the sample chain to be deleted.
+
+    Returns:
+        dict: A JSON object containing a message indicating the success or failure of the deletion.
+    """
     sample_chain = Probenreihen.query.get(sample_chain_id)
     if sample_chain:
         db.session.delete(sample_chain)
@@ -1129,337 +1482,3 @@ def delete_sample_chain(sample_chain_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-"""
-#############################################
-#           Ausgelagerte Funktionen         #
-#############################################
-
-
-
-def calculate_training_progress(user):
-    completed_tasks = 0
-    total_tasks = 0
-
-    training = Trainings.query.get(user.training_id)
-
-    if training:
-        total_tasks = len(training.fragen_ids)
-
-        for fragen_id in training.fragen_ids:
-            if check_task_completion(user, fragen_id):
-                completed_tasks += 1
-
-    if total_tasks > 0:
-        progress = (completed_tasks / total_tasks) * 100
-    else:
-        progress = 0
-
-    return progress
-
-def check_task_completion(user, fragen_id):
-    task_type = Aufgabenstellungen.query.get(fragen_id).aufgabentyp
-
-    return True
-
-    # Add conditions for other task types as needed
-
-def setup_df(form_data):
-    # Get the list of attributes from the form_data keys
-    attributes = list(form_data.keys())
-
-    # Filter out any non-attribute keys (e.g., 'csrf_token')
-    attributes = [attr for attr in attributes if not attr.startswith('csrf_')]
-    #print("attributes: ", attributes)
-    #print()
-
-    # The number of probes can be calculated as the number of entries for any attribute
-    num_probes = len(form_data.get(attributes[0]))
-
-    # Create a list to store individual row dictionaries
-    rows = []
-
-    # Iterate over each probe
-    for i in range(num_probes):
-        # Initialize an empty dictionary for this row
-        row = {}
-
-        # For each attribute, get the corresponding value from the form_data and add it to the dictionary
-        for attribute in attributes:
-            # Get the values for the current attribute at index i
-            values = form_data.getlist(attribute)
-            value = values[i]
-
-            # If the value is 'y', replace it with True, otherwise replace it with False
-            value = True if value == 'y' else False
-
-            # Add the attribute and its value to the dictionary
-            row[attribute] = value
-
-        # Append the row dictionary to the list
-        rows.append(row)
-
-    # Create the DataFrame by passing the list of dictionaries and specifying the index
-    df = pd.DataFrame(rows, index=range(num_probes))
-
-    return df
-
-def process_form_submission(question_type, form_data):
-    
-
-    #TODO: instanziate df without values if he is not existing
-    #TODO:  add the columus as they are not existing in df
-
-    
-    df = pd.DataFrame()   
-    def paar_vergleich():
-        #print("paar_vergleich")
-        #print("request.form_data",request.form )
-        print()
-        #print("form_data",form_data)
-        #TODO: update df with values from form or request form data
-        #      over write existing values or add new values
-
-    def auswahltest():
-        nonlocal df
-    # Call the setup_df function to create the DataFrame
-        return
-        df = setup_df(form_data)
-        print("request.form_data",request.form )
-        print()
-        for i in range(len(form_data['probe_name'])):
-            probe_nr_key = f'probe_nr-{i}'
-            probe_name_key = f'probe_name-{i}'
-            taste_salzig_key = f'taste_salzig-{i}'
-            taste_süß_key = f'taste_süß-{i}'
-            taste_sauer_key = f'taste_sauer-{i}'
-            taste_bitter_key = f'taste_bitter-{i}'
-            taste_nicht_erkennen_key = f'taste_nicht_erkennen-{i}'
-
-            # Retrieve the values from the request form data using the updated keys
-            probe_nr = request.form.get(probe_nr_key)
-            probe_name = request.form.get(probe_name_key)
-            taste_salzig = request.form.get(taste_salzig_key) == 'y'
-            taste_süß = request.form.get(taste_süß_key) == 'y'
-            taste_sauer = request.form.get(taste_sauer_key) == 'y'
-            taste_bitter = request.form.get(taste_bitter_key) == 'y'
-            taste_nicht_erkennen = request.form.get(taste_nicht_erkennen_key) == 'y'
-
-            # Update the corresponding row in the DataFrame with the new values
-            df.loc[i, 'probe_nr'] = probe_nr
-            df.loc[i, 'probe_name'] = probe_name
-            df.loc[i, 'taste_salzig'] = taste_salzig
-            df.loc[i, 'taste_süß'] = taste_süß
-            df.loc[i, 'taste_sauer'] = taste_sauer
-            df.loc[i, 'taste_bitter'] = taste_bitter
-            df.loc[i, 'taste_nicht_erkennen'] = taste_nicht_erkennen
-
-        print(df)
-
-
-
-    def dreieckstest():
-        print("dreieckstest")
-        print("request.form_data", request.form)
-        print()
-        print("form_data", form_data)
-
-        #df = setup_df(form_data)
-        return
-        for i in range(len(form_data['beschreibung_1'])):
-            abweichende_probe_key = f'abweichende_probe_-[{form_data["probenreihen_id"][i]}]'
-            beschreibung_key = f'beschreibung_-[{form_data["probenreihen_id"][i]}]'
-
-            # Retrieve the values from the request form data using the updated keys
-            abweichende_probe = request.form.get(abweichende_probe_key)
-            beschreibung = request.form.get(beschreibung_key)
-
-            # Add new columns to the DataFrame if they don't exist
-            if 'abweichende_probe' not in df.columns:
-                df['abweichende_probe'] = None
-            if 'beschreibung' not in df.columns:
-                df['beschreibung'] = None
-
-            # Update the corresponding rows in the DataFrame with the new values
-            df.loc[i, 'abweichende_probe'] = abweichende_probe
-            df.loc[i, 'beschreibung'] = beschreibung
-
-        print(df)
-
-    def geruchserkennungtest():
-        print("geruchserkennungtest")
-        print("request.form_data",request.form )
-        print()
-        print("form_data",form_data)
-        #TODO: update df with values from form or request form data
-        #       add the columus as they are not existing in df 
-        #       over write existing values
-        geruchserkennungen = []
- 
-
-    def konz_reihe():
-        print("konz_reihe")
-        print("request.form_data",request.form )
-        print()
-        print("form_data",form_data)
-        #TODO: update df with values from form or request form data
-        #       add the columus as they are not existing in df 
-        #       over write existing values
-        probenreihen_id = form_data.get("probenreihen_id")
-        # Process the form submission for "Konzentrationsreihe"
-        print("Konzentrationsreihe: Probenreihe ID:", probenreihen_id)
-     
-
-    def ebp():
-        
-        print("ebp")
-        print("request.form_data",request.form )
-        print()
-        print("form_data",form_data)
-        #TODO: update df with values from form or request form data
-        #       add the columus as they are not existing in df 
-        #       over write existing values
-        print("Einfach beschreibende Prüfung: form_data:", form_data)
-        
-        
-    def rangordnungstest():
-        print("rangordnungstest")
-        print("request.form_data",request.form )
-        print()
-        print("form_data",form_data)
-        #TODO: update df with values from form or request form data
-        #       add the columus as they are not existing in df 
-        #       over write existing values
-
-        antworten = form_data.get('antworten')
-    # Process the form submission for "Rangordnungstest"
-        print("Rangordnungstest: Antworten:", antworten)
-    
-
-    def profilprüfung():
-        print("profilprüfung")
-        print("request.form_data",request.form )
-        print()
-        print("form_data",form_data)
-        #TODO: update df with values from form or request form data
-        #       add the columus as they are not existing in df 
-        #       over write existing values
-        kriterien_werte = []
-    
-    form_type_funcs = {
-        "paar_vergleich": paar_vergleich,
-        "auswahltest": auswahltest,
-        "dreieckstest": dreieckstest,
-        "geruchserkennungtest": geruchserkennungtest,
-        "konz_reihe": konz_reihe,
-        "ebp": ebp,
-        "rangordnungstest": rangordnungstest,
-        "profilprüfung": profilprüfung
-    }
-
-    if question_type in form_type_funcs:
-        form_type_funcs[question_type]()
-    else:
-        print("Invalid question type")
-
-def get_form_instance(question_type, additional_data=None):
-    if question_type == 'hed_beurteilung':
-        return SubmitHed_beurteilung()
-    elif question_type == 'auswahltest':
-        
-        proben=[probe.probenname for probe in additional_data['probenreihen_id']]
-        proben_nr=[probe.proben_nr for probe in additional_data['probenreihen_id']]
-        return SubmitAuswahltest(proben, proben_nr)
-    
-    elif question_type == 'dreieckstest':
-        return SubmitDreieckstest()
-    elif question_type == 'geruchserkennungtest':
-        return SubmitGeruchserkennung()
-    elif question_type == 'ebp':
-        return SubmitEbpForm()
-    elif question_type == 'rangordnungstest':
-        return SubmitRangordnungstest()
-    elif question_type == 'profilprüfung':
-        return SubmitProfilprüfung()
-    elif question_type == 'konz_reihe':
-        return SubmitKonz_reihe()
-    elif question_type == 'paar_vergleich':
-        if additional_data and 'probenreihen_id_1' in additional_data and 'probenreihen_id_2' in additional_data:
-            return SubmitPaar_vergleich(additional_data['probenreihen_id_1'], additional_data['probenreihen_id_2'])
-    else:
-        raise ValueError(f"Unknown question_type: {question_type}")
-
-def get_question_instance(question_type, question_id):
-
-    session = db.session
-    if question_type == "paar_vergleich":
-        return session.get(Paar_vergleich, question_id)
-    elif question_type == "auswahltest":
-        return session.get(Auswahltest, question_id)
-    elif question_type == "dreieckstest":
-        return session.get(Dreieckstest, question_id)
-    elif question_type == "geruchserkennungtest":
-        return session.get(Geruchserkennung, question_id)
-    elif question_type == "hed_beurteilung":
-        return session.get(Hed_beurteilung, question_id)
-    elif question_type == "konz_reihe":
-        return session.get(Konz_reihe, question_id)
-    elif question_type == "ebp":
-        return session.get(Ebp, question_id)
-    elif question_type == "rangordnungstest":
-        return session.get(Rangordnungstest, question_id)
-    elif question_type == "profilprüfung":
-        return session.get(Profilprüfung, question_id)
-    else:
-        return None
-
-def get_additional_data(question_type, question):
-    additional_data = {}
-    
-    if question_type == "auswahltest":
-        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]        
-        
-    elif question_type == "dreieckstest":
-        probenreihen_id_1 = Probenreihen.query.get(question.probenreihe_id_1)
-        probenreihen_id_2 = Probenreihen.query.get(question.probenreihe_id_2)
-        proben_numbers_1 = [probe.proben_nr for probe in [Proben.query.get(probe) for probe in probenreihen_id_1.proben_ids]]
-        proben_numbers_2 = [probe.proben_nr for probe in [Proben.query.get(probe) for probe in probenreihen_id_2.proben_ids]]
-        additional_data["probenreihen_id_1"] = proben_numbers_1
-        additional_data["probenreihen_id_2"] = proben_numbers_2
-
-    elif question_type == "geruchserkennungtest":
-        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids] 
-
-    elif question_type == "hed_beurteilung":
-        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        additional_data["probenreihen_ids"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids] 
-
-    elif question_type == "konz_reihe":
-        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        additional_data["stammlösung"] = request.args.get('stammlösung', '1')
-        additional_data["probenreihen_id"] = [probe.proben_nr for probe in [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]]
-
-    elif question_type == "ebp":
-        proben_id = Proben.query.get(question.proben_id)
-        additional_data["proben_id"] = proben_id
-
-    elif question_type == "rangordnungstest": 
-        probenreihen_id = Probenreihen.query.get(question.probenreihe_id)
-        additional_data["probenreihen_id"] = [Proben.query.get(probe) for probe in probenreihen_id.proben_ids]
-
-    elif question_type == "profilprüfung":
-        proben_id = Proben.query.get(question.proben_id)
-        additional_data["proben_id"] = proben_id
-        additional_data["kriterien"] = question.kriterien
-
-    elif question_type == "paar_vergleich":
-        
-        probenreihen_id_1 = Probenreihen.query.get(question.probenreihe_id_1)
-        probenreihen_id_2 = Probenreihen.query.get(question.probenreihe_id_2)
-        additional_data["probenreihen_id_1"] =   [Proben.query .get(probe) for probe in probenreihen_id_1.proben_ids]
-        additional_data["probenreihen_id_2"] =  [Proben.query.get(probe) for probe in probenreihen_id_2.proben_ids]
-
-    return additional_data
-"""
