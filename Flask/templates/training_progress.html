@@ -1,26 +1,49 @@
 {% extends 'base.html' %}
 
-{% block head %}
-    
-    <title>Praktikumsfortschritt</title>
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const socket = io.connect('http://localhost:5000');
-
-            socket.on('connect', function() {
-                console.log('Connected to server');
-            });
-
-            socket.on('disconnect', function() {
-                console.log('Disconnected from server');
-            });
-        });
-    </script>
+{% block title %}
+Complete Training
 {% endblock %}
 
 {% block content %}
-    <h2>Praktikums Fortschritt</h2>
-    
-    <!-- Progress display will go here -->
+<body>
+    <h1>Abgegebene Antworten des aktuellen Trainings: {{training_name}}</h1>
+    <br>
+    <form action="{{ url_for('save_submits') }}" method="post">
+        <input type="submit" value="Als PDF speichern" class="btn btn-success">
+    </form>
+    <br>
+    {% if training_data %}
+        {% for student_data in training_data %}
+            {% if student_data %}
+                <h2>{{ usernames[loop.index0] }}</h2>
+                {% for field, value in student_data.items() %}
+                    <h3>Test: {{ field }}</h3>
+                    {% if value %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Details:</th>
+                                    <th>Daten:</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subfield, subvalue in value.items() %}
+                                    <tr>
+                                        <td>{{ subfield }}</td>
+                                        <td>{{ subvalue }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No subfields available.</p>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>Student ohne Antworten: {{usernames[loop.index0]}}</p>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</body>
 {% endblock %}
+

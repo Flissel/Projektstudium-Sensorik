@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}
+Training Page
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header">
+            <form method="POST" action="{{url_for('modify_training', training_id=training_id)}}">
+                {{ form.csrf_token }}
+                {% if question_type == 'ebp' %}
+                <h3><strong>Einfach beschreibende Prüfung</strong></h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">
+                <h5>Proben Nr. : {{form.proben_nr.label}}</h5><br>
+                {{form.aussehen_farbe.label}} {{form.aussehen_farbe(class="form-control")}}
+                {{form.geruch.label}} {{form.geruch(class="form-control")}}
+                {{form.geschmack.label}} {{form.geschmack(class="form-control")}}
+                {{form.textur.label}} {{form.textur(class="form-control")}}
+                {{form.konsistenz.label}} {{form.konsistenz(class="form-control")}}
+                </div>
+                {% elif question_type == 'rangordnungstest' %}
+                <h3>Rangordnungstest</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">              
+                    <h5>Rangordnung:</h5>
+                    {% for probe in form.proben %}
+                        Probe {{probe.label}}: {{form.ränge[loop.index0](class="form-control")}}
+                    {% endfor %}
+                </div>
+
+                {% elif question_type == 'auswahltest'%}
+                <h3>Auswahltest</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <table>
+                    <tr>
+                        <th>Proben</th>
+                        <th>Einordnung</th>
+                        <th>Bemerkungen</th>
+                    </tr>
+                    {% for probe in form.proben %}
+                    <tr>
+                        <td>{{probe.label}}</td>
+                        <td>{{form.einordnungen[loop.index0](class="form-control")}}</td>
+                        <td>{{form.bemerkungen[loop.index0](class="form-control")}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% elif question_type == 'dreieckstest' %}
+                <h3>Dreieckstest</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">
+                    <h5>Proben 1:</h5>
+                    {% for probe in form.proben_1 %}
+                        {{probe.label}}<br>
+                    {% endfor %}
+                    <br>
+                    {{ form.abweichende_probe_1.label }} {{ form.abweichende_probe_1(class="form-control") }}
+                    {{ form.beschreibung_1.label }} {{ form.beschreibung_1(class="form-control") }}
+                    <br><br>
+                    <h5>Proben 2:</h5>
+                    {% for probe in form.proben_2 %}
+                        {{probe.label}}<br>
+                    {% endfor %}
+                    <br>
+                    {{ form.abweichende_probe_2.label }} {{ form.abweichende_probe_2(class="form-control") }}
+                    {{ form.beschreibung_2.label }} {{ form.beschreibung_2(class="form-control") }}
+                </div>
+                {% elif question_type == 'geruchserkennungstest' %}
+                <h3>Geruchserkennung</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">
+                    {% if prüfvariante == 5 %}
+                    {% for probe in form.proben %}
+                    <h5>Probe: {{probe.label}}</h5>
+                        {{form.ohne_auswahl[loop.index0].label}} {{form.ohne_auswahl[loop.index0](class="form-control")}}
+                    {% endfor %}
+                    {% elif prüfvariante == 6 %}
+                    {% for probe in form.proben %}
+                        <h5>Probe: {{probe.label}}</h5>
+                        {{form.mit_auswahl[loop.index0].label}} {{form.mit_auswahl[loop.index0](class="form-control")}}
+                    {% endfor %}
+                    {% endif %}                
+                </div>
+                {% elif question_type == 'hed_beurteilung' %}
+                <h3>Hedonische Beurteilung</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">
+                    <table>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Einordnung</th>
+                            <th>Anmerkung</th>
+                        </tr>
+                        {% for probe in form.proben %}
+                        <tr>
+                            <td>{{probe.label}}</td>
+                            <td>{{form.einordnungen[loop.index0](class="form-control")}}</td>
+                            <td>{{form.bemerkungen[loop.index0](class="form-control")}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% elif question_type == 'konz_reihe' %}
+                <h3>Konzentrationsreihe</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">
+                    <table>
+                        <tr>
+                            <th>Probe</th>
+                            <th>Konzentration</th>
+                            <th>Bemerkung</th>
+                        </tr>
+                        {% for probe in form.proben %}
+                        <tr>
+                            <td>{{probe.label}}</td>
+                            <td>{{form.konzentration[loop.index0](class="form-control")}}</td>
+                            <td>{{form.bemerkungen[loop.index0](class="form-control")}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% elif question_type == 'paar_vergleich' %}
+                <h3>Paarvergleich</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">
+                    <h5>1. Probenreihe</h5>
+                    {% for probe in form.proben_1 %}
+                        {{probe.label}}<br>
+                    {% endfor %}
+                    <br>
+                    {{ form.ausgeprägte_probe_1.label }} {{ form.ausgeprägte_probe_1(class="form-control") }}
+                    {{ form.bemerkung_1.label }} {{ form.bemerkung_1(class="form-control") }}
+                    <br><br>
+                    <h5>2. Probenreihe</h5>
+                    {% for probe in form.proben_2 %}
+                        {{probe.label}}<br>
+                    {% endfor %}
+                    <br>
+                    {{ form.ausgeprägte_probe_2.label }} {{ form.ausgeprägte_probe_2(class="form-control") }}
+                    {{ form.bemerkung_2.label }} {{ form.bemerkung_2(class="form-control") }}
+                    <br><br>
+                    <h5>
+                        {{ form.erwartung_probe.label}}
+                        {{ form.erwartung_probe(class="form-control") }}
+                    </h5>
+                    {% for probe in form.proben_3 %}
+                        {{probe.label}}<br>
+                    {% endfor %}
+                </div>
+                {% elif question_type == 'profilprüfung' %}
+                <h3>Profilprüfung</h3>
+                <h4>Aufgabenstellung: {{form.aufgabenstellung.label}}</h4><br>
+                <div class="form-group">
+                    <h5>
+                        Probe: {{ form.probe.label }}
+                    </h5>
+                    <table>
+                        <tr>
+                            <th>Kriterien</th>
+                            <th>Skalenwert</th>
+                        </tr>
+                        {% for kriterium in form.kriterien %}
+                        <tr>
+                            <td>{{kriterium.label}}</td>
+                            <td>{{form.skalenwerte[loop.index0](class="form-control")}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% endif %}
+                {% if question_index == question_max -1 %}
+                <button type="submit" name="submit" class="btn btn-primary" value="abgeben">Abgeben</button>
+                {% else %}
+                <button type="submit" name="submit" class="btn btn-danger" value="zurück">Zurück</button>
+                <button type="submit" name="submit" class="btn btn-primary" value="weiter">Weiter</button>
+                {% endif %}
+            </form>
+
+{% endblock %}
