@@ -455,9 +455,10 @@ def check_inactive_user():
     
     if 'username' in session:
         user = Benutzer.query.filter_by(benutzername=session['username']).first()
-
-        last_activity = user.last_activity if user else None
        
+        if user.rolle == False:
+            last_activity = user.last_activity if user else None
+
         if last_activity is not None:
             inactive_duration = (datetime.now() - last_activity).total_seconds()
 
@@ -659,7 +660,7 @@ def professor_dashboard():
 
             index = int(action.split(' ')[1])
         if 'select' in request.form['action']:
-            students = Benutzer.query.filter_by(rolle=False).all()
+            students = Benutzer.query.filter_by(rolle=False,aktiv = True).all()
             
             for student in students:
                 student.training_id = form.trainings.choices[index][0]
@@ -692,7 +693,7 @@ def professor_dashboard():
     if 'username' in session:
         username = session['username']
         user = Benutzer.query.filter_by(benutzername=username).first()
-        if user.rolle == True:
+        if user.rolle == True :
             form.trainings = Trainings.query.all()
             form_id = str(uuid4()) #Create "form_id"
             session['form_id'] = form_id
@@ -793,21 +794,7 @@ def modify_training(training_id):
     
     return render_template('training_view_page.html', question=question, question_type=question_type, form=form,
                        question_index=session['question_index'], prüfvariante=prüfvariante, question_max=question_max, training_id=training_id)
- 
-@app.route('/select_training/<training>')
-def select_training(training):
-    """
-    This function handles the selection of a training by a professor.
-    It sets the 'training' attribute of all students to the selected training.
-    After updating the database, it redirects to the training page for the selected training.
-    """
-    students = Benutzer.query.filter_by(rolle=False,aktiv=True).all()
-
-    for student in students:
-        student.training = training
-        db.session.commit()
-    return redirect(url_for('training_progress', students=students))  
-                            
+                           
 @app.route('/professor_dashboard/create_training', methods=['GET', 'POST'])
 def create_training():
     """
@@ -1290,7 +1277,7 @@ def training_progress():
         training_data.append(get_form_data_from_json(path_to_json + student + '-' + str(training_id) + '.json'))
     training= Trainings.query.get(training_id)
     if training is None:
-        flash("Noch keine Antowortenvorhanden.", "error")
+        flash("Noch keine Antoworten vorhanden", "error")
         return redirect(url_for('training_page'))
     return render_template('training_progress.html', usernames=student_names, training_data=training_data, training_name=Trainings.query.get(training_id).name)
 
