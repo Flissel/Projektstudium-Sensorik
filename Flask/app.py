@@ -17,7 +17,7 @@ app.config['SECRET_KEY'] = 'secret_key'
 
 db.init_app(app)
 
-INACTIVITY_THRESHOLD = 3600 # 1 hour in seconds
+INACTIVITY_THRESHOLD = 3600 *3 # 1 hour in seconds
 
 path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 setted_professor_password = 'hswt_sensorik'
@@ -456,8 +456,8 @@ def check_inactive_user():
     if 'username' in session:
         user = Benutzer.query.filter_by(benutzername=session['username']).first()
        
-        if user.rolle == False:
-            last_activity = user.last_activity if user else None
+       
+        last_activity = user.last_activity if user else None
 
         if last_activity is not None:
             inactive_duration = (datetime.now() - last_activity).total_seconds()
