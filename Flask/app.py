@@ -1266,21 +1266,20 @@ def training_progress():
 	"""
     if 'username' not in session:
         return render_template('login.html', error="Bitte loggen Sie sich ein, um auf diese Seite zugreifen zu können.")
-    
-    training_id = Benutzer.query.filter_by(rolle=False, aktiv=True).first().training_id
+    if Benutzer.query.filter_by(rolle=False, aktiv=True).first() != None:
+        training_id = Benutzer.query.filter_by(rolle=False, aktiv=True).first().training_id
+        student_names = [student.benutzername for student in Benutzer.query.filter_by(rolle=False,aktiv = True).all()]
 
-    student_names = [student.benutzername for student in Benutzer.query.filter_by(rolle=False).all()]
-
-    training_data = []
-    path_to_json = './saved_submits/'
-    for student in student_names:
-        training_data.append(get_form_data_from_json(path_to_json + student + '-' + str(training_id) + '.json'))
-    training= Trainings.query.get(training_id)
-    if training is None:
-        flash("Noch keine Antoworten vorhanden", "error")
-        return redirect(url_for('training_page'))
-    return render_template('training_progress.html', usernames=student_names, training_data=training_data, training_name=Trainings.query.get(training_id).name)
-
+        training_data = []
+        path_to_json = './saved_submits/'
+        for student in student_names:
+            training_data.append(get_form_data_from_json(path_to_json + student + '-' + str(training_id) + '.json'))
+        training= Trainings.query.get(training_id)
+        if training is None:
+            flash("Kein Praktikum zur Bearbeitung freigebt", "error")
+        return render_template('training_progress.html', usernames=student_names, training_data=training_data, training_name=Trainings.query.get(training_id).name)
+    flash("Kein aktiver Student vorhanden", "error")
+    return redirect(url_for('professor_dashboard'))
 @app.route('/professor_dashboard/training_progress/save_submits', methods=['POST'])
 def save_submits():
     """
